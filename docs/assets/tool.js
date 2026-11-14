@@ -3,7 +3,7 @@
   "use strict";
   const FF = window.FF, L = window.FFLogic, CH = window.FFCharts, LINKS = window.FF_LINKS, esc = CH.esc, g = L.g;
   const $ = (id) => document.getElementById(id);
-  FFFlame.stars($("stars"));
+  FFFlame.ambient($("stars"));
 
   const GRAVITY_SHORT = ["Orbit · microgravity", "Moon · 0.17 g", "Mars · 0.38 g"];
   const DEFAULT_MATERIALS = ["PMMA (acrylic)", "Silicone", "Cotton-fiberglass fabric (SIBAL)", "Nomex", "Kapton", "Teflon"];
@@ -60,7 +60,7 @@
   function recordsFor(materials) { return FF.rows.filter((r) => r.m.some((m) => materials.includes(m))); }
   function siBlock(si) {
     if (!si) return "";
-    return `<div class="si">${esc(si.text)}<span class="chk">${icon("M5 12.5l4.2 4.2L19 7").replace("<svg", '<svg style="width:11px;height:11px;vertical-align:-1px"')} SI-written · ${si.verified} of ${si.total} numbers found in the data${si.judge ? " · re-read by a second model" : ""}${si.dropped + si.judged_out ? ` · ${si.dropped + si.judged_out} sentence${si.dropped + si.judged_out > 1 ? "s" : ""} removed` : ""}</span></div>`;
+    return `<div class="si">${esc(si.text)}<span class="chk">${icon("M5 12.5l4.2 4.2L19 7").replace("<svg", '<svg style="width:11px;height:11px;vertical-align:-1px"')} SI-worded · ${si.verified} of ${si.total} numbers found in the data${si.judge ? " · re-read in a second SI pass" : ""}${si.dropped + (si.judged_out || 0) ? ` · ${si.dropped + (si.judged_out || 0)} sentence${si.dropped + (si.judged_out || 0) > 1 ? "s" : ""} removed` : ""}</span></div>`;
   }
   function gsiText(ev) {
     if (!ev.gravity_pairs.length) return "no 1g pair";
@@ -126,7 +126,7 @@
         <div class="card"><h3>Gas flames · CFI-G</h3>${gas.tests ? split([["Went out on their own", gas.went_out_on_their_own, "#3987e5"], ["Burned until fuel was cut", gas.burned_until_fuel_was_cut, "#d95926"], ["Did not ignite", gas.tests - gas.ignited, "#5d6779"]]) : ""}<p style="margin-top:12px;font-size:14.5px">${esc(words.gas)}</p></div>
       </div>
       ${atmSi ? `<div style="margin-top:14px">${siBlock(atmSi)}</div>` : ""}
-      <p class="note">These counts are descriptive. Fuel, pressure and flow rate vary between tests along with oxygen.${isPreset() ? "" : " SI-written interpretations on the material cards are prepared for the four preset habitats; custom values show the computed facts only."}</p>
+      <p class="note">These counts are descriptive. Fuel, pressure and flow rate vary between tests along with oxygen.${isPreset() ? "" : " SI-worded interpretations on the material cards are prepared for the four preset habitats; custom values show the computed facts only."}</p>
 
       <div class="h-sec"><h2>Take it with you</h2><span></span></div>
       <div class="row">
@@ -226,7 +226,7 @@
   function drawData() {
     const unnamed = FF.rows.filter((r) => r.c === "solid" && !r.m.length).length;
     const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean)];
-    const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + t.judged_out, 0);
+    const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + (t.judged_out || 0), 0);
     $("view-data").innerHTML = `
       <span class="eyebrow">Data and method</span>
       <h1 style="margin-top:12px">${FF.rows.length.toLocaleString("en-US")} records, one table, one set of units</h1>
@@ -241,9 +241,9 @@
           <li>FLEX-2, SLICE, ACME BRE, ACME E-FIELD Flames and DAFT tables are summaries, not one row per test.</li>
           <li>No investigation here ran in partial gravity.</li></ul></div>
         <div class="card prose"><h3>How SI is used</h3><ul>
-          <li>A Gemini model wrote the short interpretations on the material cards and the investigation summaries, from a list of facts computed by code.</li>
+          <li>Code works out every finding. A Gemini model then puts those findings into sentences for the material cards and the investigation summaries. It is asked to change nothing.</li>
           <li>Code then looked up every number in each text in those facts and removed any sentence containing a number that was not there. Across ${texts.length} texts, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.</li>
-          <li>A second model (Gemma) then re-read each remaining sentence against the facts and removed any it judged unsupported. The removed-sentence count above includes both checks.</li>
+          <li>A second SI pass then re-read each remaining sentence against the facts and removed any it judged unsupported. ${texts.filter((t) => t.judge && t.judge !== t.model).length} of the ${texts.length} texts were re-read by a different model${(() => { const j = [...new Set(texts.filter((t) => t.judge && t.judge !== t.model).map((t) => t.judge))]; return j.length ? " (" + esc(j.join(", ")) + ")" : ""; })()}, ${texts.filter((t) => t.judge && t.judge === t.model).length} by the same model in a fresh pass, and ${texts.filter((t) => !t.judge).length} got no second pass. The removed-sentence count above includes both checks.</li>
           <li>Neither check is proof, so the computed facts beside each text remain the reference.</li>
           <li>Grades, counts, rankings and charts are computed without SI.</li>
           <li>An SI coding assistant (Claude) helped write the code and the site text.</li></ul></div>
@@ -286,7 +286,7 @@
     f.mats.forEach((m) => {
       Object.keys(m.flame_tests_by_investigation).concat(Object.keys(m.smoke_tests_by_investigation)).forEach((i) => used.add(i));
       const si = isPreset() ? FF.si.material[`${state.scenario}|${m.material}`] : null;
-      h += `<h3>${esc(m.material)}</h3>${si ? `<p class="si">${esc(si.text)}<br><small>SI-written (${esc(si.model)}); ${si.verified} of ${si.total} numbers found in the data.</small></p>` : ""}<ul>${L.materialSentences(FF, m, state.o2, partial()).map((s) => `<li>${esc(s)}</li>`).join("")}
+      h += `<h3>${esc(m.material)}</h3>${si ? `<p class="si">${esc(si.text)}<br><small>SI-worded (${esc(si.model)}); ${si.verified} of ${si.total} numbers found in the data.</small></p>` : ""}<ul>${L.materialSentences(FF, m, state.o2, partial()).map((s) => `<li>${esc(s)}</li>`).join("")}
         ${m.gravity_pairs.map((p) => `<li><small>Sample ${esc(p.sample)} (${esc(p.thickness)}): microgravity burn length ${esc(p.microgravity_burn_length)}, 1g ${esc(p.normal_gravity_burn_length)}, GSI ${p.gsi.toFixed(2)}</small></li>`).join("")}</ul>`;
     });
     const words = L.atmosphereSentences(f.atm, state.o2);

@@ -9,7 +9,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-MODELS = ["gemini-3.1-flash-lite", "gemma-4-31b-it"]  # second is the fallback when the first is out of quota
+MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemma-4-31b-it"]  # later ones are fallbacks
 URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 PROMPT = """You are writing for an aerospace engineer reviewing fire safety evidence for a crewed habitat.
@@ -51,12 +51,12 @@ def api_key():
     return None
 
 
-def _call(model, prompt, key):
+def _call(model, prompt, key, timeout=60):
     body = json.dumps({"contents": [{"parts": [{"text": prompt}]}],
                        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1024}}).encode()
     req = urllib.request.Request(URL.format(model=model), data=body,
                                  headers={"x-goog-api-key": key, "Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         data = json.load(r)
     parts = data["candidates"][0]["content"]["parts"]
     return " ".join(p["text"] for p in parts if "text" in p and not p.get("thought")).strip()
@@ -88,6 +88,8 @@ JUDGE = """You are checking a short text against the data it was written from.
 FACTS is a JSON object. SENTENCES are numbered. For each sentence, decide whether every claim in it
 is directly supported by FACTS. Be strict: a correct number attached to the wrong thing, a wrong
 unit, a count that FACTS does not state, or a claim FACTS does not contain are all UNSUPPORTED.
+Rewording is fine: a sentence is SUPPORTED when FACTS says the same thing in other words. Saying
+that something is not listed is SUPPORTED when FACTS marks it "not listed" or does not contain it.
 
 Reply with exactly one line per sentence and nothing else, in this form:
 1 SUPPORTED
@@ -105,7 +107,8 @@ def sentences(text):
     return [s for s in re.split(r"(?<=[.!?])\s+", text.replace("\n", " ").strip()) if s]
 
 
-def judge(text, facts, models=("gemma-4-31b-it", "gemini-3.1-flash-lite")):
+def judge(text, facts, models=("gemini-3.5-flash-lite", "gemini-3.5-flash-lite", "gemma-4-31b-it",
+                               "gemini-3.1-flash-lite")):
     """Second pass by a different model. Returns {"text", "model", "removed": [reasons]} or {"error"}."""
     key = api_key()
     parts = sentences(text)
@@ -116,7 +119,7 @@ def judge(text, facts, models=("gemma-4-31b-it", "gemini-3.1-flash-lite")):
     last = "unknown error"
     for model in models:
         try:
-            raw = _call(model, prompt, key)
+            raw = _call(model, prompt, key, timeout=45)
         except Exception as err:
             last = f"{model}: {type(err).__name__}"
             continue

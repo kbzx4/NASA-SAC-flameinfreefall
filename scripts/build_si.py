@@ -26,7 +26,7 @@ import core  # noqa: E402
 import si  # noqa: E402
 
 CACHE = ROOT / "data" / "si_cache.json"
-PAUSE = 4.5  # seconds between calls, to stay under the per-minute limit
+PAUSE = 2.5  # seconds between calls, to stay under the per-minute limit
 
 RULES = """
 Rules:
@@ -43,26 +43,35 @@ JSON:
 
 TEMPLATES = {
     "material": (
-        "You are writing for an aerospace engineer checking fire safety evidence for a crewed habitat.\n"
-        "The JSON describes NASA microgravity flame-test records for one material, and the habitat's "
-        "oxygen level.\n"
-        "Write 2 sentences, 45 words at most.\n"
-        "Sentence 1: how many flame tests exist, and how close they come to the habitat's oxygen level. "
-        "Use the count of tests near the habitat's oxygen level and the gap to the nearest test exactly as "
-        "the JSON labels them; they are different things.\n"
-        "Sentence 2: what the gravity comparison shows, if the JSON has gravity_comparison_samples; "
-        "otherwise the most important thing the evidence does not cover. Each entry there is one sample: "
-        "report a sample's burn lengths only as that entry gives them and never combine entries. A GSI of "
-        "0.00 means the two burn lengths agree; 1.00 means the sample burned fully in one and not at all "
-        "in the other.\n" + RULES),
+        "Write a two-sentence note for a fire-evidence card read by a spacecraft engineer.\n"
+        "The JSON holds three findings that code worked out from NASA flame-test records for one "
+        "material. Your job is wording only: turn them into two natural sentences. Never change, add "
+        "or drop a finding, a number or a sample.\n"
+        "Sentence 1: oxygen_finding together with oxygen_coverage.\n"
+        "Sentence 2: all of gravity_finding, with its example sample if it has one, copying the text "
+        "inside double quotes exactly. End the sentence where gravity_finding ends.\n\n"
+        "Example of the wording, for a different material:\n"
+        "None of the 30 flame tests on this material came within 2 points of the habitat's oxygen "
+        "level: they cover 15% to 19.5% oxygen, and the nearest sits 6.5 points below it. Gravity "
+        "changed the result for 1 of the 3 samples compared, which burned further in normal gravity "
+        "than in microgravity (sample 9-2: \"4 cm\" in microgravity, \"Complete\" in normal gravity); "
+        "the other 2 gave the same result in both.\n"
+        + RULES),
     "investigation": (
-        "You are writing for a university student browsing NASA microgravity combustion investigations.\n"
-        "The JSON lists attributes of one investigation, read from its data table.\n"
-        "Write 2 sentences, 45 words at most.\n"
-        "Sentence 1: what kind of test it was and under what conditions. 'Kind of test' says whether "
-        "anything was burned; do not say something burned unless it does. 'Fuels or samples' counts "
-        "distinct descriptions in the table, not distinct fuels, and its example is only one of them.\n"
-        "Sentence 2: what varied between tests, and what the table does not list.\n" + RULES),
+        "Write a summary, two or three short sentences, of one NASA microgravity combustion "
+        "investigation for a university student.\n"
+        "The JSON holds findings that code read from the investigation's data table. Your job is "
+        "wording only: turn them into natural sentences. Never change, add or drop a finding or a "
+        "number.\n"
+        "First: what_it_was and samples.\n"
+        "Then: conditions_listed, what varied between tests, and what the table does not list, "
+        "leaving out any of the three that the JSON does not have.\n\n"
+        "Example of the wording, for a different investigation:\n"
+        "This was a flame test on solid samples in microgravity, and its table gives 12 different "
+        "fuel or sample descriptions, for example \"Paper strip, 1 cm wide\". The table lists oxygen "
+        "from 18 to 21 %. The fuel or sample and oxygen varied between tests, and pressure and "
+        "airflow are not listed.\n"
+        + RULES),
 }
 
 
@@ -77,27 +86,116 @@ def tidy(v):
     return v
 
 
-def material_facts(name, o2, ev):
-    """The evidence for one material, with keys that say exactly what each number is."""
-    near = f"flame_tests_within_{brief.NEAR:g}_points_of_habitat_oxygen"
-    n = ev["nearest_test"]
+def gravity_finding(pair):
+    """What gravity changed for one Saffire-II sample, worked out from the burn lengths in cm."""
+    ug, g1, full = pair["ug"], pair["g1"], pair["full"]
+    if g1 > ug:
+        return "burned further in normal gravity than in microgravity"
+    if g1 < ug:
+        return "burned further in microgravity than in normal gravity"
+    if ug == 0:
+        return "did not burn in microgravity or in normal gravity"
+    if ug == full:
+        return f"the whole {full:g} cm sample burned in both microgravity and normal gravity"
+    return "burned the same length in both microgravity and normal gravity"
+
+
+def gravity_summary(compared):
+    """One clause that counts what gravity changed across the compared samples, with one example."""
+    n = len(compared)
+    if not n:
+        return "this data has no gravity comparison for this material"
+
+    def example(c):
+        return (f'(sample {c["sample"]}: "{c["burn_length_in_microgravity"]}" in microgravity, '
+                f'"{c["burn_length_in_normal_gravity"]}" in normal gravity)')
+
+    changed = [c for c in compared if c["finding"].startswith("burned further")]
+    same = [c for c in compared if not c["finding"].startswith("burned further")]
+    group = {1: "the 1 sample", 2: "both samples"}.get(n, f"all {n} samples") + " compared"
+    if not changed:
+        kinds = {c["finding"] for c in same}
+        detail = same[0]["finding"] if len(kinds) == 1 else "the result was the same in both"
+        if detail.startswith("did not burn"):
+            detail = ("it " if n == 1 else "they ") + detail
+        who = "either of the 2 samples compared" if n == 2 else group
+        return f"gravity made no difference for {who}: {detail} {example(same[0])}"
+    kinds = {c["finding"] for c in changed}
+    how = changed[0]["finding"] if len(kinds) == 1 else "burned a different length in microgravity and normal gravity"
+    if not same:
+        return f"gravity changed the result for {group}: {'it' if n == 1 else 'each'} {how} {example(changed[0])}"
+    rest = "the other 1 gave" if len(same) == 1 else f"the other {len(same)} gave"
+    return (f"gravity changed the result for {len(changed)} of the {n} samples compared, which {how} "
+            f"{example(changed[0])}; {rest} the same result in both")
+
+
+def material_facts(name, o2, ev, pairs):
+    """The evidence for one material. Code states each finding; the model only puts it in plain words."""
+    total, near, gap = ev["flame_tests"], ev["flame_tests_near"], ev["oxygen_gap_points"]
+    side = ev["nearest_test"]["side"].split()[0]  # at, below or above
+    if near:
+        count = f"all {total}" if near == total else f"{near} of the {total}"
+        finding = (f"{count} flame tests on this material were run within {brief.NEAR:g} "
+                   f"points of the habitat's oxygen level")
+    else:
+        finding = (f"none of the {total} flame tests on this material was run within {brief.NEAR:g} points "
+                   f"of the habitat's oxygen level; the nearest was {gap:g} points {side} it")
+    lo, _, hi = ev["oxygen_tested_pct"].partition(" to ")
+    coverage = (f"the tests that list oxygen cover {lo}% to {hi}% oxygen" if hi
+                else f"the tests that list oxygen were all run at {lo}% oxygen")
+    by_sample = pairs.set_index("sample").to_dict("index")
+    compared = [{"sample": p["sample"], "finding": gravity_finding(by_sample[p["sample"]]),
+                 "burn_length_in_microgravity": p["microgravity_burn_length"],
+                 "burn_length_in_normal_gravity": p["normal_gravity_burn_length"]}
+                for p in ev["gravity_pairs"]]
     return tidy({
         "habitat": {"scenario": name, "oxygen_pct": o2},
         "material": ev["material"],
-        "flame_tests_total": ev["flame_tests"],
-        "flame_tests_by_investigation": ev["flame_tests_by_investigation"],
-        "oxygen_range_tested_pct": ev["oxygen_tested_pct"],
-        near: ev["flame_tests_near"],
-        "gap_from_habitat_oxygen_to_nearest_test_in_points": ev["oxygen_gap_points"],
-        "nearest_test": f'{n["investigation"]} test {n["test"]}, {n["side"].replace("yours", "the habitat oxygen level")}',
-        "flame_tests_that_list_an_airflow_speed": ev["flame_tests_with_airflow"],
-        "flame_tests_that_list_pressure": 0 if not ev["pressure_tested_psi"] else None,
-        "smoke_particle_tests": ev["smoke_tests"],
-        "gravity_comparison_samples": [
-            {"sample": p["sample"], "GSI": f'{p["gsi"]:.2f}',
-             "burn_length_in_microgravity": p["microgravity_burn_length"],
-             "burn_length_in_normal_gravity": p["normal_gravity_burn_length"]}
-            for p in ev["gravity_pairs"]],
+        "oxygen_finding": finding,
+        "oxygen_coverage": coverage,
+        "gravity_finding": gravity_summary(compared),
+    })
+
+
+def _and(items):
+    """'a', 'a and b', 'a, b and c'."""
+    if len(items) < 2:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def investigation_facts(cat, inv):
+    """What the table says about one investigation, as finished clauses for the model to join."""
+    d = core.describe(cat, inv)
+    kind = d["Kind of test"]
+    what = "a " + kind[0].lower() + kind[1:].replace(";", " in microgravity;", 1)
+    if ";" not in kind:
+        what += " in microgravity"
+    if "1g" in d["Gravity"]:
+        what += ", with a normal-gravity comparison of the same samples"
+    count, _, example = d["Fuels or samples"].partition(" distinct descriptions in the table, for example: ")
+    samples = (f'the table gives {count} different fuel or sample descriptions, for example "{example}"' if example
+               else f'every row of the table has the same sample description, "{count}"')
+    fan = d["Airflow"].startswith("a fan setting")
+    listed, missing = [], []
+    for label, key in (("oxygen", "Oxygen"), ("pressure", "Pressure"), ("airflow", "Airflow")):
+        value = d[key]
+        if key == "Airflow" and fan:
+            listed.append("a fan setting (but no air speed)")
+        elif value == "not listed":
+            missing.append(label)
+        else:
+            listed.append(f"{label} {'from ' if ' to ' in value else 'of '}{value}")
+    if d["Sensors named in the table"] == "not listed":
+        missing.append("sensors")
+    varied = d["What varied between tests"].replace("airflow or fan setting", "fan setting" if fan else "airflow")
+    return tidy({
+        "investigation": inv,
+        "what_it_was": what,
+        "samples": samples,
+        "conditions_listed": "the table lists " + _and(listed) if listed else None,
+        "varied_between_tests": None if varied.startswith("nothing") else _and(varied.split(", ")),
+        "not_listed_in_table": _and(missing) or None,
     })
 
 
@@ -116,9 +214,9 @@ def jobs():
             ev = brief.material_evidence(cat, pairs, m, sc["o2"])
             if not ev["oxygen_tested_pct"]:
                 continue  # with no oxygen-listed flame test there is nothing to interpret
-            out.append(("material", f"{name}|{m}", material_facts(name, sc["o2"], ev)))
+            out.append(("material", f"{name}|{m}", material_facts(name, sc["o2"], ev, pairs)))
     for inv in cat["investigation"].unique():
-        out.append(("investigation", inv, {"investigation": inv, **core.describe(cat, inv)}))
+        out.append(("investigation", inv, investigation_facts(cat, inv)))
     return out
 
 
@@ -128,6 +226,16 @@ def main():
     made = 0
     for n, (kind, label, facts) in enumerate(todo, 1):
         k = key_of(kind, facts)
+        if k in cache and not cache[k].get("judge") and cache[k]["text"]:
+            verdict = si.judge(cache[k]["text"], facts)  # the second pass failed last time; try it again
+            if "error" not in verdict:
+                cache[k].update(judge=verdict["model"], judge_removed=verdict["removed"], text=verdict["text"])
+                cache[k].pop("judge_error", None)
+                CACHE.write_text(json.dumps(cache, indent=1, ensure_ascii=False), encoding="utf-8")
+            print(f"[{n}/{len(todo)}] {kind} {label}: second pass retried: "
+                  f"{verdict.get('error') or verdict['model']}", flush=True)
+            time.sleep(PAUSE)
+            continue
         if k in cache:
             continue
         result = si.interpret(facts, TEMPLATES[kind])
@@ -144,6 +252,7 @@ def main():
         if "error" in verdict:
             entry["judge_error"] = verdict["error"]
         cache[k] = entry
+        CACHE.write_text(json.dumps(cache, indent=1, ensure_ascii=False), encoding="utf-8")  # keep progress
         made += 1
         print(f"[{n}/{len(todo)}] {kind} {label}: {result['verified']}/{result['total']} numbers, "
               f"{result['dropped']} dropped by number check, {len(entry['judge_removed'])} by second pass"

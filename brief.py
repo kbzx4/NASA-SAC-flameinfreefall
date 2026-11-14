@@ -247,7 +247,7 @@ def brief_html(facts, si=None):
                      "lines below compare microgravity with normal gravity. NASA's challenge statement says "
                      "the two could bound intermediate gravity; that is a hypothesis.</p>")
     if si and si.get("text"):
-        parts.append("<h2>Interpretation (SI-written, number-checked)</h2>"
+        parts.append("<h2>Interpretation (SI-worded, number-checked)</h2>"
                      f"<p class='si'>{e(si['text'])}</p><small>Written by {e(si['model'])}. "
                      f"{si['verified']} of {si['total']} numbers match the data in this brief"
                      + (f"; {si['dropped']} sentences were removed because a number did not match" if si["dropped"] else "")

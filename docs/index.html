@@ -135,7 +135,7 @@
     </div>
     <div class="grid-3">
       <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
-      <div class="card reveal"><h3>SI, checked by code</h3><p>A Gemini model writes the short interpretations. Code then looks up every number it wrote in the data, a second model re-reads each sentence against the facts, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
+      <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding, and a Gemini model only puts the findings into sentences. Code then looks up every number it wrote in the data, a second SI pass re-reads each sentence against the findings, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
       <div class="card reveal"><h3>Honest about limits</h3><p>Flamebound grades how much evidence exists near your conditions. It does not predict whether a material will burn, and it is not an operational safety system.</p></div>
     </div>
   </div>
@@ -171,7 +171,8 @@
     <div>
       <h4>Project</h4>
       <p><a data-link="repo" href="#" target="_blank" rel="noopener">Source code</a> · <a data-link="challenge" href="#" target="_blank" rel="noopener">Challenge page</a></p>
-      <p>SI use: a Gemini model wrote the short interpretation texts. An SI coding assistant (Claude) helped write the code and the site text.</p>
+      <p>SI use: a Gemini model worded the short notes on the material cards and the investigation summaries, from findings computed by code. An SI coding assistant (Claude) helped write the code and the site text.</p>
+      <p>The flames on this site, including the ones drifting in the background and the one on your cursor, are illustrations drawn by code. They are not data and not SI-generated.</p>
     </div>
   </div>
 </footer>
@@ -183,7 +184,7 @@
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
-  FFFlame.stars(document.getElementById("stars"));
+  FFFlame.ambient(document.getElementById("stars"));
 
   // numbers on the page come from the data bundle, so they cannot drift from it
   const paired = FF.pairs.filter((p) => p.gsi != null);
@@ -200,7 +201,7 @@
 
   const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean)];
   if (texts.length) {
-    const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + t.judged_out, 0);
+    const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + (t.judged_out || 0), 0);
     document.getElementById("sistat").textContent = `Across the ${texts.length} texts on this site, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.`;
   }
 

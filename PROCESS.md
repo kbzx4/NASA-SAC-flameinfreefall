@@ -49,7 +49,8 @@ Changes made:
 - The two-part sample is split into its sections before the model sees it.
 - Each investigation's facts now state whether anything was burned.
 - The atmosphere texts were dropped; plain computed sentences already say the same thing.
-- A second model re-reads every sentence against the facts and removes unsupported ones.
+- A second SI pass re-reads every sentence against the facts and removes unsupported ones. It was first set to use Gemma, which often returned server errors or took 20 seconds or more, so it now uses Gemini 3.5 Flash Lite, with Gemma and the writing model as fallbacks. The cache file records which model re-read each text.
+- A later read of the texts found two more errors that both checks had passed: the fabric text said two samples "burned a different length" in microgravity and normal gravity when the whole sample burned in both ("29 cm" of a 29 cm sample, and "Complete"), and the BASS-II text said airflow varied and also that airflow was not listed. Code now states each finding as a finished clause (how many tests are near the habitat's oxygen level, what gravity changed and for how many samples, what each table lists and leaves out), and the model only joins the clauses into sentences. Letting the model infer anything, even "same" or "different" from two burn lengths, produced errors. The BASS-II facts now say that a fan setting is listed but no air speed.
 - The site now says "numbers found in the data", not "checked", and states that neither check is proof.
 
 ## Still open

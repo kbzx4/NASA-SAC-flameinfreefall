@@ -174,7 +174,9 @@ def describe(cat, inv):
                              if len(fuels) > 1 else str(fuels[0])),
         "Oxygen": _rng(g["o2_min"].min(), g["o2_max"].max(), "%"),
         "Pressure": _rng(g["pressure_min"].min(), g["pressure_max"].max(), "psi"),
-        "Airflow": _rng(g["flow_min"].min(), g["flow_max"].max(), "cm/s"),
+        "Airflow": ("a fan setting is listed, but no air speed in cm/s"
+                    if g["flow_min"].isna().all() and g["flow_raw"].notna().any()
+                    else _rng(g["flow_min"].min(), g["flow_max"].max(), "cm/s")),
         "What varied between tests": ", ".join(varied) if varied else "nothing listed in the table",
         "Sensors named in the table": "; ".join(g["sensors"].dropna().unique()) or "not listed",
         "Gravity": "microgravity" + (", with a 1g comparison" if inv == "SAFFIRE-2" else ""),

@@ -278,7 +278,8 @@ table.t tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .rank .score small { display: block; font: 500 11px/1 var(--mono); color: var(--ink-3); letter-spacing: 0.1em; margin-bottom: 6px; }
 .formula { font: 500 clamp(15px, 1.6vw, 19px)/1.5 var(--mono); padding: 18px 20px; border: 1px dashed var(--line-2); border-radius: 12px; color: var(--ink); overflow-x: auto; white-space: nowrap; }
 .formula .u { color: var(--ug-hi); } .formula .e { color: var(--g1-hi); }
-.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.tool > *, .cols-2 > * { min-width: 0; }
 .prose ul { margin: 8px 0 0; padding-left: 20px; color: var(--ink-2); font-size: 14.5px; }
 .prose li + li { margin-top: 6px; }
 select { background: #0b111c; color: var(--ink); border: 1px solid var(--line-2); border-radius: 10px; padding: 9px 12px; font: inherit; font-size: 14px; }
@@ -286,7 +287,7 @@ select { background: #0b111c; color: var(--ink); border: 1px solid var(--line-2)
 .disclaimer { font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line); margin-top: 40px; padding-top: 18px; }
 
 @media (max-width: 980px) {
-  .hero-grid, .tool, .cols-2 { grid-template-columns: 1fr; }
+  .hero-grid, .tool, .cols-2 { grid-template-columns: minmax(0, 1fr); }
   .hero { min-height: 0; padding-top: 32px; }
   .flame-stage { max-width: 520px; }
   .grid-3, .grid-2, .tiles { grid-template-columns: 1fr; }

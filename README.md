@@ -43,16 +43,16 @@ Source: [NASA Physical Science Informatics](https://psi.nasa.gov/physci/repo/sea
 
 | Tool | Used for |
 |---|---|
-| Gemini 3.1 Flash Lite | Wrote the short interpretation on each material card and the two-sentence summary of each investigation, from facts computed by code. |
-| Gemma 4 31B | Re-read each of those sentences against the facts and flagged unsupported ones for removal. |
+| Gemini 3.1 Flash Lite | Worded the short note on each material card and the summary of each investigation. Code works out every finding first (counts, gaps, what gravity changed); the model only turns the findings into sentences. |
+| Gemini 3.5 Flash Lite | Second pass: re-read each of those sentences against the facts and flagged unsupported ones for removal. When it did not answer, Gemma 4 31B or Gemini 3.1 Flash Lite (in a fresh pass) was used instead. `data/si_cache.json` records which model re-read each text. |
 | Claude (Claude Code) | Wrote the data pipeline, the site code and the site and repository text, working with the team. |
 
-Checks on the SI-written text:
+Checks on the SI-worded text:
 
 1. Code looks up every number in a text in the facts it was written from, and removes any sentence containing a number that is not there.
-2. A second model re-reads each remaining sentence against the facts and removes any it judges unsupported.
+2. A second SI pass re-reads each remaining sentence against the facts and removes any it judges unsupported.
 
-Neither check is proof. [data/si_cache.json](data/si_cache.json) holds every SI-written text the site shows, with the sentences each check removed. Grades, counts, rankings and charts are computed without SI.
+Neither check is proof. [data/si_cache.json](data/si_cache.json) holds every SI-worded text the site shows, with the sentences each check removed. Grades, counts, rankings and charts are computed without SI.
 
 ## Run it
 
