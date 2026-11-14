@@ -14,11 +14,12 @@ NASA's Physical Science Informatics (PSI) archive holds decades of microgravity 
 
 1. **You describe a habitat**: oxygen, pressure, airflow, gravity, and the materials on board.
 2. **It ranks what NASA's experiments found.** Code computes nine fire-safety findings from the NASA tables (how often droplet and gas flames went out on their own at each oxygen level, how long they burned at low oxygen, what CO2 and helium did, cool flames, what gravity changed, flame spread with and against the airflow, carbon monoxide from burning samples, and the smoke tests). They are ranked by how close their tests came to your habitat, with the result nearest your oxygen level picked out and charted.
-3. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
-4. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
-5. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Flamebound shows where that bound is tight and where it is wide open.
-6. **It ranks and compares investigations** by how close their test conditions come to yours.
-7. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
+3. **Ask Flamebound (live SI).** Ask a question about your habitat, or have SI write a briefing for any values you set. Gemini 3.1 Flash Lite answers from the facts computed for that habitat only and cites the findings it used; the number check and a second model (Gemini 3.5 Flash Lite) run in the browser before the answer is shown.
+4. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
+5. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
+6. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Flamebound shows where that bound is tight and where it is wide open.
+7. **It ranks and compares investigations** by how close their test conditions come to yours.
+8. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
 
 ## Three scores, each shown with its formula
 
@@ -26,7 +27,7 @@ NASA's Physical Science Informatics (PSI) archive holds decades of microgravity 
 |---|---|---|
 | Gravity Sensitivity Index | `GSI = \|L_1g − L_µg\| ÷ L_sample` (L is burn length) | 0: microgravity and normal gravity agree. 1: the sample burned fully in one and not at all in the other. |
 | Habitat Fire Relevance Index | `HFRI = M_conditions × M_fuel × W_evidence` | How close an investigation's tests come to your conditions. A condition the NASA table does not list counts as 0. |
-| Finding relevance | `½ (C_oxygen + C_pressure) × W_tests` | How close the group of tests nearest your oxygen level comes to your habitat. W is 1 for 10 or more tests, 0.7 for fewer. |
+| Finding relevance | `C_oxygen × ½ (1 + C_pressure) × W_tests` | How close the group of tests nearest your oxygen level comes to your habitat. Oxygen gates the score; an unlisted pressure halves it. W is 1 for 10 or more tests, 0.7 for fewer. |
 
 None of the scores predicts flammability.
 
@@ -84,6 +85,8 @@ python scripts/build_insights.py    # optional; SI interpretation of the finding
 python scripts/build_site.py        # catalog + SI text -> docs/assets/data.js
 node tests/parity.mjs               # checks the site's JavaScript against the Python
 ```
+
+Live SI needs a Gemini key. Either deploy [proxy/gemini-proxy.gs](proxy/gemini-proxy.gs) as a Google Apps Script web app (the key stays on Google's side; setup steps are at the top of the file) and put its URL in `docs/assets/config.js` as `FF_AI.proxy`, or let visitors paste their own key, which stays in their browser.
 
 An earlier Streamlit version of the tool is kept in `app.py` (`streamlit run app.py`).
 

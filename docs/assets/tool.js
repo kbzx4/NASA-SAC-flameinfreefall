@@ -139,6 +139,81 @@
     $("dl-records").onclick = () => save("fire-evidence-records.csv", "text/csv", toCsv(records));
   }
 
+  /* ------------------------------------------------------------ live SI */
+  const AI = window.FFAI;
+  const SUGGEST = ["What happens to a liquid fuel fire at this oxygen level?", "Which of my materials were flame-tested near this oxygen level?",
+    "Did adding CO2 or helium help flames go out?", "What can't this data tell me about this habitat?"];
+  const habitatKey = () => [state.o2, state.pressure, state.flow, state.gravity, state.materials.join("|")].join(";");
+  const live = { ask: null, brief: null }; // {key, q, busy, result, error}
+  const LIMIT = 30; // live requests per hour from one browser, to spare the shared free quota
+  function allowed() {
+    if (AI.mode() === "your key") return true;
+    let t = [];
+    try { t = JSON.parse(localStorage.getItem("flamebound-live") || "[]").filter((x) => Date.now() - x < 3600e3); } catch (e) { return true; }
+    if (t.length >= LIMIT) return false;
+    try { localStorage.setItem("flamebound-live", JSON.stringify(t.concat(Date.now()))); } catch (e) { /* storage blocked */ }
+    return true;
+  }
+  function cites(text, r) {
+    return esc(text).replace(/\[((?:F\d+|gaps)(?:\s*,\s*(?:F\d+|gaps))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+      c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
+  }
+  function liveCheck(r) {
+    const removed = r.dropped.length + r.judged_out.length;
+    const list = [...r.dropped.map((x) => [x, "a number in it is not in the data"]), ...r.judged_out];
+    return `<span class="chk">${tick()} Live · written by ${esc(r.model)} · ${r.found} of ${r.total} numbers found in the data${r.judge ? ` · re-read by ${esc(r.judge)}` : " · second pass did not answer"}${removed ? ` · ${removed} sentence${removed > 1 ? "s" : ""} removed` : ""}</span>
+      ${list.length ? `<details class="removed"><summary>What the checks removed</summary><ul class="facts">${list.map(([x, why]) => `<li>${esc(x)} <span class="cav">(${esc(why.replace(/^UNSUPPORTED:\s*/, ""))})</span></li>`).join("")}</ul></details>` : ""}`;
+  }
+  function liveBody(slot) {
+    const L2 = live[slot];
+    if (!L2 || L2.key !== habitatKey()) return "";
+    if (L2.busy) return `<p class="live-wait"><span class="spin"></span>Writing from the findings, then checking every sentence…</p>`;
+    if (L2.error) return `<p class="live-err">${esc(L2.error)}</p>`;
+    const r = L2.result;
+    return `<p class="live-text">${r.text ? cites(r.text, r) : "Every sentence of the answer failed a check, so nothing is shown. Try asking another way."}</p>${liveCheck(r)}`;
+  }
+  async function go(slot, q) {
+    if (!allowed()) { live[slot] = { key: habitatKey(), error: `This browser has used its ${LIMIT} live requests for the hour. The findings below do not need SI.` }; drawInsights(); return; }
+    const key = habitatKey();
+    live[slot] = { key, q, busy: true };
+    drawInsights();
+    try {
+      const r = await AI.run(slot === "ask" ? "ask" : "brief", FF, L, state, q || "");
+      if (live[slot].key === key) live[slot] = { key, q, result: r };
+    } catch (e) {
+      const why = e.status === 429 ? "The free SI quota is used up for now. Everything else on this page is computed and still works."
+        : e.status === 400 || e.status === 403 ? "The SI service refused the key. Check the key, or clear it and paste another."
+        : "The SI service did not answer. Try again in a moment.";
+      if (live[slot].key === key) live[slot] = { key, q, error: why };
+    }
+    if (state.view === "insights") drawInsights();
+  }
+  function askPanel() {
+    if (!AI.configured()) {
+      return `<div class="ask"><div class="k">Ask Flamebound · live SI</div>
+        <p class="hint" style="margin:8px 0 10px">Live questions need a Gemini API key. Paste one to try it here; it is kept only in this browser. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key ↗</a></p>
+        <form id="key-form" class="ask-row"><input id="key-in" class="find" type="password" autocomplete="off" placeholder="Gemini API key" aria-label="Gemini API key"><button class="btn primary small">Turn on live SI</button></form></div>`;
+    }
+    const a = live.ask && live.ask.key === habitatKey() ? live.ask : null;
+    return `<div class="ask"><div class="k">Ask Flamebound · live SI${AI.mode() === "your key" ? ` · using your key · <button class="linkish" id="key-clear">forget it</button>` : ""}</div>
+      <form id="ask-form" class="ask-row"><input id="ask-q" class="find" maxlength="300" placeholder="Ask about this habitat" value="${esc(a ? a.q : "")}" aria-label="Ask a question about this habitat"><button class="btn primary small"${a && a.busy ? " disabled" : ""}>Ask</button></form>
+      <div class="pills" id="ask-sugg" style="margin-top:10px">${SUGGEST.map((x) => `<button class="pill" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+      <div class="ask-out">${liveBody("ask")}</div>
+      <p class="hint" style="margin-top:10px">Answers come only from the findings on this page and cite them, like F1. They are checked by code and a second model as they arrive, but nobody reads them before you do.</p></div>`;
+  }
+  function bindLive() {
+    const kf = $("key-form");
+    if (kf) kf.onsubmit = (e) => { e.preventDefault(); const k = $("key-in").value.trim(); if (k) { AI.setUserKey(k); drawInsights(); } };
+    const kc = $("key-clear");
+    if (kc) kc.onclick = () => { AI.setUserKey(""); live.ask = live.brief = null; drawInsights(); };
+    const af = $("ask-form");
+    if (af) af.onsubmit = (e) => { e.preventDefault(); const q = $("ask-q").value.trim(); if (q) go("ask", q); };
+    const sg = $("ask-sugg");
+    if (sg) sg.onclick = (e) => { const b = e.target.closest("button"); if (b) go("ask", b.dataset.q); };
+    const wb = $("brief-live");
+    if (wb) wb.onclick = () => go("brief");
+  }
+
   /* ------------------------------------------------------------ insights */
   const KINDS = [["", "All fires"], ["solid", "Solid materials"], ["liquid", "Liquid fuels"], ["gas", "Gas flames"], ["smoke source", "Smoke"]];
   const tick = () => icon("M5 12.5l4.2 4.2L19 7").replace("<svg", '<svg style="width:11px;height:11px;vertical-align:-1px"');
@@ -151,14 +226,15 @@
   }
   function insightCard(f, r, i, pinned) {
     const t = f.si, b = f.bands[r.band];
-    const near = b.o2 ? `Nearest your ${g(state.o2)}% oxygen` : "Applies to any habitat";
-    const why = [b.o2 ? `Oxygen ${rangeText(b.o2, "%")}: closeness ${r.m_o2.toFixed(2)}` : "No oxygen level listed: 0",
-      b.p ? `Pressure ${rangeText(b.p, " psi")}: closeness ${r.m_p.toFixed(2)}` : "No pressure listed: 0",
+    const off = b.o2 ? Math.max(b.o2[0] - state.o2, state.o2 - b.o2[1], 0) : null;
+    const near = b.o2 == null ? "No oxygen level listed" : off === 0 ? `At your ${g(state.o2)}% oxygen` : `Nearest tests to your ${g(state.o2)}% oxygen, ${g(Math.round(off * 10) / 10)} points away`;
+    const why = [b.o2 ? `Oxygen ${rangeText(b.o2, "%")}: closeness ${r.m_o2.toFixed(2)}` : "No oxygen level listed: closeness 0",
+      b.p ? `Pressure ${rangeText(b.p, " psi")}: closeness ${r.m_p.toFixed(2)}` : "No pressure listed: closeness 0, which halves the score",
       `${b.n} test${b.n === 1 ? "" : "s"} in this group${b.n >= 10 ? "" : ", fewer than 10: × 0.7"}`];
     const legend = f.chart ? `<div class="legend">${f.chart.series.map(([l, c]) => `<span><i style="background:${c}"></i>${esc(l)}</span>`).join("")}</div>` : "";
     const facts = `<ul class="facts">${Object.values(f.facts).map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul>`;
-    return `<article class="insight${pinned ? " pinned" : ""}">
-      <div class="ins-head"><span class="n">${i + 1}</span><span class="tag">${esc(f.topic)}</span>${f.investigations.map((inv, k) => `<a class="tag" href="${f.links[k]}" target="_blank" rel="noopener">${esc(inv)} · ${esc(f.psi[k])} ↗</a>`).join("")}
+    return `<article class="insight${pinned ? " pinned" : ""}" id="ins-${f.id}">
+      <div class="ins-head"><span class="n">${i + 1}</span><span class="tag code">F${FF.findings.indexOf(f) + 1}</span><span class="tag">${esc(f.topic)}</span>${f.investigations.map((inv, k) => `<a class="tag" href="${f.links[k]}" target="_blank" rel="noopener">${esc(inv)} · ${esc(f.psi[k])} ↗</a>`).join("")}
         <span class="rel" tabindex="0" data-tip="<b>Relevance ${r.score.toFixed(2)}</b><span>${esc(why.join("|")).split("|").join("<br>")}</span>">${pinned ? "Pinned · relevance" : "Relevance"} <b>${r.score.toFixed(2)}</b><i><em style="width:${r.score * 100}%"></em></i></span></div>
       <h3>${esc(t && t.headline ? t.headline : cap(f.topic))}</h3>
       <p class="near-line"><b>${near}:</b> ${esc(cap(b.line))}.</p>
@@ -179,16 +255,23 @@
     const words = state.find.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const shown = rank.filter((r) => words.every((w) => insightText(byId[r.id]).includes(w)));
     const brief = isPreset() ? FF.briefings[state.scenario] : null, gaps = L.gaps(FF, state.o2, state.pressure);
-    const custom = all.slice(0, 3).map((r) => cap(byId[r.id].bands[r.band].line) + ".").join(" ");
+    const far = all[0].m_o2 === 0;
+    const custom = (far ? `No finding has tests within ${g(FF.range.o2)} points of ${g(state.o2)}% oxygen. The nearest results are these, and they are a long way from your habitat. ` : "")
+      + all.slice(0, 3).map((r) => cap(byId[r.id].bands[r.band].line) + ".").join(" ");
     const models = [...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", ");
     el.innerHTML = `
       <span class="eyebrow">Fire safety insights</span>
       <h1 style="margin-top:12px">What NASA's microgravity fire tests suggest for ${esc(habitat)}</h1>
       <p class="lede">${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${esc(gravityLabel())}. ${FF.findings.length} findings computed from the ${(() => { const inv = new Set(FF.findings.flatMap((f) => f.investigations)); return `${FF.rows.filter((r) => inv.has(r.i)).length.toLocaleString("en-US")} NASA test records of ${inv.size} investigations`; })()}, ranked by how close their tests came to these conditions, and interpreted by SI.</p>
-      <div class="briefing">
-        <div class="k">${brief ? "Briefing · SI-written from the ranked findings and the gaps" : "Closest results · computed for your custom values"}</div>
-        <p>${esc(brief ? brief.text : custom)}</p>${brief ? checkLine(brief) : `<span class="chk none">SI briefings are prepared for the four preset habitats. These lines are computed, not SI-written.</span>`}
+      <div class="briefing">${(() => {
+        const lb = live.brief && live.brief.key === habitatKey() ? live.brief : null;
+        if (lb) return `<div class="k">Briefing · written live by SI for these values</div>${liveBody("brief")}`;
+        if (brief) return `<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}`;
+        return `<div class="k">Closest results · computed, not SI-written</div><p>${esc(custom)}</p>
+          ${AI.configured() ? `<button class="btn small" id="brief-live" style="margin-top:12px">Write an SI briefing for these values</button>` : `<span class="chk none">Turn on live SI below to get an SI-written briefing for these values.</span>`}`;
+      })()}
       </div>
+      ${askPanel()}
       ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence.</b> No finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. The findings below are the nearest there are; treat this habitat as a research gap.</div>` : ""}
       ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No test in the data ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first.</div>` : ""}
       <div class="ins-tools">
@@ -196,12 +279,12 @@
         <input class="find" id="find" type="search" placeholder="Find: oxygen, CO2, smoke, gravity, PMMA" value="${esc(state.find)}" aria-label="Find a finding">
       </div>
       <div id="ins-list">${shown.length ? shown.map((r, i) => insightCard(byId[r.id], r, i, r === pin)).join("") : `<p class="muted">No finding matches "${esc(state.find)}".</p>`}</div>
-      <div class="h-sec"><h2>What this data cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</span></div>
+      <div class="h-sec" id="gaps"><h2>What this data cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</span></div>
       <div class="card prose"><ul>${gaps.map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul></div>
       <div class="cols-2" style="margin-top:18px">
         <div class="card"><h3>How the findings are ranked</h3>
-          <div class="formula">Relevance = ½ (C<sub>oxygen</sub> + C<sub>pressure</sub>) × W<sub>tests</sub></div>
-          <p style="margin-top:14px">Each finding splits its tests into groups by oxygen level, and the group nearest your habitat is scored. C is 1 when your value is inside the group's tested range and falls to 0 at ${g(FF.range.o2)} points of oxygen or ${g(FF.range.pressure)} psi away. A value the table does not list scores 0, because it cannot be checked. W is 1 for 10 or more tests and 0.7 for fewer.</p></div>
+          <div class="formula">Relevance = C<sub>oxygen</sub> × ½ (1 + C<sub>pressure</sub>) × W<sub>tests</sub></div>
+          <p style="margin-top:14px">Each finding splits its tests into groups by oxygen level, and the group nearest your oxygen level is scored. C is 1 when your value is inside the group's tested range and falls to 0 at ${g(FF.range.o2)} points of oxygen or ${g(FF.range.pressure)} psi away. Oxygen gates the score: tests far from your oxygen level score 0 however close their pressure is. A pressure the table does not list counts as 0, which halves the score. W is 1 for 10 or more tests and 0.7 for fewer.</p></div>
         <div class="card prose"><h3>Who did what</h3><ul>
           <li>Code computed every finding, count, ranking and gap from the NASA tables. Open "The facts code computed" on any card to see them.</li>
           <li>SI (${esc(models)}) wrote each headline, the summary of what the tests found, the interpretation, the limit and the briefing, reading only those facts.</li>
@@ -210,6 +293,7 @@
       </div>`;
     shown.forEach((r) => { const f = byId[r.id]; if (f.chart) CH.finding($("ch-" + f.id), f, r.band); });
     CH.bindTips(el);
+    bindLive();
     $("kinds").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; state.kind = b.dataset.k; drawInsights(); };
     $("find").oninput = (e) => {
       state.find = e.target.value;
@@ -323,6 +407,7 @@
           <li>No investigation here ran in partial gravity.</li></ul></div>
         <div class="card prose"><h3>How SI is used</h3><ul>
           <li>Insights: code computes each finding from the NASA tables and ranks the findings for your habitat. ${esc([...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", "))} then interprets each finding (headline, what the tests found, what it suggests, its limit) and writes a briefing for each preset habitat, reading only the facts code computed.</li>
+          <li>Live: "Ask Flamebound" and "Write an SI briefing" send the facts computed for your habitat (the ranked findings, the gaps and your materials) to Gemini 3.1 Flash Lite, which answers from those facts only and cites the findings it used. The same two checks run in your browser before the answer is shown. Live answers are not read by a person first.</li>
           <li>Material cards and investigation summaries: code works out every finding and a Gemini model only puts it into sentences. It is asked to change nothing.</li>
           <li>Code then looked up every number in each text in those facts and removed any sentence containing a number that was not there. Across ${texts.length} texts, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.</li>
           <li>A second SI pass then re-read each remaining sentence against the facts and removed any it judged unsupported. ${texts.filter((t) => t.judge && t.judge !== t.model).length} of the ${texts.length} texts were re-read by a different model${(() => { const j = [...new Set(texts.filter((t) => t.judge && t.judge !== t.model).map((t) => t.judge))]; return j.length ? " (" + esc(j.join(", ")) + ")" : ""; })()}, ${texts.filter((t) => t.judge && t.judge === t.model).length} by the same model in a fresh pass, and ${texts.filter((t) => !t.judge).length} got no second pass. The removed-sentence count above includes both checks.</li>
@@ -363,7 +448,7 @@
         const b = isPreset() ? FF.briefings[state.scenario] : null;
         const top = L.rankFindings(FF, state.o2, state.pressure).slice(0, 5);
         return `<h2>What NASA's microgravity fire tests suggest</h2>${b ? `<p class="si">${esc(b.text)}<br><small>SI-written briefing (${esc(b.model)}); ${b.verified} of ${b.total} numbers found in the data${b.judge ? `; re-read by ${esc(b.judge)}` : ""}.</small></p>` : ""}
-          <p><small>The ${top.length} findings whose tests came closest to these conditions. Relevance = ½ (oxygen closeness + pressure closeness) × test-count weight.</small></p>
+          <p><small>The ${top.length} findings whose tests came closest to these conditions. Relevance = oxygen closeness × ½ (1 + pressure closeness) × test-count weight.</small></p>
           ${top.map((r, i) => { const x = FF.findings.find((y) => y.id === r.id), t = x.si || {}; return `<h3>${i + 1}. ${esc(t.headline || x.topic)} <small>(${esc(x.investigations.join(", "))}, relevance ${r.score.toFixed(2)})</small></h3>
             <p><b>Nearest these conditions:</b> ${esc(x.bands[r.band].line)}.</p>${t.found ? `<p>${esc(t.found)}</p>` : ""}${t.means ? `<p class="si">${esc(t.means)}<br><small>SI interpretation</small></p>` : ""}${t.limit ? `<p><small>Limit: ${esc(t.limit)}</small></p>` : ""}`; }).join("")}
           <h3>What this data cannot tell you</h3><ul>${L.gaps(FF, state.o2, state.pressure).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;

@@ -190,19 +190,20 @@
 
   /* ---- findings: ranked by how close their tests come to a habitat (build_findings.rank) ---- */
   function rankFindings(FF, o2, pressure, fuelClass) {
+    const gapTo = (r) => (r ? Math.max(r[0] - o2, o2 - r[1], 0) : Infinity);
     const out = [];
     FF.findings.forEach((f) => {
       if (fuelClass && f.fuel_class !== fuelClass) return;
-      let best = null;
-      f.bands.forEach((b, i) => {
-        const mo = closeness(b.o2, o2, FF.range.o2), mp = closeness(b.p, pressure, FF.range.pressure);
-        const sc = ((mo + mp) / 2) * (b.n >= 10 ? 1 : 0.7);
-        if (!best || sc > best[0]) best = [sc, i, mo, mp];
+      let i = 0;
+      f.bands.forEach((b, k) => {
+        const d = gapTo(b.o2) - gapTo(f.bands[i].o2);
+        if (d < 0 || (d === 0 && b.n > f.bands[i].n)) i = k;
       });
-      out.push({ id: f.id, score: round(best[0], 2), band: best[1], m_o2: round(best[2], 2), m_p: round(best[3], 2) });
+      const b = f.bands[i], mo = closeness(b.o2, o2, FF.range.o2), mp = closeness(b.p, pressure, FF.range.pressure);
+      out.push({ id: f.id, score: round(mo * (1 + mp) / 2 * (b.n >= 10 ? 1 : 0.7), 2), band: i, m_o2: round(mo, 2), m_p: round(mp, 2), n: b.n, gap: gapTo(b.o2) });
     });
-    const n = (r) => FF.findings.find((f) => f.id === r.id).bands[r.band].n;
-    out.sort((a, b) => b.score - a.score || n(b) - n(a));
+    out.sort((a, b) => b.score - a.score || a.gap - b.gap || b.n - a.n); // ties: nearest oxygen, then more tests
+    out.forEach((r) => { delete r.n; delete r.gap; });
     return out;
   }
 

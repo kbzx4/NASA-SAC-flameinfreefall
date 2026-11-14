@@ -360,26 +360,30 @@ def closeness(r, x, scale):
     return min(1.0, max(0.0, 1 - d / scale))
 
 
-def rank(found, o2, pressure, fuel_class=None):
-    """Score each finding for a habitat. Uses the oxygen band nearest the habitat's oxygen level.
+def o2_gap(r, x):
+    return float("inf") if not r else max(r[0] - x, x - r[1], 0)
 
-    score = M_conditions x W_tests, where M_conditions is the mean closeness of that band's oxygen and
-    pressure to the habitat (a value the table does not list counts as 0), and W_tests is 1 when the
-    band holds 10 or more tests, else 0.7. A fuel-class filter, if given, drops other classes.
+
+def rank(found, o2, pressure, fuel_class=None):
+    """Score each finding for a habitat, using its group of tests nearest the habitat's oxygen level.
+
+    score = C_oxygen x (1 + C_pressure) / 2 x W_tests. Oxygen gates the score: a group 20 or more
+    points of oxygen away scores 0 however close its pressure is. A pressure the table does not list
+    counts as 0, which halves the score. W_tests is 1 for 10 or more tests in the group, else 0.7.
+    Ties go to the nearer oxygen level, then to more tests. A fuel-class filter, if given, drops other classes.
     """
     out = []
     for f in found:
         if fuel_class and f["fuel_class"] != fuel_class:
             continue
-        best = None
-        for i, b in enumerate(f["bands"]):
-            mo, mp = closeness(b["o2"], o2, core.RANGE["o2"]), closeness(b["p"], pressure, core.RANGE["pressure"])
-            s = (mo + mp) / 2 * (1 if b["n"] >= 10 else 0.7)
-            if best is None or s > best[0]:
-                best = (s, i, mo, mp)
-        s, i, mo, mp = best
-        out.append({"id": f["id"], "score": r2(s), "band": i, "m_o2": r2(mo), "m_p": r2(mp)})
-    out.sort(key=lambda r: (-r["score"], -next(f for f in found if f["id"] == r["id"])["bands"][r["band"]]["n"]))
+        i = min(range(len(f["bands"])), key=lambda k: (o2_gap(f["bands"][k]["o2"], o2), -f["bands"][k]["n"]))
+        b = f["bands"][i]
+        mo, mp = closeness(b["o2"], o2, core.RANGE["o2"]), closeness(b["p"], pressure, core.RANGE["pressure"])
+        s = mo * (1 + mp) / 2 * (1 if b["n"] >= 10 else 0.7)
+        out.append({"id": f["id"], "score": r2(s), "band": i, "m_o2": r2(mo), "m_p": r2(mp), "n": b["n"], "gap": o2_gap(b["o2"], o2)})
+    out.sort(key=lambda r: (-r["score"], r["gap"], -r["n"]))  # ties: nearest oxygen, then more tests
+    for r in out:
+        del r["n"], r["gap"]
     return out
 
 

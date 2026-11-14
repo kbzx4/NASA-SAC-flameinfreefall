@@ -70,6 +70,12 @@ Changes made:
 - Reading the final texts: the gas-flame facts said "the burner reached" a temperature, and the model wrote that a fire may "stay cooler"; the fact now says the burner hardware, not the flame. The cool-flame interpretation was removed by the second pass because "harder to see" was not in the facts; the definition now says so. The second pass removed the Spacesuit briefing's main gap sentence over the words "most important"; that briefing was regenerated once.
 - One known stretch is left as written: the gas-flame interpretation says "30% oxygen or more" where the tests ran at 33.2 to 40%. The exact range sits beside it on the card.
 
+## Nov 14, night: high oxygen and live SI
+
+- At 85.5% oxygen the tool showed results from 20 to 21% oxygen and no "no close evidence" warning. No test is within 20 points of 85.5%, so oxygen closeness was 0 for every finding, a pressure match alone gave 0.5, and the tie between oxygen groups went to the first one. Each finding now uses its group of tests nearest the habitat's oxygen level, oxygen gates the score (`C_oxygen × ½ (1 + C_pressure) × W_tests`), and ties go to the nearer oxygen level. The cards say how far away the nearest tests are. A sweep of 10,860 slider settings checks that the nearest group is always the one used. The Spacesuit briefing had been written from the wrong groups and was dropped.
+- Live SI: "Ask Flamebound" answers questions, and "Write an SI briefing" covers any habitat, from the facts the page computed for it. Gemini 3.1 Flash Lite answers in 3 to 6 seconds; in tests the second pass (Gemini 3.5 Flash Lite) caught a misattributed oxygen range and a wrong "lower than". Gemma 4 26B timed out three times in a row, so it is only the last fallback.
+- The free tier allows 20 requests a day for the stronger models (Gemini 4 Hydrogen included), so live SI uses the Flash Lite models.
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.

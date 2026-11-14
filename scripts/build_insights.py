@@ -32,7 +32,7 @@ from scripts import build_findings as bf  # noqa: E402
 CACHE = ROOT / "data" / "insight_cache.json"
 # The free tier allows 20 requests a day for most strong models; gemini-4-hydrogen had room and wrote
 # the most careful interpretations in a side-by-side test. The second pass uses a different model.
-WRITERS = ["gemini-4-hydrogen", "gemini-3.5-flash", "gemini-3-flash-preview"]
+WRITERS = ["gemini-4-hydrogen", "gemini-3.5-flash", "gemini-3-flash-preview", "gemma-4-26b-a4b-it"]
 JUDGES = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-4-hydrogen"]
 FIELDS = ["HEADLINE", "FOUND", "MEANS", "LIMIT"]
 
