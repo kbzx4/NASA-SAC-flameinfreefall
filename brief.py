@@ -125,6 +125,7 @@ def build_facts(cat, pairs, name, o2, pressure, flow, gravity_label, chosen):
         "materials_selected": len(mats),
         "atmosphere": atmosphere_evidence(cat, o2),
         "partial_gravity_tests_loaded": 0,
+        "psi_ids": dict(zip(cat["investigation"], cat["psi_id"])),
     }
 
 
@@ -270,8 +271,7 @@ def brief_html(facts, si=None):
     for m in facts["materials"]:
         for inv in list(m["flame_tests_by_investigation"]) + list(m["smoke_tests_by_investigation"]):
             used[inv] = None
-    ids = {"SAFFIRE-1": "PSI-98", "SAFFIRE-2": "PSI-99", "SAFFIRE-3": "PSI-100", "BASS-II": "PSI-25",
-           "SAME": "PSI-102", "SAME-R": "PSI-101", "FLEX": "PSI-69", "CFI-G": "PSI-159"}
+    ids = facts["psi_ids"]
     for inv in list(used) + ["FLEX", "CFI-G"]:
         parts.append(f"<li>{e(inv)}, NASA Physical Science Informatics {ids[inv]}: "
                      f"<a href='{core.source_link(ids[inv])}'>{core.source_link(ids[inv])}</a></li>")

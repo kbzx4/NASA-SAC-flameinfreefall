@@ -84,12 +84,58 @@ def verify(text, facts):
     return {"text": " ".join(kept), "total": total, "verified": good, "dropped": dropped}
 
 
-def interpret(facts):
+JUDGE = """You are checking a short text against the data it was written from.
+FACTS is a JSON object. SENTENCES are numbered. For each sentence, decide whether every claim in it
+is directly supported by FACTS. Be strict: a correct number attached to the wrong thing, a wrong
+unit, a count that FACTS does not state, or a claim FACTS does not contain are all UNSUPPORTED.
+
+Reply with exactly one line per sentence and nothing else, in this form:
+1 SUPPORTED
+2 UNSUPPORTED: short reason
+
+FACTS:
+{facts}
+
+SENTENCES:
+{sentences}
+"""
+
+
+def sentences(text):
+    return [s for s in re.split(r"(?<=[.!?])\s+", text.replace("\n", " ").strip()) if s]
+
+
+def judge(text, facts, models=("gemma-4-31b-it", "gemini-3.1-flash-lite")):
+    """Second pass by a different model. Returns {"text", "model", "removed": [reasons]} or {"error"}."""
+    key = api_key()
+    parts = sentences(text)
+    if not key or not parts:
+        return {"error": "nothing to judge"}
+    prompt = JUDGE.format(facts=json.dumps(facts, ensure_ascii=False),
+                          sentences="\n".join(f"{i} {s}" for i, s in enumerate(parts, 1)))
+    last = "unknown error"
+    for model in models:
+        try:
+            raw = _call(model, prompt, key)
+        except Exception as err:
+            last = f"{model}: {type(err).__name__}"
+            continue
+        verdicts = dict(re.findall(r"(?m)^\s*(\d+)\s+(SUPPORTED|UNSUPPORTED[^\n]*)", raw))
+        if len(verdicts) != len(parts):
+            last = f"{model}: unreadable verdict"
+            continue
+        bad = {int(i): v for i, v in verdicts.items() if v.startswith("UNSUPPORTED")}
+        return {"text": " ".join(s for i, s in enumerate(parts, 1) if i not in bad), "model": model,
+                "removed": [f"{parts[i - 1]} -> {v}" for i, v in sorted(bad.items())]}
+    return {"error": last}
+
+
+def interpret(facts, template=PROMPT):
     """Returns {"text", "model", "total", "verified", "dropped"} or {"error": reason}."""
     key = api_key()
     if not key:
         return {"error": "No SI key is configured."}
-    prompt = PROMPT.format(facts=json.dumps(facts, ensure_ascii=False))
+    prompt = template.format(facts=json.dumps(facts, ensure_ascii=False))
     last = "unknown error"
     for model in MODELS:
         try:

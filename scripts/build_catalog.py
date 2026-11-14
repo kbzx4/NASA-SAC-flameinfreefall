@@ -37,6 +37,12 @@ INV = {
     "SAME": ("PSI-102", ""),
     "SAME-R": ("PSI-101", ""),
     "SLICE": ("PSI-106", "10.60555/pm12-rg61"),
+    "BASS": ("PSI-26", ""),
+    "CFI": ("PSI-39", "10.60555/m6pj-a914"),
+    "ACME Flame Design": ("PSI-10", "10.60555/w4zy-bt45"),
+    "ACME BRE": ("PSI-20", ""),
+    "ACME E-FIELD Flames": ("PSI-22", ""),
+    "DAFT": ("PSI-47", ""),
 }
 
 COLS = [
@@ -311,9 +317,129 @@ def slice_():
     return out
 
 
+def bass():
+    src = "PSI-26_Experimental table_BASS.csv"
+    out = []
+    for d in read(src):
+        fuel = d["Fuel Sample Material"]
+        if "soot cleaning" in fuel.lower():
+            continue  # a maintenance entry, not a burn test
+        out.append(row(
+            "BASS", src, test_id=d["Test #"], fuel_class="solid", fuel=fuel, gravity="µg",
+            notes=f'As-run order {d["As Run Test #"]}, sample {d["Sample #"]}. '
+                  "Table lists no O2, pressure, airflow or outcome.",
+        ))
+    return out
+
+
+def cfi():
+    src = "PSI-39_Experimental table_CFI.csv"
+    out = []
+    for d in read(src):
+        o = num(d["Oxygen"])
+        p = nums(d["Pressure"])
+        parts = [f"{label} {num(d[col]):g}" for label, col in (("N2", "Nitrogen"), ("He", "Helium")) if num(d[col])]
+        extra = {}
+        if o is not None:
+            extra.update(span("o2", o * 100, o * 100))
+        if p:
+            extra.update(span("pressure", p[0] * ATM_TO_PSI, p[0] * ATM_TO_PSI))
+        out.append(row(
+            "CFI", src, test_id=f'{d["Flex Number"]} ({d["CIR"]})', fuel_class="liquid",
+            fuel=f'{d["Fuel"]} droplet' + {"Yes": ", fiber-supported", "No": ", free-floating"}.get(d["Fiber"], ""),
+            o2_raw=d["Oxygen"], diluent="; ".join(parts), pressure_raw=d["Pressure"], gravity="µg",
+            notes="Cool Flames Investigation. Table lists no airflow or outcome.", **extra,
+        ))
+    return out
+
+
+def flame_design():
+    src = "PSI-10_Experimental table_Flame Design_Normal Flame.csv"
+    out = []
+    for d in read(src):
+        o = num(d["XO2 (init)"])
+        p = num(d["pinit (atm)"])
+        extra = {}
+        if o is not None:
+            extra.update(span("o2", o * 100, o * 100))
+        if p is not None:
+            extra.update(span("pressure", p * ATM_TO_PSI, p * ATM_TO_PSI))
+        out.append(row(
+            "ACME Flame Design", src, test_id=d["Test"], fuel_class="gas",
+            fuel=f'{d["Fuel"]}, fuel mole fraction {d["Xfuel"]}, fuel flow {d["mfuel (mg/s)"]} mg/s (spherical burner)',
+            o2_raw=d["XO2 (init)"], pressure_raw=f'{d["pinit (atm)"]} atm', diluent="N2",
+            gravity="µg", notes="Table lists no outcome. RAMPED means the flow was varied during the test.",
+            **extra,
+        ))
+    return out
+
+
+def bre():
+    src = "PSI-20_Experimental table_ACME BRE.csv"
+    out = []
+    for d in read(src):
+        raw = d["Oxygen Conc (percent)"]
+        o = nums(raw)
+        fixed = ""
+        if raw.endswith("00%"):  # a spreadsheet percent format turned 34 into "3400%"
+            o = [x / 100 for x in o]
+            fixed = f'Oxygen cell reads "{raw}" in the source; read as {o[0]:g}%. '
+        out.append(row(
+            "ACME BRE", src, row_level="summary (one line per test day)",
+            test_id=f'{d["Year"]} {d["Month"]} {d["Date"]}', fuel_class="gas",
+            fuel=f'{d["Fuel Bottle"]}, {d["Burner Size (mm)"]} mm burner',
+            o2_raw=raw, o2_min=fmt(min(o)), o2_max=fmt(max(o)), diluent="N2", gravity="µg",
+            outcome=f'{d["Flames Ignited"]} flames ignited that day',
+            notes=fixed + "Burning Rate Emulator. Oxygen values are approximate levels for tests that "
+                          "ignited; chamber pressure also varied but is not listed.",
+        ))
+    return out
+
+
+def efield():
+    src = "PSI-22_Experimental table_ACME E-FIELD Flames.csv"
+    out, seen = [], set()
+    rows = read(src)
+    for i, d in enumerate(rows):
+        if not d["Test Day"]:
+            continue  # continuation line: extra fuel concentrations for the day above
+        conc = [d["Fuel Conc"]]
+        for nxt in rows[i + 1:]:
+            if nxt["Test Day"]:
+                break
+            conc.append(nxt["Fuel Conc"])
+        key = (d["Test Day"], d["Mesh Polarity"], d["Fuel Bottle"])
+        if key in seen:
+            continue  # the source lists test day 18319 twice
+        seen.add(key)
+        out.append(row(
+            "ACME E-FIELD Flames", src, row_level="summary (one line per test day)",
+            test_id=d["Test Day"], fuel_class="gas",
+            fuel=f'{d["Fuel Bottle"]} bottle, run at {", ".join(conc)} fuel (balance N2)',
+            diluent="N2", gravity="µg", outcome=f'{d["Flames Ignited"]} flames ignited that day',
+            notes=f'{d["Test Type"]}. Mesh polarity {d["Mesh Polarity"]}. An electric field acted on the '
+                  "flame. Table lists no O2, pressure or airflow.",
+        ))
+    return out
+
+
+def daft():
+    src = "PSI-47_Experimental table_DAFT.csv"
+    out = []
+    for d in read(src):
+        out.append(row(
+            "DAFT", src, row_level="summary (one line per session)", test_id=d["Session Name"],
+            fuel_class="dust", fuel=d["Sample Material"], gravity="µg",
+            sensors=d["Hardware Description"].replace("Contained ", "").replace(" and batteries", ""),
+            notes=f'{d["Actual Day"]}. {d["Sampled Location"]}. Dust-particle measurement, not a flame test.',
+        ))
+    return out
+
+
 def main():
     saf, pairs = saffire()
-    rows = saf + bass2() + flex() + flex2() + cfig() + same() + slice_()
+    rows = (saf + bass2() + bass() + flex() + flex2() + cfi() + cfig() + flame_design()
+            + bre() + efield() + slice_() + same() + daft())
     for r in rows:
         if r["fuel_class"] in ("solid", "smoke source"):
             r["material"] = tag_material(r["fuel"])

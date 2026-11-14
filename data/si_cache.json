@@ -1,0 +1,392 @@
+{
+ "9c4ab012ff3cea1ded02": {
+  "kind": "material",
+  "label": "ISS cabin|Cotton-fiberglass fabric (SIBAL)",
+  "text": "There are 45 flame tests for this material, with 10 tests within 0.2 oxygen points of the 21% habitat level. Gravity pairs for samples 2-5 and 2-6 show a GSI of 0.00, with microgravity burn lengths of 29 cm and normal gravity burn lengths of Complete.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 10,
+  "verified": 10,
+  "dropped": 0,
+  "raw": "There are 45 flame tests for this material, with 10 tests within 0.2 oxygen points of the 21% habitat level. Gravity pairs for samples 2-5 and 2-6 show a GSI of 0.00, with microgravity burn lengths of 29 cm and normal gravity burn lengths of Complete."
+ },
+ "7dc4174680419f512f20": {
+  "kind": "material",
+  "label": "ISS cabin|Japan wax",
+  "text": "There are 11 flame tests for Japan wax, with the nearest oxygen level at 17.4% being 3.6 points below the habitat. The evidence does not cover gravity comparisons, airflow, or smoke tests.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 3,
+  "verified": 3,
+  "dropped": 0,
+  "raw": "There are 11 flame tests for Japan wax, with the nearest oxygen level at 17.4% being 3.6 points below the habitat. The evidence does not cover gravity comparisons, airflow, or smoke tests."
+ },
+ "1ff9053060ba878816ef": {
+  "kind": "material",
+  "label": "ISS cabin|Nomex",
+  "text": "There are 10 flame tests for Nomex, with 4 tests occurring within 2 oxygen points of the 21% habitat level. The gravity comparison for sample 2-7b shows a GSI of 0.00, with a microgravity burn length of 0 and a normal gravity burn length of ~ 0.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 9,
+  "verified": 9,
+  "dropped": 0,
+  "raw": "There are 10 flame tests for Nomex, with 4 tests occurring within 2 oxygen points of the 21% habitat level. The gravity comparison for sample 2-7b shows a GSI of 0.00, with a microgravity burn length of 0 and a normal gravity burn length of ~ 0."
+ },
+ "61228cd4af7ca2f38ad2": {
+  "kind": "material",
+  "label": "ISS cabin|PMMA (acrylic)",
+  "text": "There are 92 flame tests for PMMA, with 29 tests occurring within 2 oxygen points of the 21% habitat level. The gravity pairs show a GSI of 0.66 for sample 2-8 with burn lengths of ~ 10 cm (note 3) and Complete, and 0.66 for 2-9.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 12,
+  "verified": 12,
+  "dropped": 0,
+  "raw": "There are 92 flame tests for PMMA, with 29 tests occurring within 2 oxygen points of the 21% habitat level. The gravity pairs show a GSI of 0.66 for sample 2-8 with burn lengths of ~ 10 cm (note 3) and Complete, and 0.66 for 2-9."
+ },
+ "8a8dc6176e561e2a3f9b": {
+  "kind": "material",
+  "label": "ISS cabin|Silicone",
+  "text": "There are 4 flame tests for Silicone, with oxygen levels coming within 0.5% of the 21% habitat level. The gravity comparison shows GSI values of 1.00, 0.26, 0.00, and 1.00 for the four samples, indicating varying burn lengths between microgravity and normal gravity.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 7,
+  "verified": 7,
+  "dropped": 0,
+  "raw": "There are 4 flame tests for Silicone, with oxygen levels coming within 0.5% of the 21% habitat level. The gravity comparison shows GSI values of 1.00, 0.26, 0.00, and 1.00 for the four samples, indicating varying burn lengths between microgravity and normal gravity."
+ },
+ "81537e32a3b97d7b51c7": {
+  "kind": "atmosphere",
+  "label": "ISS cabin",
+  "text": "The FLEX investigation conducted 165 droplet tests, while the CFI-G investigation performed 63 gas-flame tests near the 21% oxygen level. These counts show the number of tests performed under varying pressure conditions. A limit of these data is that the pressure ranges of 10.18 to 44.86 psi and 7.35 to 44.09 psi extend beyond the 14.7 psi of the ISS cabin.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 8,
+  "verified": 8,
+  "dropped": 0,
+  "raw": "The FLEX investigation conducted 165 droplet tests, while the CFI-G investigation performed 63 gas-flame tests near the 21% oxygen level. These counts show the number of tests performed under varying pressure conditions. A limit of these data is that the pressure ranges of 10.18 to 44.86 psi and 7.35 to 44.09 psi extend beyond the 14.7 psi of the ISS cabin."
+ },
+ "0a07e7758f6c2b7eeb3b": {
+  "kind": "material",
+  "label": "Moon base / pressurized rover|Cotton-fiberglass fabric (SIBAL)",
+  "text": "There are 45 flame tests for this material, with the nearest oxygen level 7.9% below your 30% habitat level. The gravity pairs show a GSI of 0.00 for sample 2-5 with burn lengths of 29 cm and Complete, and 0.00 for sample 2-6.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 10,
+  "verified": 10,
+  "dropped": 0,
+  "raw": "There are 45 flame tests for this material, with the nearest oxygen level 7.9% below your 30% habitat level. The gravity pairs show a GSI of 0.00 for sample 2-5 with burn lengths of 29 cm and Complete, and 0.00 for sample 2-6."
+ },
+ "cf8ddd6402d2d3b435eb": {
+  "kind": "material",
+  "label": "Moon base / pressurized rover|Japan wax",
+  "text": "There are 11 flame tests for Japan wax, and the nearest oxygen level of 17.4% is 12.6 points below your 30% habitat level. The evidence does not cover gravity comparisons or any flame tests with airflow.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "raw": "There are 11 flame tests for Japan wax, and the nearest oxygen level of 17.4% is 12.6 points below your 30% habitat level. The evidence does not cover gravity comparisons or any flame tests with airflow."
+ },
+ "bde74445b9f86eeb3e72": {
+  "kind": "material",
+  "label": "Moon base / pressurized rover|Nomex",
+  "text": "There are 10 flame tests for Nomex, with the nearest oxygen level at 22.2% being 7.8 points below your 30% habitat level. The gravity comparison for sample 2-7b shows a GSI of 0.00, with burn lengths of 0 (Nomex section, not ignited) and ~ 0 (Nomex).",
+  "model": "gemini-3.1-flash-lite",
+  "total": 9,
+  "verified": 9,
+  "dropped": 0,
+  "raw": "There are 10 flame tests for Nomex, with the nearest oxygen level at 22.2% being 7.8 points below your 30% habitat level. The gravity comparison for sample 2-7b shows a GSI of 0.00, with burn lengths of 0 (Nomex section, not ignited) and ~ 0 (Nomex)."
+ },
+ "041e484c3edaa72a42de": {
+  "kind": "material",
+  "label": "Moon base / pressurized rover|PMMA (acrylic)",
+  "text": "There are 92 flame tests for PMMA, with the nearest oxygen level at 22.2% being 7.8 points below the habitat. The gravity pairs show sample 2-8 has a GSI of 0.66 and sample 2-9 has a GSI of 0.66.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 9,
+  "verified": 9,
+  "dropped": 0,
+  "raw": "There are 92 flame tests for PMMA, with the nearest oxygen level at 22.2% being 7.8 points below the habitat. The gravity pairs show sample 2-8 has a GSI of 0.66 and sample 2-9 has a GSI of 0.66."
+ },
+ "61c292926f54a690e223": {
+  "kind": "material",
+  "label": "Moon base / pressurized rover|Silicone",
+  "text": "There are 4 flame tests for Silicone, with oxygen levels 7.9 points below your 30% habitat level. Gravity comparisons show GSI values of 1.00 for samples 2-1 and 2-4, 0.26 for sample 2-2, and 0.00 for sample 2-3.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 14,
+  "verified": 14,
+  "dropped": 0,
+  "raw": "There are 4 flame tests for Silicone, with oxygen levels 7.9 points below your 30% habitat level. Gravity comparisons show GSI values of 1.00 for samples 2-1 and 2-4, 0.26 for sample 2-2, and 0.00 for sample 2-3."
+ },
+ "aa112a28afe478b16001": {
+  "kind": "atmosphere",
+  "label": "Moon base / pressurized rover",
+  "text": "The 3 oxygen window points at 30% oxygen include 15 FLEX droplet tests and 0 CFI-G gas-flame tests. These counts show that 2 droplets went out first, 3 burned to completion, and 10 were disrupted. A limit of these tests is that the droplet pressure range of 10.33 to 14.91 psi does not match the 10.2 psi habitat scenario.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 10,
+  "verified": 10,
+  "dropped": 0,
+  "raw": "The 3 oxygen window points at 30% oxygen include 15 FLEX droplet tests and 0 CFI-G gas-flame tests. These counts show that 2 droplets went out first, 3 burned to completion, and 10 were disrupted. A limit of these tests is that the droplet pressure range of 10.33 to 14.91 psi does not match the 10.2 psi habitat scenario."
+ },
+ "b9cde0018801db6bfaa0": {
+  "kind": "material",
+  "label": "Exploration atmosphere|Cotton-fiberglass fabric (SIBAL)",
+  "text": "There are 45 flame tests for this material, with the nearest oxygen level at 22.1% compared to the habitat's 34%. For sample 2-5, the GSI is 0.00 with a 29 cm microgravity burn length and Complete normal gravity burn length.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 7,
+  "verified": 7,
+  "dropped": 0,
+  "raw": "There are 45 flame tests for this material, with the nearest oxygen level at 22.1% compared to the habitat's 34%. For sample 2-5, the GSI is 0.00 with a 29 cm microgravity burn length and Complete normal gravity burn length."
+ },
+ "d35ae1b8ddeb79a5fcdf": {
+  "kind": "material",
+  "label": "Exploration atmosphere|Japan wax",
+  "text": "There are 11 flame tests for Japan wax, and the nearest oxygen level is 16.6 points below the habitat's 34%. The evidence does not cover gravity comparisons or any tests with airflow.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 3,
+  "verified": 3,
+  "dropped": 0,
+  "raw": "There are 11 flame tests for Japan wax, and the nearest oxygen level is 16.6 points below the habitat's 34%. The evidence does not cover gravity comparisons or any tests with airflow."
+ },
+ "4d275a372b740e04e278": {
+  "kind": "material",
+  "label": "Exploration atmosphere|Nomex",
+  "text": "There are 10 flame tests for Nomex, and the nearest oxygen level is 11.8 points below the habitat's 34%. The gravity comparison for sample 2-7b shows a GSI of 0.00, with burn lengths of 0 (Nomex section, not ignited) and ~ 0 (Nomex).",
+  "model": "gemini-3.1-flash-lite",
+  "total": 8,
+  "verified": 8,
+  "dropped": 0,
+  "raw": "There are 10 flame tests for Nomex, and the nearest oxygen level is 11.8 points below the habitat's 34%. The gravity comparison for sample 2-7b shows a GSI of 0.00, with burn lengths of 0 (Nomex section, not ignited) and ~ 0 (Nomex)."
+ },
+ "b4e0f4f8f24234adfc49": {
+  "kind": "material",
+  "label": "Exploration atmosphere|PMMA (acrylic)",
+  "text": "There are 92 flame tests for this material, with the nearest oxygen level at 22.2% being 11.8 points below your 34% habitat level. The gravity comparison shows a GSI of 0.66 for sample 2-8 and 0.66 for sample 2-9.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 10,
+  "verified": 10,
+  "dropped": 0,
+  "raw": "There are 92 flame tests for this material, with the nearest oxygen level at 22.2% being 11.8 points below your 34% habitat level. The gravity comparison shows a GSI of 0.66 for sample 2-8 and 0.66 for sample 2-9."
+ },
+ "f8ef5d57fa8db86f2642": {
+  "kind": "atmosphere",
+  "label": "Exploration atmosphere",
+  "text": "The 3 oxygen window points at 34% oxygen show 9 FLEX droplet tests and 21 CFI-G gas-flame tests. These results include 1 droplet burned to completion and 14 ignited gas flames. A limit of these tests is that the pressure ranges of 10.33 to 10.5 psi and 7.35 to 14.7 psi differ from the 8.2 psi habitat scenario.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 11,
+  "verified": 11,
+  "dropped": 0,
+  "raw": "The 3 oxygen window points at 34% oxygen show 9 FLEX droplet tests and 21 CFI-G gas-flame tests. These results include 1 droplet burned to completion and 14 ignited gas flames. A limit of these tests is that the pressure ranges of 10.33 to 10.5 psi and 7.35 to 14.7 psi differ from the 8.2 psi habitat scenario."
+ },
+ "e8ec27f5c77c9af4ba6c": {
+  "kind": "material",
+  "label": "Spacesuit|Cotton-fiberglass fabric (SIBAL)",
+  "text": "There are 45 flame tests for this material, with the nearest oxygen level at 22.1% compared to the habitat's 100%. Gravity comparisons for sample 2-5 show a GSI of 0.00 with burn lengths of 29 cm and Complete, and sample 2-6 shows 0.00.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 10,
+  "verified": 10,
+  "dropped": 0,
+  "raw": "There are 45 flame tests for this material, with the nearest oxygen level at 22.1% compared to the habitat's 100%. Gravity comparisons for sample 2-5 show a GSI of 0.00 with burn lengths of 29 cm and Complete, and sample 2-6 shows 0.00."
+ },
+ "98cd9e4059932b3c6b53": {
+  "kind": "material",
+  "label": "Spacesuit|Japan wax",
+  "text": "There are 11 flame tests for Japan wax, and the nearest oxygen level is 82.6 points below the habitat's 100%. The evidence does not cover gravity_pairs.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 3,
+  "verified": 3,
+  "dropped": 0,
+  "raw": "There are 11 flame tests for Japan wax, and the nearest oxygen level is 82.6 points below the habitat's 100%. The evidence does not cover gravity_pairs."
+ },
+ "f3606d05611543443566": {
+  "kind": "material",
+  "label": "Spacesuit|Nomex",
+  "text": "There are 10 flame tests for Nomex, with the nearest oxygen level at 22.2% compared to the habitat's 100%. The gravity comparison for sample 2-7b shows a GSI of 0.00, where the burn lengths are 0 (Nomex section, not ignited) and ~ 0 (Nomex).",
+  "model": "gemini-3.1-flash-lite",
+  "total": 8,
+  "verified": 8,
+  "dropped": 0,
+  "raw": "There are 10 flame tests for Nomex, with the nearest oxygen level at 22.2% compared to the habitat's 100%. The gravity comparison for sample 2-7b shows a GSI of 0.00, where the burn lengths are 0 (Nomex section, not ignited) and ~ 0 (Nomex)."
+ },
+ "fe63bb34ef23531ffd54": {
+  "kind": "material",
+  "label": "Spacesuit|PMMA (acrylic)",
+  "text": "There are 92 flame tests for this material, with the nearest oxygen level at 22.2% compared to the habitat's 100%. The gravity pairs show sample 2-8 had a microgravity burn length of ~ 10 cm (note 3) and normal gravity burn length of Complete.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 7,
+  "verified": 7,
+  "dropped": 0,
+  "raw": "There are 92 flame tests for this material, with the nearest oxygen level at 22.2% compared to the habitat's 100%. The gravity pairs show sample 2-8 had a microgravity burn length of ~ 10 cm (note 3) and normal gravity burn length of Complete."
+ },
+ "bc7420e2b2bc8dc749cf": {
+  "kind": "material",
+  "label": "Spacesuit|Silicone",
+  "text": "There are 4 flame tests for Silicone, with oxygen levels 77.9 points below the 100% habitat level. The gravity pairs show GSI values of 1.00, 0.26, 0.00, and 1.00, comparing microgravity burn lengths of ~ 0 to normal gravity burn lengths of Complete, 7.6 cm, ~ 0, and Complete.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 10,
+  "verified": 10,
+  "dropped": 0,
+  "raw": "There are 4 flame tests for Silicone, with oxygen levels 77.9 points below the 100% habitat level. The gravity pairs show GSI values of 1.00, 0.26, 0.00, and 1.00, comparing microgravity burn lengths of ~ 0 to normal gravity burn lengths of Complete, 7.6 cm, ~ 0, and Complete."
+ },
+ "00d46d0c05286347849e": {
+  "kind": "atmosphere",
+  "label": "Spacesuit",
+  "text": "The 3 oxygen window points at 100% oxygen show 0 FLEX droplet tests and 0 CFI-G gas-flame tests. These counts are limited because they represent 0 completed tests for both investigations.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 5,
+  "verified": 5,
+  "dropped": 0,
+  "raw": "The 3 oxygen window points at 100% oxygen show 0 FLEX droplet tests and 0 CFI-G gas-flame tests. These counts are limited because they represent 0 completed tests for both investigations."
+ },
+ "eee09248834852599d9f": {
+  "kind": "investigation",
+  "label": "SAFFIRE-1",
+  "text": "SAFFIRE-1 burned 0.37 cm thick SIBAL Fabric in microgravity with 21.5 to 21.7 % oxygen and 20 cm/s airflow. The tests varied by oxygen and flow direction, but the table does not list pressure.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 5,
+  "verified": 5,
+  "dropped": 0,
+  "raw": "SAFFIRE-1 burned 0.37 cm thick SIBAL Fabric in microgravity with 21.5 to 21.7 % oxygen and 20 cm/s airflow. The tests varied by oxygen and flow direction, but the table does not list pressure."
+ },
+ "b42971291a9b95b0ac7e": {
+  "kind": "investigation",
+  "label": "SAFFIRE-2",
+  "text": "The SAFFIRE-2 investigation burned 8 solid fuel samples, including 0.27 mm thick Silicone, in microgravity and normal gravity at 21.5 to 22.1 % oxygen and 20 cm/s airflow. Tests varied by fuel or sample, oxygen, and flow direction, but the table does not list pressure.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 6,
+  "verified": 6,
+  "dropped": 0,
+  "raw": "The SAFFIRE-2 investigation burned 8 solid fuel samples, including 0.27 mm thick Silicone, in microgravity and normal gravity at 21.5 to 22.1 % oxygen and 20 cm/s airflow. Tests varied by fuel or sample, oxygen, and flow direction, but the table does not list pressure."
+ },
+ "ab02f2a61db1c7beda8c": {
+  "kind": "investigation",
+  "label": "SAFFIRE-3",
+  "text": "SAFFIRE-3 burned SIBAL Fabric, .33 cm thick, 94 cm x 40.6 cm in microgravity with 30 cm/s airflow. The tests varied by flow direction, but the table does not list oxygen or pressure levels.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "raw": "SAFFIRE-3 burned SIBAL Fabric, .33 cm thick, 94 cm x 40.6 cm in microgravity with 30 cm/s airflow. The tests varied by flow direction, but the table does not list oxygen or pressure levels."
+ },
+ "21bf862ec54908a71692": {
+  "kind": "investigation",
+  "label": "BASS-II",
+  "text": "BASS-II burned 51 solid fuels, including 100 micron PMMA film 2 cm wide, in microgravity at 13.6 to 22.2 % oxygen. Tests varied by fuel or sample, oxygen, and airflow or fan setting, though the table does not list pressure or airflow.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 5,
+  "verified": 5,
+  "dropped": 0,
+  "raw": "BASS-II burned 51 solid fuels, including 100 micron PMMA film 2 cm wide, in microgravity at 13.6 to 22.2 % oxygen. Tests varied by fuel or sample, oxygen, and airflow or fan setting, though the table does not list pressure or airflow."
+ },
+ "315cd891d5d913e8c1b0": {
+  "kind": "investigation",
+  "label": "BASS",
+  "text": "The BASS investigation burned 33 solid fuels, such as SIBAL 2 cm, in microgravity. The fuel or sample varied between the 121 tests, but the table does not list oxygen, pressure, airflow, or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 3,
+  "verified": 3,
+  "dropped": 0,
+  "raw": "The BASS investigation burned 33 solid fuels, such as SIBAL 2 cm, in microgravity. The fuel or sample varied between the 121 tests, but the table does not list oxygen, pressure, airflow, or sensors."
+ },
+ "b2a31528c911b4e8eea4": {
+  "kind": "investigation",
+  "label": "FLEX",
+  "text": "Methanol droplets with an initial diameter of 1.69 mm were burned in microgravity at 12 to 34 % oxygen and 10.18 to 44.86 psi. Tests varied by fuel or sample, oxygen, pressure, and diluent gas, but the table does not list airflow or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 5,
+  "verified": 5,
+  "dropped": 0,
+  "raw": "Methanol droplets with an initial diameter of 1.69 mm were burned in microgravity at 12 to 34 % oxygen and 10.18 to 44.86 psi. Tests varied by fuel or sample, oxygen, pressure, and diluent gas, but the table does not list airflow or sensors."
+ },
+ "c007d9ee444614fe4d9e": {
+  "kind": "investigation",
+  "label": "FLEX-2",
+  "text": "FLEX-2 burned liquid fuel droplets ranging from 1.5 to 5 mm in microgravity at 17 to 30 % oxygen, 7.35 to 44.09 psi pressure, and 0.1 to 5 cm/s airflow. The fuel or sample varied between tests, but the table does not list sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 9,
+  "verified": 9,
+  "dropped": 0,
+  "raw": "FLEX-2 burned liquid fuel droplets ranging from 1.5 to 5 mm in microgravity at 17 to 30 % oxygen, 7.35 to 44.09 psi pressure, and 0.1 to 5 cm/s airflow. The fuel or sample varied between tests, but the table does not list sensors."
+ },
+ "9221fee5b8d27ae7a6ea": {
+  "kind": "investigation",
+  "label": "CFI",
+  "text": "The CFI investigation burned 9 liquid fuels, including C12H26 droplets, in microgravity at 17 to 21 % oxygen and 7.35 to 73.48 psi. Tests varied by fuel or sample, oxygen, pressure, and diluent gas, but the table does not list airflow or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 5,
+  "verified": 5,
+  "dropped": 0,
+  "raw": "The CFI investigation burned 9 liquid fuels, including C12H26 droplets, in microgravity at 17 to 21 % oxygen and 7.35 to 73.48 psi. Tests varied by fuel or sample, oxygen, pressure, and diluent gas, but the table does not list airflow or sensors."
+ },
+ "e42ef5157ee54751454c": {
+  "kind": "investigation",
+  "label": "CFI-G",
+  "text": "Ethane and other gas fuels burned in microgravity at 17.97 to 39.97 % oxygen and 7.35 to 44.09 psi. The tests varied by fuel or sample, oxygen, and pressure, but the table does not list airflow.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "raw": "Ethane and other gas fuels burned in microgravity at 17.97 to 39.97 % oxygen and 7.35 to 44.09 psi. The tests varied by fuel or sample, oxygen, and pressure, but the table does not list airflow."
+ },
+ "42e18d76888c2d24a239": {
+  "kind": "investigation",
+  "label": "ACME Flame Design",
+  "text": "C2H4 gas burned in microgravity at 19.8 to 40 % oxygen and 13.7 to 19.06 psi. The tests varied fuel or sample, oxygen, and pressure, but the table does not list airflow or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "raw": "C2H4 gas burned in microgravity at 19.8 to 40 % oxygen and 13.7 to 19.06 psi. The tests varied fuel or sample, oxygen, and pressure, but the table does not list airflow or sensors."
+ },
+ "b9811b3148d3b85e5906": {
+  "kind": "investigation",
+  "label": "ACME BRE",
+  "text": "The ACME BRE investigation burned gas fuels including 100% C2H4 using a 25 mm burner in microgravity at 21 to 40 % oxygen. Tests varied by fuel or sample and oxygen, but the table does not list pressure, airflow, or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "raw": "The ACME BRE investigation burned gas fuels including 100% C2H4 using a 25 mm burner in microgravity at 21 to 40 % oxygen. Tests varied by fuel or sample and oxygen, but the table does not list pressure, airflow, or sensors."
+ },
+ "eb10e81cb4c99b07c8e2": {
+  "kind": "investigation",
+  "label": "ACME E-FIELD Flames",
+  "text": "The ACME E-FIELD Flames investigation burned 9 gas fuels, including 100% CH4, in microgravity. The fuel or sample varied between tests, but the table does not list oxygen, pressure, airflow, or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 2,
+  "verified": 2,
+  "dropped": 0,
+  "raw": "The ACME E-FIELD Flames investigation burned 9 gas fuels, including 100% CH4, in microgravity. The fuel or sample varied between tests, but the table does not list oxygen, pressure, airflow, or sensors."
+ },
+ "935a8088440092a31027": {
+  "kind": "investigation",
+  "label": "SLICE",
+  "text": "The SLICE investigation burned 9 gas fuels, including 100% CH4, in microgravity. The fuel or sample varied between tests, but the table does not list oxygen, pressure, airflow, or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 2,
+  "verified": 2,
+  "dropped": 0,
+  "raw": "The SLICE investigation burned 9 gas fuels, including 100% CH4, in microgravity. The fuel or sample varied between tests, but the table does not list oxygen, pressure, airflow, or sensors."
+ },
+ "fc355a143a380e2258aa": {
+  "kind": "investigation",
+  "label": "SAME",
+  "text": "The SAME investigation burned 5 listed fuels, including Teflon, in microgravity with airflow between 5 to 10 cm/s. The tests varied the fuel or sample and the airflow or fan setting, but the table does not list oxygen levels or pressure.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 3,
+  "verified": 3,
+  "dropped": 0,
+  "raw": "The SAME investigation burned 5 listed fuels, including Teflon, in microgravity with airflow between 5 to 10 cm/s. The tests varied the fuel or sample and the airflow or fan setting, but the table does not list oxygen levels or pressure."
+ },
+ "586af93168480faa2f0e": {
+  "kind": "investigation",
+  "label": "SAME-R",
+  "text": "The SAME-R investigation burned 5 samples, including Kapton, in microgravity with airflow ranging from 0 to 8.1 cm/s. Tests varied by fuel or sample and airflow or fan setting, though the table does not list oxygen levels, pressure, or sensors.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 3,
+  "verified": 3,
+  "dropped": 0,
+  "raw": "The SAME-R investigation burned 5 samples, including Kapton, in microgravity with airflow ranging from 0 to 8.1 cm/s. Tests varied by fuel or sample and airflow or fan setting, though the table does not list oxygen levels, pressure, or sensors."
+ },
+ "09463d86d02df15116d3": {
+  "kind": "investigation",
+  "label": "DAFT",
+  "text": "Arizona Road Dust (ARD Fine) was burned with ISS GN2 to create an aerosol in microgravity. The table lists nothing that varied between tests and does not list oxygen, pressure, or airflow.",
+  "model": "gemini-3.1-flash-lite",
+  "total": 0,
+  "verified": 0,
+  "dropped": 0,
+  "raw": "Arizona Road Dust (ARD Fine) was burned with ISS GN2 to create an aerosol in microgravity. The table lists nothing that varied between tests and does not list oxygen, pressure, or airflow."
+ }
+}

@@ -40,7 +40,8 @@ FUEL_CLASSES = {
     "Gaseous fuels": "gas",
     "Smoke detection": "smoke source",
 }
-RELATED = {frozenset(("solid", "smoke source")), frozenset(("liquid", "gas"))}
+RELATED = {frozenset(("solid", "smoke source")), frozenset(("liquid", "gas")),
+           frozenset(("smoke source", "dust"))}
 
 # Distance at which closeness reaches 0, per dimension.
 RANGE = {"o2": 20.0, "pressure": 10.0, "flow": 30.0}
@@ -58,7 +59,10 @@ MATERIAL_RULES = [  # (text to look for in the PSI fuel cell, name shown in the 
     ("lampwick", "Lampwick"),
     ("pyrell", "Pyrell"),
     ("dibutyl", "Dibutyl phthalate"),
-    ("wax", "Japan wax"),
+    ("japan wax", "Japan wax"),
+    ("paraffin", "Paraffin wax"),
+    ("parrafin", "Paraffin wax"),
+    ("ultem", "Ultem"),
 ]
 
 
@@ -164,8 +168,10 @@ def describe(cat, inv):
     return {
         "PSI ID": g["psi_id"].iloc[0],
         "Rows in PSI table": f"{len(g)} ({g['row_level'].iloc[0]})",
+        "Kind of test": KIND_OF_TEST[g["fuel_class"].iloc[0]],
         "Fuel class": g["fuel_class"].iloc[0],
-        "Fuels or samples": f"{len(fuels)} listed, e.g. {fuels[0]}" if len(fuels) > 1 else str(fuels[0]),
+        "Fuels or samples": (f"{len(fuels)} distinct descriptions in the table, for example: {fuels[0]}"
+                             if len(fuels) > 1 else str(fuels[0])),
         "Oxygen": _rng(g["o2_min"].min(), g["o2_max"].max(), "%"),
         "Pressure": _rng(g["pressure_min"].min(), g["pressure_max"].max(), "psi"),
         "Airflow": _rng(g["flow_min"].min(), g["flow_max"].max(), "cm/s"),
@@ -173,6 +179,15 @@ def describe(cat, inv):
         "Sensors named in the table": "; ".join(g["sensors"].dropna().unique()) or "not listed",
         "Gravity": "microgravity" + (", with a 1g comparison" if inv == "SAFFIRE-2" else ""),
     }
+
+
+KIND_OF_TEST = {
+    "solid": "Flame test on solid samples",
+    "liquid": "Flame test on liquid fuel droplets",
+    "gas": "Flame test on gas-fuelled burner flames",
+    "smoke source": "Smoke-particle measurement from overheated materials; nothing was set alight",
+    "dust": "Dust-particle measurement; nothing was burned",
+}
 
 
 # ----------------------------------------------------- gravity bound (GSI)
@@ -199,9 +214,12 @@ def load_pairs():
             # Composite sample: 5 cm of PMMA then 24 cm of Nomex. Source note 2 says the PMMA
             # was consumed and the Nomex did not ignite. The 1g column covers the Nomex only.
             rows.append({**base, "sample": "2-7a", "material": "PMMA section", "thickness": "0.85 mm",
-                         "full": 5.0, "ug": 5.0, "g1": None})
+                         "full": 5.0, "ug": 5.0, "g1": None,
+                         "ug_raw": "5 cm (PMMA section, completely consumed)", "g1_raw": None,
+                         "ug_spread": None, "g1_spread": None})
             rows.append({**base, "sample": "2-7b", "material": "Nomex section", "thickness": "0.37 mm",
-                         "full": 24.0, "ug": 0.0, "g1": 0.0})
+                         "full": 24.0, "ug": 0.0, "g1": 0.0,
+                         "ug_raw": "0 (Nomex section, not ignited)", "g1_raw": "~ 0 (Nomex)"})
             continue
         full = float(re.search(r"\d+\.?\d*", r["sample_length_raw"]).group())
         ug, _ = _length(r["ug_burn_length_raw"], full)
