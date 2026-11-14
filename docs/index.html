@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261115b">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -196,92 +196,99 @@
   </div>
 </footer>
 
-<script src="assets/config.js"></script>
-<script src="assets/data.js"></script>
-<script src="assets/logic.js"></script>
-<script src="assets/charts.js"></script>
-<script src="assets/flame.js"></script>
-<script src="assets/replay.js"></script>
+<script src="assets/config.js?v=20261115b"></script>
+<script src="assets/data.js?v=20261115b"></script>
+<script src="assets/logic.js?v=20261115b"></script>
+<script src="assets/charts.js?v=20261115b"></script>
+<script src="assets/flame.js?v=20261115b"></script>
+<script src="assets/replay.js?v=20261115b"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
-  FFFlame.ambient(document.getElementById("stars"));
-
-  // numbers on the page come from the data bundle, so they cannot drift from it
-  const paired = FF.pairs.filter((p) => p.gsi != null);
-  const solid = FF.rows.filter((r) => r.c === "solid" && r.o && r.g !== "1");
-  const n = {
-    records: FF.rows.length.toLocaleString("en-US"),
-    investigations: FF.investigations.length,
-    solidmax: Math.max(...solid.map((r) => r.o[1])),
-    flips: paired.filter((p) => p.gsi >= 0.5).length,
-    pairs: paired.length,
-    built: FF.built,
-    findings: FF.findings.length,
-    topo2: Math.max(...FFLogic.placed(FF).map((x) => x.o)),
-    open: FFLogic.ATMOS.filter((a) => FFLogic.coverage(FF, a.o2, a.p).n === 0).length,
-    atmos: FFLogic.ATMOS.length,
-  };
-  document.querySelectorAll("[data-n]").forEach((el) => { el.textContent = n[el.dataset.n]; });
-
-  const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean),
-    ...FF.findings.map((f) => f.si).filter(Boolean), ...Object.values(FF.briefings)];
-
-  // the three findings ranked closest to a Moon base
-  const moon = FF.scenarios.find((sc) => sc.name.startsWith("Moon"));
-  const esc = FFCharts.esc, cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
-  document.getElementById("top-insights").innerHTML = FFLogic.rankFindings(FF, moon.o2, moon.pressure).slice(0, 3).map((r, i) => {
-    const f = FF.findings.find((x) => x.id === r.id), t = f.si || {};
-    return `<div class="card reveal top-ins"><span class="step-n">${i + 1} · ${esc(f.topic.toUpperCase())} · RELEVANCE ${r.score.toFixed(2)}</span>
-      <h3>${esc(t.headline || cap(f.topic))}</h3><p class="near">${esc(cap(f.bands[r.band].line))}.</p>${t.means ? `<p class="si">${esc(t.means)}</p>` : ""}</div>`;
-  }).join("");
-  if (texts.length) {
-    const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + (t.judged_out || 0), 0);
-    document.getElementById("sistat").textContent = `Across the ${texts.length} texts on this site, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.`;
-  }
-
-  document.querySelectorAll("[data-link]").forEach((a) => {
-    const url = L[a.dataset.link];
-    if (url) { a.href = url; if (a.dataset.link === "demo") { a.target = "_blank"; a.rel = "noopener"; } }
-    else { a.setAttribute("aria-disabled", "true"); a.removeAttribute("href"); const s = a.querySelector("span"); if (s) s.textContent = "Demo video soon"; }
-  });
-
-  FFCharts.atlas(document.getElementById("atlas"), FF, { onPin: (id) => { const a = FFLogic.ATMOS.find((x) => x.id === id); location.href = `tool.html?view=map&o2=${a.o2}&p=${a.p}`; } });
-  FFCharts.dumbbell(document.getElementById("dumbbell"), FF.pairs);
-  FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, compact: true, loop: true });
-
-  // hero flame
-  const flame = FFFlame.Flame(document.getElementById("flame"));
-  const slider = document.getElementById("g"), gval = document.getElementById("gval"), gwhere = document.getElementById("gwhere"), gnote = document.getElementById("gnote");
-  function show(v, jump) {
-    flame.set(v, jump);
-    gval.textContent = v.toFixed(2) + " g";
-    const near = (x) => Math.abs(v - x) < 0.025;
-    if (v < 0.025) { gwhere.textContent = "Orbit · tested"; gnote.innerHTML = "<b>Microgravity.</b> Hot gas does not rise, so the flame becomes a dim blue ball around the wick, fed only by slow diffusion. NASA has burned candles like this on the space station."; }
-    else if (v > 0.975) { gwhere.textContent = "Earth · tested"; gnote.innerHTML = "<b>Normal gravity.</b> Hot gas rises, pulls fresh air in from below and stretches the flame into a teardrop."; }
-    else {
-      gwhere.textContent = (near(0.17) ? "Moon" : near(0.38) ? "Mars" : "Partial gravity") + " · no data";
-      gnote.innerHTML = "<b>Untested.</b> NASA's open combustion archive has no data at this gravity. The shape drawn here is a guess between the two ends.";
+  // the candle, the stars and the fade-ins run first, each on its own, so a failure elsewhere cannot blank the page
+  const safe = (fn) => { try { fn(); } catch (e) { console.error(e); } };
+  safe(() => FFFlame.ambient(document.getElementById("stars")));
+  let io = null;
+  const reveal = () => document.querySelectorAll(".reveal:not(.seen)").forEach((el) => { el.classList.add("seen"); if (io) io.observe(el); else el.classList.add("in"); });
+  safe(() => { io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 }); });
+  reveal();
+  safe(() => {
+    // hero flame
+    const flame = FFFlame.Flame(document.getElementById("flame"));
+    const slider = document.getElementById("g"), gval = document.getElementById("gval"), gwhere = document.getElementById("gwhere"), gnote = document.getElementById("gnote");
+    function show(v, jump) {
+      flame.set(v, jump);
+      gval.textContent = v.toFixed(2) + " g";
+      const near = (x) => Math.abs(v - x) < 0.025;
+      if (v < 0.025) { gwhere.textContent = "Orbit · tested"; gnote.innerHTML = "<b>Microgravity.</b> Hot gas does not rise, so the flame becomes a dim blue ball around the wick, fed only by slow diffusion. NASA has burned candles like this on the space station."; }
+      else if (v > 0.975) { gwhere.textContent = "Earth · tested"; gnote.innerHTML = "<b>Normal gravity.</b> Hot gas rises, pulls fresh air in from below and stretches the flame into a teardrop."; }
+      else {
+        gwhere.textContent = (near(0.17) ? "Moon" : near(0.38) ? "Mars" : "Partial gravity") + " · no data";
+        gnote.innerHTML = "<b>Untested.</b> NASA's open combustion archive has no data at this gravity. The shape drawn here is a guess between the two ends.";
+      }
     }
-  }
-  let auto = !window.matchMedia("(prefers-reduced-motion: reduce)").matches, t0 = performance.now();
-  function tick(now) {
-    if (!auto) return;
-    const s = ((now - t0) / 1000) % 18; // hold in orbit, rise to Earth, hold, fall back
-    const v = s < 3 ? 0 : s < 9 ? (1 - Math.cos(((s - 3) / 6) * Math.PI)) / 2 : s < 12 ? 1 : (1 + Math.cos(((s - 12) / 6) * Math.PI)) / 2;
-    slider.value = v; show(v);
-    requestAnimationFrame(tick);
-  }
-  const stop = () => { auto = false; };
-  slider.addEventListener("input", () => { stop(); show(+slider.value); });
-  slider.addEventListener("pointerdown", stop);
-  document.querySelectorAll("[data-g]").forEach((b) => b.addEventListener("click", () => { stop(); slider.value = b.dataset.g; show(+b.dataset.g, true); }));
-  const start = new URLSearchParams(location.search).get("g"); // e.g. index.html?g=0.17 opens on the Moon
-  if (start !== null && !isNaN(+start)) { stop(); slider.value = start; show(+slider.value, true); }
-  else { show(0); if (auto) requestAnimationFrame(tick); }
+    let auto = !window.matchMedia("(prefers-reduced-motion: reduce)").matches, t0 = performance.now();
+    function tick(now) {
+      if (!auto) return;
+      const s = ((now - t0) / 1000) % 18; // hold in orbit, rise to Earth, hold, fall back
+      const v = s < 3 ? 0 : s < 9 ? (1 - Math.cos(((s - 3) / 6) * Math.PI)) / 2 : s < 12 ? 1 : (1 + Math.cos(((s - 12) / 6) * Math.PI)) / 2;
+      slider.value = v; show(v);
+      requestAnimationFrame(tick);
+    }
+    const stop = () => { auto = false; };
+    slider.addEventListener("input", () => { stop(); show(+slider.value); });
+    slider.addEventListener("pointerdown", stop);
+    document.querySelectorAll("[data-g]").forEach((b) => b.addEventListener("click", () => { stop(); slider.value = b.dataset.g; show(+b.dataset.g, true); }));
+    const start = new URLSearchParams(location.search).get("g"); // e.g. index.html?g=0.17 opens on the Moon
+    if (start !== null && !isNaN(+start)) { stop(); slider.value = start; show(+slider.value, true); }
+    else { show(0); if (auto) requestAnimationFrame(tick); }
+  });
+  safe(() => {
 
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+    // numbers on the page come from the data bundle, so they cannot drift from it
+    const paired = FF.pairs.filter((p) => p.gsi != null);
+    const solid = FF.rows.filter((r) => r.c === "solid" && r.o && r.g !== "1");
+    const n = {
+      records: FF.rows.length.toLocaleString("en-US"),
+      investigations: FF.investigations.length,
+      solidmax: Math.max(...solid.map((r) => r.o[1])),
+      flips: paired.filter((p) => p.gsi >= 0.5).length,
+      pairs: paired.length,
+      built: FF.built,
+      findings: FF.findings.length,
+      topo2: Math.max(...FFLogic.placed(FF).map((x) => x.o)),
+      open: FFLogic.ATMOS.filter((a) => FFLogic.coverage(FF, a.o2, a.p).n === 0).length,
+      atmos: FFLogic.ATMOS.length,
+    };
+    document.querySelectorAll("[data-n]").forEach((el) => { el.textContent = n[el.dataset.n]; });
+
+    const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean),
+      ...FF.findings.map((f) => f.si).filter(Boolean), ...Object.values(FF.briefings)];
+
+    // the three findings ranked closest to a Moon base
+    const moon = FF.scenarios.find((sc) => sc.name.startsWith("Moon"));
+    const esc = FFCharts.esc, cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+    document.getElementById("top-insights").innerHTML = FFLogic.rankFindings(FF, moon.o2, moon.pressure).slice(0, 3).map((r, i) => {
+      const f = FF.findings.find((x) => x.id === r.id), t = f.si || {};
+      return `<div class="card reveal top-ins"><span class="step-n">${i + 1} · ${esc(f.topic.toUpperCase())} · RELEVANCE ${r.score.toFixed(2)}</span>
+        <h3>${esc(t.headline || cap(f.topic))}</h3><p class="near">${esc(cap(f.bands[r.band].line))}.</p>${t.means ? `<p class="si">${esc(t.means)}</p>` : ""}</div>`;
+    }).join("");
+    if (texts.length) {
+      const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + (t.judged_out || 0), 0);
+      document.getElementById("sistat").textContent = `Across the ${texts.length} texts on this site, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.`;
+    }
+
+    document.querySelectorAll("[data-link]").forEach((a) => {
+      const url = L[a.dataset.link];
+      if (url) { a.href = url; if (a.dataset.link === "demo") { a.target = "_blank"; a.rel = "noopener"; } }
+      else { a.setAttribute("aria-disabled", "true"); a.removeAttribute("href"); const s = a.querySelector("span"); if (s) s.textContent = "Demo video soon"; }
+    });
+
+  });
+  safe(() => FFCharts.atlas(document.getElementById("atlas"), FF, { onPin: (id) => { const a = FFLogic.ATMOS.find((x) => x.id === id); location.href = `tool.html?view=map&o2=${a.o2}&p=${a.p}`; } }));
+  safe(() => FFCharts.dumbbell(document.getElementById("dumbbell"), FF.pairs));
+  safe(() => FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, compact: true, loop: true }));
+  reveal(); // the cards drawn above
 })();
 </script>
 </body>
