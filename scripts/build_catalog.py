@@ -11,9 +11,12 @@ Run from the project root:  python scripts/build_catalog.py
 """
 import csv
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from core import tag_material  # noqa: E402
 RAW = ROOT / "data" / "raw"
 OUT = ROOT / "data" / "catalog.csv"
 PAIRS = ROOT / "data" / "saffire2_pairs.csv"
@@ -38,7 +41,7 @@ INV = {
 
 COLS = [
     "investigation", "psi_id", "doi", "row_level", "test_id",
-    "fuel_class", "fuel",
+    "fuel_class", "fuel", "material",
     "o2_pct", "o2_min", "o2_max", "o2_raw",
     "diluent",
     "pressure_psi", "pressure_min", "pressure_max", "pressure_raw",
@@ -311,6 +314,9 @@ def slice_():
 def main():
     saf, pairs = saffire()
     rows = saf + bass2() + flex() + flex2() + cfig() + same() + slice_()
+    for r in rows:
+        if r["fuel_class"] in ("solid", "smoke source"):
+            r["material"] = tag_material(r["fuel"])
     with open(OUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=COLS)
         w.writeheader()

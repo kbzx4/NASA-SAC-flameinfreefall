@@ -1,13 +1,18 @@
+import json
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+import brief
 import core
+import si
 
-st.set_page_config(page_title="Flame in Freefall: Gravity Bound", page_icon="🔥", layout="wide")
+st.set_page_config(page_title="Fire Evidence Brief", page_icon="🔥", layout="wide")
 
 BLUE, ORANGE, AQUA, GRAY = "#2a78d6", "#eb6834", "#1baf7a", "#8a8a85"
 CLASS_COLOR = {"solid": BLUE, "liquid": ORANGE, "gas": AQUA}
+DEFAULT_MATERIALS = ["PMMA (acrylic)", "Silicone", "Cotton-fiberglass fabric (SIBAL)", "Nomex", "Kapton", "Teflon"]
 
 
 @st.cache_data
@@ -15,12 +20,17 @@ def data():
     return core.load_catalog(), core.load_pairs()
 
 
+@st.cache_data(show_spinner=False)
+def interpret(facts_json):
+    return si.interpret(json.loads(facts_json))
+
+
 cat, pairs = data()
 
 # ------------------------------------------------------------------ sidebar
 with st.sidebar:
-    st.header("Your habitat")
-    name = st.selectbox("Scenario", list(core.SCENARIOS))
+    st.header("1. Your habitat")
+    name = st.selectbox("Scenario", list(core.SCENARIOS), index=1)
     preset = core.SCENARIOS[name]
     st.caption(preset["note"])
     custom = name == "Custom"
@@ -28,27 +38,124 @@ with st.sidebar:
     pressure = st.slider("Pressure (psi)", 3.0, 45.0, preset["pressure"], 0.1, disabled=not custom)
     flow = st.slider("Ventilation airflow (cm/s)", 0.0, 40.0, 10.0, 1.0,
                      help="Set this to your habitat's air speed. The default of 10 cm/s is a placeholder, not a NASA value.")
-    fuel_label = st.selectbox("What are you worried about?", list(core.FUEL_CLASSES))
-    fuel_class = core.FUEL_CLASSES[fuel_label]
-    gravity_label = st.selectbox("Gravity", list(core.GRAVITY))
-    gravity = core.GRAVITY[gravity_label]
+    gravity_label = st.selectbox("Gravity", list(core.GRAVITY), index=1)
+    partial = core.GRAVITY[gravity_label] != "ug"
+    st.header("2. Materials on board")
+    all_materials = brief.materials(cat)
+    chosen = st.multiselect("Materials", all_materials,
+                            default=[m for m in DEFAULT_MATERIALS if m in all_materials])
+    st.caption("These are the materials named in the loaded NASA tables.")
+
+facts = brief.build_facts(cat, pairs, name, o2, pressure, flow, gravity_label, chosen)
 
 # ------------------------------------------------------------------- header
-st.title("Flame in Freefall")
-st.markdown(
-    "**Which microgravity fire experiments matter for your habitat, and what do microgravity and "
-    "normal-gravity results together say about the Moon and Mars, where no test data exists?**"
-)
-st.warning("Research tool, not an operational safety system. It ranks and compares published NASA "
-           "test records. It does not predict whether a material will burn.", icon="⚠️")
-if gravity != "ug":
-    st.info(f"**{gravity_label}: no test data.** None of the {cat['investigation'].nunique()} "
-            "investigations loaded here ran in partial gravity. The rankings below use microgravity "
-            "tests. The Gravity bound tab shows the range that microgravity and 1g results leave open.",
-            icon="🌙")
+st.title("Fire Evidence Brief")
+st.markdown("**Describe a crewed habitat. Get what NASA's microgravity fire experiments say about it, "
+            "and how far those tests are from your conditions.**")
+st.warning("An evidence summary, not a safety assessment. It reports which NASA tests exist near your "
+           "conditions. It does not predict whether a material will burn.", icon="⚠️")
 
-tab_bound, tab_rank, tab_cover, tab_compare, tab_about = st.tabs(
-    ["Gravity bound", "Ranked evidence", "Oxygen coverage", "Compare", "Earth, limits and sources"])
+tab_brief, tab_bound, tab_rank, tab_cover, tab_compare, tab_about = st.tabs(
+    ["Your brief", "Gravity bound", "Ranked investigations", "Oxygen coverage", "Compare", "Data, limits and sources"])
+
+# -------------------------------------------------------------------- brief
+with tab_brief:
+    if not chosen:
+        st.info("Pick at least one material in the sidebar.")
+    else:
+        st.subheader(brief.headline(facts))
+        st.markdown(f"**{name}**: {o2:g}% oxygen, {pressure:g} psi, {flow:g} cm/s airflow, {gravity_label}.")
+        if partial:
+            st.info(f"**{gravity_label}: no test data.** No loaded investigation ran in partial gravity. "
+                    "The Gravity column compares microgravity with normal gravity for the same material. "
+                    "NASA's challenge statement says the two could bound what happens in between.", icon="🌙")
+
+        rows = []
+        for m in facts["materials"]:
+            g = [p["gsi"] for p in m["gravity_pairs"]]
+            rows.append({
+                "Material": m["material"],
+                "Evidence": brief.GRADES[m["grade"]],
+                "Flame tests": m["flame_tests"],
+                "Oxygen tested (%)": m["oxygen_tested_pct"] or "not listed",
+                "Gap to your oxygen (points)": m["oxygen_gap_points"],
+                "Gravity (GSI)": (f"{min(g):.2f}" if min(g) == max(g) else f"{min(g):.2f} to {max(g):.2f}") if g else "no 1g pair",
+                "Smoke tests": m["smoke_tests"],
+            })
+        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
+                     column_config={"Gap to your oxygen (points)": st.column_config.NumberColumn(format="%.1f")})
+        st.caption(f"\"Near\" means within {brief.NEAR:g} points of oxygen. No solid-fuel table loaded here lists "
+                   "pressure, so the grade uses oxygen only. GSI: 0 means microgravity and 1g gave the same "
+                   "burn length; 1 means the sample burned fully in one and not at all in the other.")
+
+        # oxygen tested per material
+        ev_rows = brief.evidence_rows(cat, chosen)
+        flame = ev_rows[(ev_rows["fuel_class"] == "solid") & (ev_rows["gravity"] != "1g") & ev_rows["o2_pct"].notna()]
+        fig = go.Figure()
+        xs, ys, ids = [], [], []
+        for m in chosen:
+            mine = flame[flame["material"].map(lambda cell: m in cell.split("; "))]
+            xs += list(mine["o2_pct"])
+            ys += [m] * len(mine)
+            ids += list(mine["investigation"] + " test " + mine["test_id"].astype(str))
+        fig.add_trace(go.Scatter(
+            x=xs, y=ys, mode="markers", customdata=ids, showlegend=False,
+            hovertemplate="<b>%{y}</b><br>%{customdata}<br>O2 %{x:g}%<extra></extra>",
+            marker=dict(color=BLUE, size=14, symbol="line-ns-open", line=dict(width=2))))
+        fig.add_vline(x=o2, line=dict(color=ORANGE, dash="dash", width=2),
+                      annotation_text=f"Your habitat: {o2:g}% O2", annotation_position="top")
+        fig.update_layout(
+            title="Oxygen level of each microgravity flame test, by material",
+            height=110 + 44 * len(chosen), margin=dict(l=10, r=10, t=70, b=40),
+            xaxis=dict(title="Oxygen (% by volume)", range=[10, max(40, o2 + 5)]),
+            yaxis=dict(title=None, categoryorder="array", categoryarray=chosen[::-1], range=[-0.5, len(chosen) - 0.5]))
+        st.plotly_chart(fig, width="stretch")
+
+        st.markdown("#### By material")
+        for m in facts["materials"]:
+            with st.expander(f"{m['material']}: {brief.GRADES[m['grade']]}"):
+                for s in brief.material_sentences(m, o2, partial):
+                    st.markdown(f"- {s}")
+                if m["gravity_pairs"]:
+                    st.dataframe(pd.DataFrame(m["gravity_pairs"]).rename(columns={
+                        "sample": "Saffire-II sample", "thickness": "Thickness", "gsi": "GSI",
+                        "microgravity_burn_length": "Microgravity burn length (source)",
+                        "normal_gravity_burn_length": "1g burn length (source)"}),
+                        hide_index=True, width="stretch")
+
+        st.markdown("#### Your atmosphere: liquids and gases")
+        cols = st.columns(2)
+        for col, (title, text) in zip(cols, brief.atmosphere_sentences(facts["atmosphere"], o2).items()):
+            col.markdown(f"**{title}**")
+            col.markdown(text)
+        st.caption("These counts are descriptive. Fuel, pressure and flow rate vary between tests along with oxygen.")
+
+        st.markdown("#### Interpretation")
+        facts_json = json.dumps(facts, sort_keys=True)
+        if st.button("Write the interpretation with SI", type="primary"):
+            with st.spinner("Writing, then checking every number against the data"):
+                st.session_state["si"] = (facts_json, interpret(facts_json))
+        result = None
+        if st.session_state.get("si", (None,))[0] == facts_json:
+            result = st.session_state["si"][1]
+            if "error" in result:
+                st.error(f"{result['error']} The brief above does not depend on it.")
+                result = None
+            else:
+                st.markdown(result["text"])
+                note = f"✅ {result['verified']} of {result['total']} numbers match the data above."
+                if result["dropped"]:
+                    note += f" {result['dropped']} sentences were removed because a number did not match."
+                st.caption(f"{note} Written by {result['model']}; checked by code, not by the model.")
+        else:
+            st.caption("SI writes one paragraph from the facts above. Code then checks every number in it "
+                       "against those facts and removes any sentence that fails.")
+
+        d1, d2 = st.columns(2)
+        d1.download_button("Download the brief (HTML, printable)", brief.brief_html(facts, result),
+                           file_name="fire-evidence-brief.html", mime="text/html")
+        d2.download_button(f"Download the {len(ev_rows)} test records behind it (CSV)",
+                           ev_rows.to_csv(index=False), file_name="fire-evidence-records.csv", mime="text/csv")
 
 # ------------------------------------------------------------ gravity bound
 with tab_bound:
@@ -128,10 +235,12 @@ with tab_bound:
 
 # ----------------------------------------------------------- ranked evidence
 with tab_rank:
+    fuel_label = st.selectbox("What are you worried about?", list(core.FUEL_CLASSES))
+    fuel_class = core.FUEL_CLASSES[fuel_label]
     scored = core.score_tests(cat, o2, pressure, flow, fuel_class)
     ranking = core.rank_investigations(scored, o2, pressure, flow, fuel_class)
     top = ranking.iloc[0]
-    st.subheader(f"Most relevant evidence for {name}: {top['Investigation']}")
+    st.subheader(f"Most relevant investigation for {name}: {top['Investigation']}")
     if top["HFRI"] < 0.4:
         st.error("No close evidence. Nothing loaded here was tested near this scenario. Treat it as a research gap.", icon="🕳️")
     st.markdown(f"Scenario: **{o2:g}% O2, {pressure:g} psi, {flow:g} cm/s airflow**, "
@@ -156,7 +265,7 @@ with tab_rank:
             f"- **M_conditions**: mean closeness of oxygen, pressure and airflow. Each is 1 inside "
             f"the tested range and falls to 0 at {core.RANGE['o2']:g} points of O2, "
             f"{core.RANGE['pressure']:g} psi or {core.RANGE['flow']:g} cm/s away. A value the PSI "
-            f"table does not list counts as {core.UNKNOWN}.\n"
+            "table does not list counts as 0, because it cannot be checked.\n"
             "- **M_fuel**: 1 same fuel class, 0.5 related, 0.2 other.\n"
             "- **W_evidence**: 1 if the PSI table has one row per test, 0.6 if it is a summary."
         )
@@ -201,45 +310,55 @@ with tab_cover:
 with tab_compare:
     st.subheader("Compare investigations")
     names = list(cat["investigation"].unique())
-    chosen = st.multiselect("Investigations", names, default=["SAFFIRE-2", "BASS-II", "FLEX"], max_selections=4)
-    if chosen:
-        table = pd.DataFrame({n: core.describe(cat, n) for n in chosen})
-        st.table(table)
+    picked = st.multiselect("Investigations", names, default=["SAFFIRE-2", "BASS-II", "FLEX"], max_selections=4)
+    if picked:
+        st.table(pd.DataFrame({n: core.describe(cat, n) for n in picked}))
         st.caption("Every cell is read from the PSI experiment table. \"Not listed\" means the table is silent.")
 
 # -------------------------------------------------------------------- about
 with tab_about:
     a, b = st.columns(2)
     with a:
-        st.subheader("On Earth")
+        st.subheader("Model-ready data")
         st.markdown(
-            "The challenge statement names three Earth uses of this research: fine-water-mist "
-            "extinguishers, smoke detection and firefighter gear. In the data loaded here:\n"
-            f"- **Smoke detection**: SAME and SAME-R, "
-            f"{len(cat[cat['investigation'].isin(['SAME', 'SAME-R'])])} smoke-particle tests on "
-            "overheated Teflon, Kapton, silicone, lampwick and Pyrell.\n"
-            f"- **Suppression**: FLEX, {len(cat[cat['investigation'] == 'FLEX'])} droplet tests, "
-            "many with CO2 or helium added to the atmosphere."
+            f"All {len(cat)} test records in one table: oxygen in %, pressure in psi, airflow in cm/s, "
+            "with the original PSI text kept beside every converted value."
         )
+        st.download_button("Download the full catalog (CSV)", cat.to_csv(index=False),
+                           file_name="psi-combustion-catalog.csv", mime="text/csv")
         st.subheader("Limits")
+        unnamed = int(((cat["fuel_class"] == "solid") & cat["material"].isna()).sum())
         st.markdown(
             f"- {len(cat)} rows from {cat['investigation'].nunique()} PSI experiment tables. PSI holds more.\n"
             "- Empty cells are left empty. No value is estimated.\n"
+            f"- {unnamed} BASS-II rows name a shape but no material (for example \"1/4\\\" clear rod\"). "
+            "They are not assigned to any material.\n"
             "- BASS-II lists a fan setting, not an air speed, and no pressure or outcome.\n"
             "- FLEX-2 and SLICE tables are summaries, not one row per test.\n"
             "- No investigation here ran in partial gravity."
         )
+        st.subheader("On Earth")
+        st.markdown(
+            "The challenge statement names three Earth uses of this research: fine-water-mist "
+            "extinguishers, smoke detection and firefighter gear. In the data loaded here, SAME and "
+            f"SAME-R hold {len(cat[cat['investigation'].isin(['SAME', 'SAME-R'])])} smoke-particle tests, "
+            f"and FLEX holds {len(cat[cat['investigation'] == 'FLEX'])} droplet tests, many with CO2 or "
+            "helium added to the atmosphere."
+        )
     with b:
         st.subheader("Sources")
         src = (cat.groupby("investigation", sort=False)
-               .agg(psi_id=("psi_id", "first"), rows=("test_id", "size"), doi=("doi", "first"),
-                    file=("source_file", "first")).reset_index())
+               .agg(psi_id=("psi_id", "first"), rows=("test_id", "size"), file=("source_file", "first")).reset_index())
         src["link"] = src["psi_id"].map(core.source_link)
         st.dataframe(
-            src[["investigation", "psi_id", "rows", "file", "link"]].rename(columns={
-                "investigation": "Investigation", "psi_id": "PSI ID", "rows": "Rows",
-                "file": "PSI file", "link": "Record"}),
+            src.rename(columns={"investigation": "Investigation", "psi_id": "PSI ID", "rows": "Rows",
+                                "file": "PSI file", "link": "Record"}),
             hide_index=True, width="stretch",
             column_config={"Record": st.column_config.LinkColumn("Record", display_text="Open")})
-        st.markdown("Data: NASA Physical Science Informatics, [psi.nasa.gov](https://psi.nasa.gov). "
-                    "Cleaning decisions are logged in `DATA_NOTES.md` in the repository.")
+        st.markdown("Data: NASA Physical Science Informatics, [psi.nasa.gov](https://psi.nasa.gov).")
+        st.subheader("How SI is used")
+        st.markdown(
+            "On the brief page, a Gemini model writes one paragraph from the facts shown. Code then checks "
+            "every number in that paragraph against those facts and removes any sentence that fails. "
+            "The tables, counts, grades and charts are computed without SI."
+        )

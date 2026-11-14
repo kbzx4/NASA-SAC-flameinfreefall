@@ -47,6 +47,31 @@ RANGE = {"o2": 20.0, "pressure": 10.0, "flow": 30.0}
 UNKNOWN = 0.0  # a dimension the PSI table does not list earns no credit: it cannot be checked
 
 
+MATERIAL_RULES = [  # (text to look for in the PSI fuel cell, name shown in the app)
+    ("pmma", "PMMA (acrylic)"),
+    ("sibal", "Cotton-fiberglass fabric (SIBAL)"),
+    ("cotton-fiberglass", "Cotton-fiberglass fabric (SIBAL)"),
+    ("silicone", "Silicone"),
+    ("nomex", "Nomex"),
+    ("kapton", "Kapton"),
+    ("teflon", "Teflon"),
+    ("lampwick", "Lampwick"),
+    ("pyrell", "Pyrell"),
+    ("dibutyl", "Dibutyl phthalate"),
+    ("wax", "Japan wax"),
+]
+
+
+def tag_material(fuel_text):
+    """Materials named in a PSI fuel cell. Empty if the cell names none (e.g. '1/4" clear rod')."""
+    text = str(fuel_text).lower()
+    found = []
+    for needle, name in MATERIAL_RULES:
+        if needle in text and name not in found:
+            found.append(name)
+    return "; ".join(found)
+
+
 def load_catalog():
     return pd.read_csv(DATA / "catalog.csv")
 
