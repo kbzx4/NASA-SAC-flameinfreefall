@@ -23,7 +23,8 @@
     scenario: preset.name, o2: preset.o2, pressure: preset.pressure, flow: 10,
     gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g")))) : 1,
     materials: DEFAULT_MATERIALS.filter((m) => FF.materials.includes(m)),
-    view: ["insights", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    view: ["insights", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    replay: { kind: "droplets" },
     concern: "solid", compare: ["SAFFIRE-2", "BASS-II", "FLEX"], open: null, kind: "", find: "",
   };
   const partial = () => state.gravity > 0;
@@ -235,6 +236,7 @@
       <h3>${esc(t && t.headline ? t.headline : cap(f.topic))}</h3>
       <p class="near-line"><b>${near}:</b> ${esc(cap(b.line))}.</p>
       ${f.chart ? `<div class="ins-chart" id="ch-${f.id}"></div>${legend}` : ""}
+      ${REPLAYABLE[f.id] ? `<button class="btn small rp-go" data-f="${f.id}" data-band="${r.band}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Replay these tests</button>` : ""}
       ${t ? `<div class="ins-body">${t.found ? `<div><div class="k">What the tests found</div><p>${esc(t.found)}</p></div>` : ""}
         ${t.means ? `<div class="si"><div class="k">What it suggests for a crewed habitat · SI interpretation</div>${esc(t.means)}${checkLine(t)}</div>` : ""}
         ${t.limit ? `<p class="limit"><b>Limit:</b> ${esc(t.limit)}</p>` : ""}</div>` : facts}
@@ -291,6 +293,11 @@
     CH.bindTips(el);
     bindLive();
     $("kinds").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; state.kind = b.dataset.k; drawInsights(); };
+    el.querySelectorAll(".rp-go").forEach((b) => b.onclick = () => {
+      const [kind, gasFilter] = REPLAYABLE[b.dataset.f];
+      state.replay = { kind, right: b.dataset.f === "droplet-diluent" ? undefined : +b.dataset.band, gas: gasFilter };
+      state.view = "replay"; update(); window.scrollTo({ top: 0 });
+    });
     $("find").oninput = (e) => {
       state.find = e.target.value;
       const pos = e.target.selectionStart;
@@ -470,11 +477,37 @@
   }
 
   /* ---------------------------------------------------------------- loop */
-  const DRAW = { insights: drawInsights, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
+  /* --------------------------------------------------------------- replay */
+  const REPLAYABLE = { "droplet-oxygen": ["droplets", ""], "droplet-low-oxygen": ["droplets", ""], "droplet-diluent": ["droplets", "He"],
+    "gas-oxygen": ["gas", ""], "cool-flames": ["gas", ""] };
+  let replayCtl = null;
+  function drawReplay() {
+    const el = $("view-replay"), rp = state.replay;
+    el.innerHTML = `
+      <span class="eyebrow">Test replay</span>
+      <h1 style="margin-top:12px">Watch NASA's own tests burn, side by side</h1>
+      <p class="lede">Every flame below is one real test from NASA's tables, replayed in time-lapse. The left side starts at ISS air, the right at the oxygen level nearest your ${g(state.o2)}%. Watch how many flames go out on their own, and how many keep going.</p>
+      <div id="rp"></div>
+      <div class="cols-2" style="margin-top:22px">
+        <div class="card prose"><h3>What is data</h3><ul>
+          <li>Which tests appear, their oxygen level, fuel, starting droplet size, burn time and how each one ended all come from the NASA table (FLEX, PSI-69; CFI-G, PSI-159). Hover over a flame for its test.</li>
+          <li>A droplet shrinks following the d² law: its diameter squared falls at a steady rate. The FLEX burning rates are measured this way, and for the tests that list both, the law matches the recorded burn time to within about 5% for most.</li>
+          <li>A droplet whose flame went out keeps the diameter the table lists at extinction: fuel left unburned.</li></ul></div>
+        <div class="card prose"><h3>What is drawn</h3><ul>
+          <li>The look of each flame: its colour, glow and size around the droplet or burner. The tables do not measure these.</li>
+          <li>How a disrupted droplet breaks apart. The table records "Disruption" without saying how.</li>
+          <li>Time runs faster than in the tests, and every test starts together; on the space station they ran one at a time.</li></ul></div>
+      </div>`;
+    if (replayCtl) replayCtl.destroy();
+    replayCtl = FFReplay.mount($("rp"), FF, { kind: rp.kind, right: rp.right, gas: rp.gas || "", o2: state.o2 });
+  }
+
+  const DRAW = { insights: drawInsights, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
   function update() {
     drawControls();
     document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === state.view));
     document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + state.view));
+    if (state.view !== "replay" && replayCtl) { replayCtl.destroy(); replayCtl = null; }
     DRAW[state.view]();
   }
   update();

@@ -98,6 +98,12 @@
       <h2>What the experiments found, ranked by how close they come to your design.</h2>
       <p>Code computes each finding from the NASA tables. The findings are ranked by how close their tests came to the habitat's oxygen level and pressure. SI then explains what each one suggests, and every sentence it writes is checked twice.</p>
     </div>
+    <div class="figure reveal" style="margin-bottom:18px">
+      <h3>Real NASA tests, replayed: ISS air against Moon-base oxygen</h3>
+      <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
+      <div id="replay"></div>
+      <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse.</p>
+    </div>
     <div class="grid-3" id="top-insights"></div>
     <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?s=Moon%20base%20%2F%20pressurized%20rover">See all <span data-n="findings"></span> findings for a Moon base
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
@@ -195,6 +201,7 @@
 <script src="assets/logic.js"></script>
 <script src="assets/charts.js"></script>
 <script src="assets/flame.js"></script>
+<script src="assets/replay.js"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -242,6 +249,7 @@
     { o2: 34, label: "Exploration atmosphere · 34%", anchor: "start", wideOnly: true },
   ]);
   FFCharts.dumbbell(document.getElementById("dumbbell"), FF.pairs);
+  FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, compact: true, loop: true });
 
   // hero flame
   const flame = FFFlame.Flame(document.getElementById("flame"));

@@ -111,6 +111,7 @@ def main():
         "si": {"material": si["material"], "atmosphere": si["atmosphere"]},
         "findings": [{**f, "si": shown(texts.get(f["id"]), ("headline", "found", "means", "limit"))} for f in found],
         "briefings": {k: shown(v, ("text",)) for k, v in briefs.items()},
+        "replay": build_findings.replay(),
         "expected": expected,
     }
     OUT.mkdir(parents=True, exist_ok=True)

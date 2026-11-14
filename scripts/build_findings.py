@@ -336,6 +336,53 @@ def smoke(cat):
     }
 
 
+def replay():
+    """Every FLEX droplet test and CFI-G gas-flame test, as compact rows for the site's test replay.
+
+    droplets: [oxygen %, fuel, start diameter mm, end diameter mm, burn time s, end, gas added, pressure psi, test]
+      end is E (flame went out), C (burned until the fuel was used up) or D (droplet disrupted).
+      The end diameter is the listed extinction diameter; for C it is 0; for D, or when it is not
+      listed, it comes from the d2 law with the listed burning rate: d_end^2 = d0^2 - K * t_burn.
+    gas: [oxygen %, fuel, burn time s, end, cool flame?, pressure psi, test]
+      end is SE (went out on its own), FT (burned until the fuel was cut off) or N (did not light).
+    Tests without a start size or burn time cannot be replayed and are left out.
+    """
+    f = pd.DataFrame(read("PSI-69_Experimental table_FLEX.csv"))
+    num = lambda c: pd.to_numeric(f[c], errors="coerce")
+    o2, d0, dx, k, tb = (num("O initial ambient composition; mole fraction") * 100, num("Droplet initial diameter; mm"),
+                         num("Visible flame extinction diameter; mm"), num("Burning rate; mm"), num("Burn time; s"))
+    co2, he, p = num("CO initial ambient composition; mole fraction"), num("He initial ambient composition; mole fraction"), num("Ambient pressure; mmHg")
+    drops = []
+    for i in range(len(f)):
+        end = {"Extinction": "E", "Completion": "C", "Disruption": "D"}.get(f["Test end"][i])
+        if not end or pd.isna(d0[i]) or pd.isna(tb[i]) or pd.isna(o2[i]) or tb[i] <= 0:
+            continue
+        if end == "C":
+            de = 0.0
+        elif end == "E" and not pd.isna(dx[i]) and dx[i] < d0[i]:
+            de = float(dx[i])
+        elif not pd.isna(k[i]):
+            de = max(0.0, float(d0[i]) ** 2 - float(k[i]) * float(tb[i])) ** 0.5
+        else:
+            continue
+        gas = "CO2" if co2[i] > 0 else "He" if he[i] > 0 else "N2"
+        drops.append([round(float(o2[i]), 1), f["Fuel"][i], float(d0[i]), round(de, 2), float(tb[i]), end, gas,
+                      None if pd.isna(p[i]) or p[i] <= 0 else round(float(p[i]) * 14.6959 / 760, 2), f["FLEX Identifier"][i]])
+    g = pd.DataFrame(read("PSI-159_Experimental table_CFI-G_Normal Flames.csv"))
+    gas = []
+    for r in g.to_dict("records"):
+        o = pd.to_numeric(r["XO2 before test"], errors="coerce")
+        t = pd.to_numeric(r["burn time (sec)"], errors="coerce")
+        lit = r["Hot ignition"] == "Yes"
+        if pd.isna(o) or (lit and pd.isna(t)):
+            continue
+        end = {"SE": "SE", "FT": "FT"}.get(r["Self-ext or flow term"], "N") if lit else "N"
+        pr = pd.to_numeric(r["approx p (bar)"], errors="coerce")
+        gas.append([round(float(o) * 100, 1), r["Fuel"], float(t) if lit else 0.0, end,
+                    str(r["Cool flame?"]).lower().startswith("yes"), None if pd.isna(pr) else round(float(pr) * 14.5038, 2), r["Test"]])
+    return {"droplets": drops, "gas": gas}
+
+
 def findings(cat=None):
     cat = core.load_catalog() if cat is None else cat
     out = [droplet_oxygen(cat), droplet_low_oxygen(cat), droplet_diluent(cat), gas_oxygen(cat), cool_flames(cat),

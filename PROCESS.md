@@ -76,6 +76,12 @@ Changes made:
 - Live SI: "Ask Flamebound" answers questions, and "Write an SI briefing" covers any habitat, from the facts the page computed for it. Gemini 3.1 Flash Lite answers in 3 to 6 seconds; in tests the second pass (Gemini 3.5 Flash Lite) caught a misattributed oxygen range and a wrong "lower than". Gemma 4 26B timed out three times in a row, so it is only the last fallback.
 - The free tier allows 20 requests a day for the stronger models (Gemini 4 Hydrogen included), so live SI uses the Flash Lite models.
 
+## Nov 14, late: test replay
+
+- The site was mostly text and bar charts. Rather than an invented fire simulation, the new Test replay plays back NASA's own tests: every FLEX droplet test and CFI-G gas-flame test at two chosen oxygen levels, side by side, in time-lapse. Each droplet starts at its listed diameter, shrinks by the d² law, and ends at its listed burn time in the listed way. For the extinction tests that list a burning rate, the d² law predicts the recorded burn time to within about 5% for most (median ratio 0.95).
+- 256 of 274 droplet tests and all 179 gas-flame tests have what a replay needs; the page says how many are left out at each oxygen level.
+- The look of each flame is drawn and labelled as drawn. Heptane flames are drawn with a warm core because heptane makes soot; that is the only fuel difference drawn.
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.
