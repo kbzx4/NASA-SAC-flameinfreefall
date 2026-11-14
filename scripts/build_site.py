@@ -112,6 +112,7 @@ def main():
         "findings": [{**f, "si": shown(texts.get(f["id"]), ("headline", "found", "means", "limit"))} for f in found],
         "briefings": {k: shown(v, ("text",)) for k, v in briefs.items()},
         "replay": build_findings.replay(),
+        "models": json.loads((ROOT / "data" / "models.json").read_text(encoding="utf-8")),
         "expected": expected,
     }
     OUT.mkdir(parents=True, exist_ok=True)

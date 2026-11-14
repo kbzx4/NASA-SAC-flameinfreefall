@@ -82,6 +82,16 @@ Changes made:
 - 256 of 274 droplet tests and all 179 gas-flame tests have what a replay needs; the page says how many are left out at each oxygen level.
 - The look of each flame is drawn and labelled as drawn. Heptane flames are drawn with a warm core because heptane makes soot; that is the only fuel difference drawn.
 
+## Nov 15, early: from presenting data to predicting
+
+- Feedback: the tool still only re-presented the tables. The new Fire model fits models to the tests and predicts at the user's own conditions.
+- Droplets (FLEX, 261 tests with oxygen, pressure and size): a multinomial logistic regression on oxygen, CO2, helium, pressure, droplet size and fuel predicts how a test ends. On unseen tests (5-fold cross-validation) it ranks flames that went out above those that did not with AUC 0.88, and names the right ending 78% of the time against 69% for always guessing the commonest. Each extra point of oxygen multiplies the odds that the flame goes out on its own by 0.67; each extra millimetre of droplet by 3.2. A linear model of log burning rate explains 60% of the spread between unseen tests.
+- Gas flames (CFI-G): whether a lit flame goes out on its own is predicted with AUC 0.84. Whether a flame lights at all could not be predicted better than guessing (71% right against 74% for always guessing "lights"), so the site says so and does not predict it.
+- Uncertainty: every model is refitted on 300 bootstrap resamples; the site shows the middle 90% of their answers. Inputs outside the tested range are named on the page.
+- `tests/parity.mjs` now also checks the site's predictions against the Python fit (170 checks).
+- A simulation draws 60 droplets from the model (each from a random bootstrap refit, with the burning-rate scatter) and plays them next to the real tests nearest the user's oxygen level, so the model can be compared with the data by eye.
+- Live SI now receives the model's predictions for the habitat, labelled as model output, and cites them as [model].
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.

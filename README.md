@@ -14,13 +14,14 @@ NASA's Physical Science Informatics (PSI) archive holds decades of microgravity 
 
 1. **You describe a habitat**: oxygen, pressure, airflow, gravity, and the materials on board.
 2. **It ranks what NASA's experiments found.** Code computes nine fire-safety findings from the NASA tables (how often droplet and gas flames went out on their own at each oxygen level, how long they burned at low oxygen, what CO2 and helium did, cool flames, what gravity changed, flame spread with and against the airflow, carbon monoxide from burning samples, and the smoke tests). They are ranked by how close their tests came to your habitat, with the result nearest your oxygen level picked out and charted.
-3. **Test replay.** NASA's own FLEX droplet tests and CFI-G gas-flame tests replay side by side in time-lapse at two oxygen levels. Each droplet starts at its recorded size, shrinks by the d² law and ends at its recorded burn time the way the table says it ended (flame out with fuel left, burned to nothing, or disrupted); live counters tally the outcomes. The look of each flame is drawn, not measured.
-4. **Ask Flamebound (live SI).** Ask a question about your habitat, or have SI write a briefing for any values you set. Gemini 3.1 Flash Lite answers from the facts computed for that habitat only and cites the findings it used; the number check and a second model (Gemini 3.5 Flash Lite) run in the browser before the answer is shown.
-5. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
-6. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
-7. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Flamebound shows where that bound is tight and where it is wide open.
-8. **It ranks and compares investigations** by how close their test conditions come to yours.
-9. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
+3. **Fire model.** Models fitted to every FLEX droplet test (261) and every lit CFI-G gas flame (132) predict outcomes at your exact conditions, with a 90% range from 300 bootstrap refits: the chance a droplet flame goes out on its own, burns until the fuel is used up or disrupts; its burning rate; the oxygen level where going out on its own becomes a 50-50 chance; and the chance a lit gas flame goes out on its own. Checked on tests they never saw (5-fold cross-validation): droplet AUC 0.88, gas AUC 0.84. Whether a gas flame lights could not be predicted better than guessing, so the site does not predict it. Inputs beyond the tested range are flagged. A simulation draws 60 droplets from the model and plays them next to the real tests nearest your oxygen level.
+4. **Test replay.** NASA's own FLEX droplet tests and CFI-G gas-flame tests replay side by side in time-lapse at two oxygen levels. Each droplet starts at its recorded size, shrinks by the d² law and ends at its recorded burn time the way the table says it ended (flame out with fuel left, burned to nothing, or disrupted); live counters tally the outcomes. The look of each flame is drawn, not measured.
+5. **Ask Flamebound (live SI).** Ask a question about your habitat, or have SI write a briefing for any values you set. Gemini 3.1 Flash Lite answers from the facts computed for that habitat only and cites the findings it used; the number check and a second model (Gemini 3.5 Flash Lite) run in the browser before the answer is shown.
+6. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
+7. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
+8. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Flamebound shows where that bound is tight and where it is wide open.
+9. **It ranks and compares investigations** by how close their test conditions come to yours.
+10. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
 
 ## Three scores, each shown with its formula
 
@@ -83,6 +84,7 @@ python scripts/build_catalog.py     # raw tables -> data/catalog.csv
 python scripts/build_findings.py    # findings and their ranking -> data/findings.json
 python scripts/build_si.py          # optional; needs GEMINI_API_KEY in keys.env
 python scripts/build_insights.py    # optional; SI interpretation of the findings
+python scripts/build_models.py      # fits, cross-validates and bootstraps the Fire model -> data/models.json
 python scripts/build_site.py        # catalog + SI text -> docs/assets/data.js
 node tests/parity.mjs               # checks the site's JavaScript against the Python
 ```

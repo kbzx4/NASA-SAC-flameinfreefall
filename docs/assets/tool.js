@@ -23,7 +23,8 @@
     scenario: preset.name, o2: preset.o2, pressure: preset.pressure, flow: 10,
     gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g")))) : 1,
     materials: DEFAULT_MATERIALS.filter((m) => FF.materials.includes(m)),
-    view: ["insights", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    view: ["insights", "model", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    model: { fuel: "Methanol", gas: "N2", d0: 3, gfuel: "propane", flow: 1, xf: 1 },
     replay: { kind: "droplets" },
     concern: "solid", compare: ["SAFFIRE-2", "BASS-II", "FLEX"], open: null, kind: "", find: "",
   };
@@ -156,8 +157,8 @@
     return true;
   }
   function cites(text, r) {
-    return esc(text).replace(/\[((?:F\d+|gaps)(?:\s*,\s*(?:F\d+|gaps))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
-      c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
+    return esc(text).replace(/\[((?:F\d+|gaps|model)(?:\s*,\s*(?:F\d+|gaps|model))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+      c === "model" ? `<a class="cite" href="?view=model" data-view-link="model">model</a>` : c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
   }
   function liveCheck() { return ""; }
 
@@ -209,6 +210,7 @@
     if (sg) sg.onclick = (e) => { const b = e.target.closest("button"); if (b) go("ask", b.dataset.q); };
     const wb = $("brief-live");
     if (wb) wb.onclick = () => go("brief");
+    document.querySelectorAll("[data-view-link]").forEach((x) => x.onclick = (e) => { e.preventDefault(); state.view = x.dataset.viewLink; update(); window.scrollTo({ top: 0 }); });
   }
 
   /* ------------------------------------------------------------ insights */
@@ -477,6 +479,132 @@
   }
 
   /* ---------------------------------------------------------------- loop */
+  /* ----------------------------------------------------------- fire model */
+  const MD = window.FFModels, MODELS = FF.models;
+  const pct = (v) => (v * 100 < 1 && v > 0 ? "<1" : v * 100 > 99 && v < 1 ? ">99" : Math.round(v * 100)) + "%";
+  let simCtl = null;
+
+  /* probability against oxygen, with the 90% band, the tests behind it and the habitat marked */
+  function curve(el, cfg) {
+    const W = Math.max(300, el.clientWidth), narrow = W < 560, H = narrow ? 230 : 270, L0 = 46, R0 = 16, T0 = 14, B0 = 40;
+    const lo = cfg.x[0], hi = cfg.x[1], X = (v) => L0 + ((v - lo) / (hi - lo)) * (W - L0 - R0), Y = (p) => T0 + (1 - p) * (H - T0 - B0);
+    const xs = [], n = 70;
+    for (let i = 0; i <= n; i++) xs.push(lo + ((hi - lo) * i) / n);
+    const pts = xs.map((x) => { const r = cfg.at(x); return [x, r.fit, r.lo, r.hi]; });
+    const inside = (x) => x >= cfg.trained[0] - 1e-9 && x <= cfg.trained[1] + 1e-9;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(cfg.label)} against oxygen level">`;
+    s += `<rect x="${X(Math.max(lo, cfg.trained[0]))}" y="${T0}" width="${X(Math.min(hi, cfg.trained[1])) - X(Math.max(lo, cfg.trained[0]))}" height="${H - T0 - B0}" fill="rgba(255,255,255,0.035)"/>`;
+    [0, 0.25, 0.5, 0.75, 1].forEach((p) => { s += `<line x1="${L0}" x2="${W - R0}" y1="${Y(p)}" y2="${Y(p)}" stroke="rgba(255,255,255,0.07)"/><text x="${L0 - 8}" y="${Y(p) + 4}" fill="#6f7a8f" font-size="11.5" text-anchor="end" font-family="JetBrains Mono, monospace">${p * 100}%</text>`; });
+    for (let t = Math.ceil(lo / 10) * 10; t <= hi; t += hi - lo > 60 ? 20 : 10) s += `<text x="${X(t)}" y="${H - B0 + 18}" fill="#6f7a8f" font-size="11.5" text-anchor="middle" font-family="JetBrains Mono, monospace">${t}%</text>`;
+    s += `<text x="${W - R0}" y="${H - 6}" fill="#6f7a8f" font-size="11.5" text-anchor="end">Oxygen, % by volume · shaded: oxygen range of the tests</text>`;
+    // tests: went out (top) or did not (bottom), jittered so they do not pile up
+    cfg.points.forEach((p, i) => {
+      const j = (((i * 9301 + 49297) % 233280) / 233280 - 0.5) * 0.07;
+      s += `<circle cx="${X(p[0]) + j * 40}" cy="${Y(p[1] ? 0.985 + j * 0.2 : 0.015 + j * 0.2)}" r="2.6" fill="${p[1] ? "#3987e5" : "#9aa3b5"}" opacity="0.55"/>`;
+    });
+    const path = (k, keep) => pts.filter(([x]) => keep(x)).map(([x, ...v], i) => `${i ? "L" : "M"}${X(x).toFixed(1)},${Y(v[k]).toFixed(1)}`).join("");
+    const band = pts.map(([x, , l]) => `${X(x).toFixed(1)},${Y(l).toFixed(1)}`).concat(pts.slice().reverse().map(([x, , , h]) => `${X(x).toFixed(1)},${Y(h).toFixed(1)}`)).join(" ");
+    s += `<polygon points="${band}" fill="rgba(57,135,229,0.18)"/>`;
+    s += `<path d="${path(0, () => true)}" fill="none" stroke="#7fd0ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.7"/>`;
+    s += `<path d="${path(0, inside)}" fill="none" stroke="#7fd0ff" stroke-width="2.5"/>`;
+    const hx = Math.min(hi, Math.max(lo, cfg.you)), hr = cfg.at(hx);
+    s += `<line x1="${X(hx)}" x2="${X(hx)}" y1="${T0}" y2="${H - B0}" stroke="#fff" stroke-dasharray="4 4" stroke-width="1.5"/>`;
+    s += `<circle cx="${X(hx)}" cy="${Y(hr.fit)}" r="6" fill="#fff" stroke="#04060b" stroke-width="2"/>`;
+    s += `<text x="${X(hx) + (X(hx) > W * 0.7 ? -10 : 10)}" y="${Math.max(T0 + 12, Y(hr.fit) - 10)}" fill="#fff" font-size="13" font-weight="600" text-anchor="${X(hx) > W * 0.7 ? "end" : "start"}">${esc(cfg.youLabel)}: ${pct(hr.fit)}</text>`;
+    // hover: the value at each oxygen level
+    const step = (W - L0 - R0) / n;
+    pts.forEach(([x, f, l, h]) => { s += `<rect x="${X(x) - step / 2}" y="${T0}" width="${step}" height="${H - T0 - B0}" fill="transparent" data-tip="<b>${g(Math.round(x * 10) / 10)}% oxygen</b><span>${esc(cfg.label)}: ${pct(f)}<br>90% range ${pct(l)} to ${pct(h)}${inside(x) ? "" : "<br>Outside the tested oxygen range"}</span>"/>`; });
+    el.innerHTML = s + "</svg>";
+  }
+
+  function drawModel() {
+    const el = $("view-model"), m = state.model, D = MODELS.droplets, G = MODELS.gas;
+    const x = MD.dropletX(state.o2, m.gas, state.pressure, m.d0, m.fuel), end = MD.classify(D.ending, x), k = MD.rate(D.rate, x);
+    const away = (m.d0 * m.d0) / k.fit, ff = MD.fiftyFifty(D.ending, x, 0);
+    const r1 = (v) => g(Math.round(v * 10) / 10);
+    const offD = MD.outside(D.range, D.inputs, x, ["oxygen", "CO2", "helium", "pressure", "droplet size", "fuel"]);
+    const gx = MD.gasX(state.o2, state.pressure, m.xf, m.flow, m.gfuel), se = MD.classify(G.self_ext, gx);
+    const offG = MD.outside(G.range, G.inputs, gx, ["oxygen", "pressure", "fuel fraction", "fuel flow"]);
+    const sc = D.ending.score, gsc = G.self_ext.score, gl = G.lights.score, oddsD = D.ending.odds_flame_goes_out, oddsG = G.self_ext.odds_goes_out;
+    const unit = { oxygen: "%", CO2: "%", helium: "%", pressure: " atm", "droplet size": " mm", "fuel fraction": "", "fuel flow": " mg/s" };
+    const off = (list) => list.length ? `<div class="callout info"><b>Beyond the tests.</b> ${list.map(([n, v, r]) => `Your ${n} (${g(Math.round(v * 100) / 100)}${unit[n] || ""}) is outside the ${g(r[0])} to ${g(r[1])}${unit[n] || ""} the tests covered.`).join(" ")} Here the model extends the trend it learned; no test checks it, and the range shown does not include that risk.</div>` : "";
+    const chip = (key, v, label) => `<button class="pill" data-m="${key}" data-v="${esc(v)}" aria-pressed="${String(m[key]) === String(v)}">${esc(label)}</button>`;
+    el.innerHTML = `
+      <span class="eyebrow">Fire model</span>
+      <h1 style="margin-top:12px">What models trained on NASA's tests predict at ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</h1>
+      <p class="lede">Two models, each fitted to every test in a NASA table and checked on tests it never saw. They predict for conditions between the tests and say how sure they are: the range is the middle 90% of 300 refits on resampled tests.</p>
+
+      <div class="card model">
+        <div class="model-head"><div><h3>Burning fuel droplets</h3><p class="muted">Fitted to ${sc.tests} FLEX droplet tests (PSI-69)</p></div>
+          <div class="model-ctl">
+            <div class="pills">${chip("fuel", "Methanol", "Methanol")}${chip("fuel", "Heptane", "Heptane")}</div>
+            <div class="pills">${chip("gas", "N2", "Nitrogen only")}${chip("gas", "CO2", "20% CO2 added")}${chip("gas", "He", "20% helium added")}</div>
+            <label class="mini">Droplet size <output>${g(m.d0)} mm</output><input class="plain" type="range" min="1.1" max="4.7" step="0.1" value="${m.d0}" data-r="d0"></label>
+          </div></div>
+        ${off(offD)}
+        <div class="tiles">
+          <div class="tile"><div class="k">Flame goes out on its own, fuel left</div><div class="v">${pct(end.fit[0])} <small>90% range ${pct(end.lo[0])} to ${pct(end.hi[0])}</small></div></div>
+          <div class="tile"><div class="k">Burns until the fuel is used up</div><div class="v">${pct(end.fit[1])} <small>${pct(end.lo[1])} to ${pct(end.hi[1])}</small></div></div>
+          <div class="tile"><div class="k">Droplet disrupted</div><div class="v">${pct(end.fit[2])} <small>${pct(end.lo[2])} to ${pct(end.hi[2])}</small></div></div>
+        </div>
+        ${ff ? `<p class="model-line big"><b>50-50 point: ${r1(ff.fit)}% oxygen</b> <span class="muted">(90% range ${r1(ff.lo)} to ${r1(ff.hi)}%)</span>. Below it, most of these droplet flames go out on their own; above it, most keep burning.${ff.fit < D.range.o2[0] || ff.fit > D.range.o2[1] ? " This point lies outside the tested oxygen range." : ""}</p>` : ""}
+        <p class="model-line">Burning rate ${g(Math.round(k.fit * 1000) / 1000)} mm²/s (90% range ${g(Math.round(k.lo * 1000) / 1000)} to ${g(Math.round(k.hi * 1000) / 1000)}). A ${g(m.d0)} mm droplet that keeps burning is used up in about ${g(Math.round(away * 10) / 10)} s.</p>
+        <div class="chart-box"><div class="k">Chance the flame goes out on its own, against oxygen · ${esc(m.fuel.toLowerCase())}, ${g(m.d0)} mm, ${m.gas === "N2" ? "nitrogen only" : m.gas === "CO2" ? "20% CO2" : "20% helium"}, ${g(state.pressure)} psi</div><div id="curve-d"></div>
+          <div class="legend"><span><i style="background:#7fd0ff"></i>Model (dashed: beyond the tested oxygen range)</span><span><i style="background:rgba(57,135,229,0.5)"></i>90% range</span><span><i style="background:#3987e5"></i>Test: flame went out</span><span><i style="background:#9aa3b5"></i>Test: did not</span></div></div>
+        <div class="row" style="margin-top:16px"><button class="btn primary small" id="sim-go"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Simulate 60 droplets here, next to the real tests</button></div>
+        <div id="sim"></div>
+        <details style="margin-top:14px"><summary>How good is this model?</summary><ul class="facts">
+          <li>On tests it never saw (5-fold cross-validation), it ranks a test whose flame went out above one whose flame did not ${Math.round(sc.auc_goes_out * 100)}% of the time (AUC ${sc.auc_goes_out}).</li>
+          <li>It names the right ending (went out, used up, disrupted) for ${Math.round(sc.accuracy * 100)}% of unseen tests. Always guessing the commonest ending gets ${Math.round(sc.majority_guess * 100)}%.</li>
+          <li>What it learned, holding the rest fixed: each extra point of oxygen multiplies the odds that the flame goes out on its own by ${oddsD.o2}; each extra millimetre of droplet by ${oddsD.d0}; heptane instead of methanol by ${oddsD.hep}; each point of CO2 added by ${oddsD.co2}, and of helium by ${oddsD.he}.</li>
+          <li>The burning-rate model explains ${Math.round(D.rate.score.r2_log * 100)}% of the spread between unseen tests, with a typical error of ${D.rate.score.mae} mm²/s.</li>
+          <li>The FLEX tests change several things at once, so these are associations in this data, not proof of cause.</li></ul></details>
+      </div>
+
+      <div class="card model" style="margin-top:18px">
+        <div class="model-head"><div><h3>Gas flames on a burner</h3><p class="muted">Fitted to the ${gsc.tests} CFI-G flames that lit (PSI-159)</p></div>
+          <div class="model-ctl">
+            <div class="pills">${["ethane", "propane", "butane"].map((f) => chip("gfuel", f, f.charAt(0).toUpperCase() + f.slice(1))).join("")}</div>
+            <label class="mini">Fuel flow <output>${g(m.flow)} mg/s</output><input class="plain" type="range" min="0.5" max="3" step="0.25" value="${m.flow}" data-r="flow"></label>
+            <label class="mini">Fuel in the supply <output>${Math.round(m.xf * 100)}%</output><input class="plain" type="range" min="0.25" max="1" step="0.05" value="${m.xf}" data-r="xf"></label>
+          </div></div>
+        ${off(offG)}
+        <div class="tiles" style="grid-template-columns:1fr">
+          <div class="tile"><div class="k">A lit flame goes out on its own, rather than burning until the fuel is cut off</div><div class="v">${pct(se.fit[0])} <small>90% range ${pct(se.lo[0])} to ${pct(se.hi[0])}</small></div></div></div>
+        <div class="chart-box"><div class="k">Chance a lit gas flame goes out on its own, against oxygen · ${esc(m.gfuel)}, ${g(m.flow)} mg/s, ${Math.round(m.xf * 100)}% fuel, ${g(state.pressure)} psi</div><div id="curve-g"></div>
+          <div class="legend"><span><i style="background:#7fd0ff"></i>Model</span><span><i style="background:rgba(57,135,229,0.5)"></i>90% range</span><span><i style="background:#3987e5"></i>Test: went out on its own</span><span><i style="background:#9aa3b5"></i>Test: burned until fuel cut</span></div></div>
+        <details style="margin-top:14px"><summary>How good is this model?</summary><ul class="facts">
+          <li>On unseen tests it ranks a flame that went out on its own above one that kept burning ${Math.round(gsc.auc * 100)}% of the time (AUC ${gsc.auc}), and is right for ${Math.round(gsc.accuracy * 100)}% of them, against ${Math.round(gsc.majority_guess * 100)}% for always guessing "went out".</li>
+          <li>What it learned: each extra point of oxygen multiplies the odds of going out on its own by ${oddsG.o2}; each extra mg/s of fuel flow by ${oddsG.m}.</li>
+          <li>Whether a gas flame lights at all could not be predicted from these inputs: a model got ${Math.round(gl.accuracy * 100)}% right on unseen tests, below the ${Math.round(gl.majority_guess * 100)}% from always guessing "lights". So the site does not predict it.</li></ul></details>
+      </div>`;
+    const tested = (r) => [Math.min(r[0], 10), Math.max(40, Math.min(100, state.o2 + 6))];
+    curve($("curve-d"), { x: tested(D.range.o2), trained: D.range.o2, you: state.o2, youLabel: `${g(state.o2)}% O2`, label: "Chance the flame goes out on its own",
+      at: (o) => { const r = MD.classify(D.ending, MD.dropletX(o, m.gas, state.pressure, m.d0, m.fuel)); return { fit: r.fit[0], lo: r.lo[0], hi: r.hi[0] }; },
+      points: D.points.filter((p) => p[2] === (m.fuel === "Heptane" ? 1 : 0)).map((p) => [p[0], p[1] === "E"]) });
+    curve($("curve-g"), { x: tested(G.range.o2), trained: G.range.o2, you: state.o2, youLabel: `${g(state.o2)}% O2`, label: "Chance a lit flame goes out on its own",
+      at: (o) => { const r = MD.classify(G.self_ext, MD.gasX(o, state.pressure, m.xf, m.flow, m.gfuel)); return { fit: r.fit[0], lo: r.lo[0], hi: r.hi[0] }; },
+      points: G.points.filter((p) => p[1] && p[3] === m.gfuel).map((p) => [p[0], p[2] === 1]) });
+    CH.bindTips(el);
+    el.querySelectorAll("[data-m]").forEach((b) => b.onclick = () => { m[b.dataset.m] = b.dataset.v; drawModel(); });
+    el.querySelectorAll("[data-r]").forEach((r) => {
+      r.oninput = () => { r.previousElementSibling.textContent = r.dataset.r === "xf" ? Math.round(r.value * 100) + "%" : g(+r.value) + (r.dataset.r === "d0" ? " mm" : " mg/s"); };
+      r.onchange = () => { m[r.dataset.r] = +r.value; drawModel(); };
+    });
+    $("sim-go").onclick = () => {
+      if (simCtl) simCtl.destroy();
+      const sim = MD.simulate(D, x, 60, Math.round(state.o2 * 100 + m.d0 * 10));
+      const bands = FF.findings.find((f) => f.id === "droplet-oxygen").bands;
+      let bi = 0; bands.forEach((b, i) => { const gap = (q) => Math.max(q.o2[0] - state.o2, state.o2 - q.o2[1], 0); if (gap(b) < gap(bands[bi])) bi = i; });
+      const B = bands[bi], real = FF.replay.droplets.map((r) => ({ o2: r[0], fuel: r[1], d0: r[2], de: r[3], t: r[4], end: r[5], gas: r[6], p: r[7], id: r[8] }))
+        .filter((r) => r.o2 >= B.o2[0] - 0.05 && r.o2 <= B.o2[1] + 0.05 && r.fuel === m.fuel);
+      simCtl = FFReplay.mount($("sim"), FF, { kind: "droplets", custom: [
+        { label: `Model: 60 ${m.fuel.toLowerCase()} droplets at ${g(state.o2)}% oxygen`, note: `About ${g(m.d0)} mm, ${m.gas === "N2" ? "nitrogen only" : m.gas === "CO2" ? "20% CO2" : "20% helium"}, ${g(state.pressure)} psi. Each one drawn from the model.`, rows: sim },
+        { label: `Real: ${real.length} ${m.fuel.toLowerCase()} tests at ${B.label} oxygen`, note: "The NASA tests nearest your oxygen level, any size and gas. Where the two sides look alike, the model is reproducing the data.", rows: real },
+      ] });
+    };
+  }
+
   /* --------------------------------------------------------------- replay */
   const REPLAYABLE = { "droplet-oxygen": ["droplets", ""], "droplet-low-oxygen": ["droplets", ""], "droplet-diluent": ["droplets", "He"],
     "gas-oxygen": ["gas", ""], "cool-flames": ["gas", ""] };
@@ -502,12 +630,13 @@
     replayCtl = FFReplay.mount($("rp"), FF, { kind: rp.kind, right: rp.right, gas: rp.gas || "", o2: state.o2 });
   }
 
-  const DRAW = { insights: drawInsights, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
+  const DRAW = { insights: drawInsights, model: drawModel, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
   function update() {
     drawControls();
     document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === state.view));
     document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + state.view));
     if (state.view !== "replay" && replayCtl) { replayCtl.destroy(); replayCtl = null; }
+    if (simCtl) { simCtl.destroy(); simCtl = null; }
     DRAW[state.view]();
   }
   update();

@@ -4,8 +4,8 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 globalThis.window = globalThis;
-for (const f of ["docs/assets/data.js", "docs/assets/logic.js"]) vm.runInThisContext(readFileSync(f, "utf8"));
-const { FF, FFLogic: L } = globalThis;
+for (const f of ["docs/assets/data.js", "docs/assets/logic.js", "docs/assets/models.js"]) vm.runInThisContext(readFileSync(f, "utf8"));
+const { FF, FFLogic: L, FFModels: MD } = globalThis;
 
 const sortKeys = (v) => Array.isArray(v) ? v.map(sortKeys)
   : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys(v[k])])) : v;
@@ -42,5 +42,10 @@ for (const sc of FF.scenarios) {
   checks++;
   if (!same(gp, exp.gaps)) fail(`${sc.name} / gaps`, gp, exp.gaps);
 }
+// model predictions: the site's JavaScript against the Python that fitted the models
+const M = FF.models, near = (a, b) => Math.abs(a - b) < 1e-3;
+for (const [x, want] of M.checks.ending) { checks++; const got = MD.classify(M.droplets.ending, x).fit; if (!got.every((v, i) => near(v, want[i]))) fail(`droplet ending ${x}`, got, want); }
+for (const [x, want] of M.checks.rate) { checks++; const got = MD.rate(M.droplets.rate, x).fit; if (!near(got, want)) fail(`droplet rate ${x}`, got, want); }
+for (const [x, want] of M.checks.self_ext) { checks++; const got = MD.classify(M.gas.self_ext, x).fit; if (!near(got[0], want[0])) fail(`gas self-ext ${x}`, got, want); }
 console.log(`${checks - failures} of ${checks} checks match`);
 process.exit(failures ? 1 : 0);

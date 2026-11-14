@@ -17,7 +17,7 @@
       finding: "droplet-oxygen", label: "Fuel droplets · FLEX", cell: 44, target: 16,
       states: [["Went out, fuel left", COL.out, "E"], ["Burned until used up", COL.burn, "C"], ["Droplet disrupted", COL.other, "D"]],
       rows: (FF) => FF.replay.droplets.map((r) => ({ o2: r[0], fuel: r[1], d0: r[2], de: r[3], t: r[4], end: r[5], gas: r[6], p: r[7], id: r[8] })),
-      tip: (r) => `<b>FLEX test ${esc(r.id)}</b><span>${esc(r.fuel)} droplet, ${g(r.d0)} mm<br>${g(r.o2)}% oxygen${r.gas === "N2" ? "" : r.gas === "CO2" ? ", CO2 added" : ", helium added"}${r.p ? `, ${g(r.p)} psi` : ""}<br>${{ E: `Flame went out after ${g(r.t)} s with ${g(r.de)} mm of fuel left`, C: `Burned until the fuel was used up, ${g(r.t)} s`, D: `Droplet disrupted after ${g(r.t)} s` }[r.end]}</span>`,
+      tip: (r) => r.sim ? `<b>Simulated droplet (model)</b><span>${esc(r.fuel)}, ${g(r.d0)} mm, ${g(r.o2)}% oxygen<br>${{ E: `Flame goes out after ${g(r.t)} s with ${g(r.de)} mm left`, C: `Burns until used up, ${g(r.t)} s`, D: `Droplet disrupted after ${g(r.t)} s` }[r.end]}<br>Drawn from the model, not a test</span>` : `<b>FLEX test ${esc(r.id)}</b><span>${esc(r.fuel)} droplet, ${g(r.d0)} mm<br>${g(r.o2)}% oxygen${r.gas === "N2" ? "" : r.gas === "CO2" ? ", CO2 added" : ", helium added"}${r.p ? `, ${g(r.p)} psi` : ""}<br>${{ E: `Flame went out after ${g(r.t)} s with ${g(r.de)} mm of fuel left`, C: `Burned until the fuel was used up, ${g(r.t)} s`, D: `Droplet disrupted after ${g(r.t)} s` }[r.end]}</span>`,
     },
     gas: {
       finding: "gas-oxygen", label: "Gas flames · CFI-G", cell: 38, target: 18,
@@ -111,7 +111,7 @@
     let panels = [], tmax = 1, speed = 1;
 
     el.innerHTML = `<div class="replay${o.compact ? " compact" : ""}">
-      ${o.compact ? "" : `<div class="rp-top">
+      ${o.compact || o.custom ? "" : `<div class="rp-top">
         <div class="pills rp-kind">${Object.entries(KINDS).map(([k, v]) => `<button class="pill" data-kind="${k}" aria-pressed="${k === kind}">${v.label}</button>`).join("")}</div>
         <div class="pills rp-gas"></div></div>`}
       <div class="rp-bar"><button class="btn primary small rp-play"></button><button class="btn small rp-restart">Restart</button>
@@ -121,6 +121,7 @@
     const $ = (s) => el.querySelector(s), canv = [...el.querySelectorAll("canvas")];
 
     function filtered(i) {
+      if (o.custom) return o.custom[i].rows;
       const b = bands[sel[i]], all = K.rows(FF);
       return all.filter((r) => r.o2 >= b.lo - 0.05 && r.o2 <= b.hi + 0.05 && (kind !== "droplets" || !o.gas || r.gas === o.gas));
     }
@@ -131,6 +132,7 @@
       speed = Math.max(1, tmax / K.target);
       el.querySelectorAll(".rp-head").forEach((h, i) => {
         const p = panels[i], total = FF.findings.find((f) => f.id === K.finding).bands[sel[i]].n;
+        if (o.custom) { h.innerHTML = `<b>${esc(o.custom[i].label)}</b><span>${esc(o.custom[i].note)}</span>`; return; }
         h.innerHTML = o.compact ? `<b>${esc(bands[sel[i]].label)}</b><span>${p.rows.length} NASA tests</span>`
           : `<div class="pills">${bands.map((b, j) => `<button class="pill" data-side="${i}" data-band="${j}" aria-pressed="${j === sel[i]}">${esc(b.label.replace(" oxygen", ""))}</button>`).join("")}</div>
             <span>${p.rows.length} tests replayed${!o.gas && p.rows.length < total ? ` of ${total}; ${total - p.rows.length} ${total - p.rows.length === 1 ? "lacks" : "lack"} a start size or burn time` : ""}</span>`;

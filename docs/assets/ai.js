@@ -117,7 +117,8 @@ SENTENCES:
   const RULES = `Rules:
 - Use only CONTEXT. Bring in no outside facts: no other experiments, standards, missions or numbers.
 - If CONTEXT does not answer the question, say so plainly and name the gap from CONTEXT.gaps that applies.
-- After each claim, cite the finding it comes from in square brackets, like [F2].
+- End each sentence with the sources it used, once, in square brackets, like [F2] or [F2, model].
+  Never put a citation inside a sentence.
 - Write every number exactly as it appears in CONTEXT. Do not work out new numbers, percentages or ratios.
 - The tests change several things at once: describe what was seen together, never cause and effect.
 - Say "suggests" or "may", never "proves". Do not call anything safe or unsafe, and give no instructions.
@@ -126,7 +127,8 @@ SENTENCES:
   const ASK = `You answer questions on a fire-safety dashboard for crewed spacecraft, Moon bases and Mars
 habitats. Code computed CONTEXT from NASA microgravity combustion test tables: the user's habitat, the
 findings ranked for it (each with an id such as F1, its facts, the result nearest the habitat and its
-caveats), what the data cannot tell, and the materials the user picked.
+caveats), what the data cannot tell, the materials the user picked, and model_predictions from models
+fitted to the tests. When you use a model prediction, say once that it is a model prediction, and cite it as [model].
 
 Answer QUESTION in at most 110 words.
 
@@ -150,6 +152,27 @@ ${RULES}
 CONTEXT:
 %C%`;
 
+  /* What the fitted models (assets/models.js) predict for this habitat, as plain facts. */
+  function modelFacts(FF, st) {
+    const MD = root.FFModels;
+    if (!MD || !FF.models) return undefined;
+    const D = FF.models.droplets, G = FF.models.gas, pc = (v) => Math.round(v * 100);
+    const drop = (fuel) => {
+      const x = MD.dropletX(st.o2, "N2", st.pressure, 3, fuel), e = MD.classify(D.ending, x), ff = MD.fiftyFifty(D.ending, x, 0);
+      return { droplet: `3 mm ${fuel.toLowerCase()} droplet, nitrogen only`, chance_flame_goes_out_on_its_own_pct: pc(e.fit[0]),
+        range_90_pct: [pc(e.lo[0]), pc(e.hi[0])], chance_burns_until_used_up_pct: pc(e.fit[1]), chance_droplet_disrupted_pct: pc(e.fit[2]),
+        oxygen_where_chance_of_going_out_is_50_pct: ff ? Math.round(ff.fit * 10) / 10 : "no crossing" };
+    };
+    const se = MD.classify(G.self_ext, MD.gasX(st.o2, st.pressure, 1, 1, "propane"));
+    return {
+      what_these_are: "predictions from models fitted to the FLEX and CFI-G test tables and checked on tests they never saw; they are model output, not test results",
+      habitat_inside_tested_oxygen_range: st.o2 >= D.range.o2[0] && st.o2 <= D.range.o2[1],
+      droplets: [drop("Methanol"), drop("Heptane")],
+      gas_flame: { flame: "propane, 1 mg/s, pure fuel", chance_lit_flame_goes_out_on_its_own_pct: pc(se.fit[0]), range_90_pct: [pc(se.lo[0]), pc(se.hi[0])] },
+      model_quality: { droplet_auc: D.ending.score.auc_goes_out, gas_auc: G.self_ext.score.auc, gas_lighting: "could not be predicted better than guessing" },
+    };
+  }
+
   /* The facts sent to the model: everything the page shows for this habitat, and nothing else. */
   function context(FF, L, st) {
     const ranked = L.rankFindings(FF, st.o2, st.pressure);
@@ -170,6 +193,7 @@ CONTEXT:
         };
       }),
       gaps: L.gaps(FF, st.o2, st.pressure),
+      model_predictions: modelFacts(FF, st),
       materials_on_board: st.materials.map((m) => {
         const ev = L.materialEvidence(FF, m, st.o2);
         return { material: m, flame_tests_in_microgravity: ev.flame_tests, oxygen_tested_pct: ev.oxygen_tested_pct || "not listed",
