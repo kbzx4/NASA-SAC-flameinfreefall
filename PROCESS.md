@@ -100,6 +100,8 @@ Changes made:
 - It is the landing page's lead figure and a tool tab, where clicking a pin or a point sets the habitat. Live SI receives the coverage numbers and cites them as [map]; asked about a spacesuit, it answered that no test came near, from the 40% and 7.4 psi limits.
 - Crew atmospheres come from NASA history (the Apollo 1 cabin was pure oxygen at about 16.7 psi) and the Exploration Atmospheres Working Group (34%, 8.2 psi). They are context, not data, and are not used in any score.
 
+- The Spacesuit briefing was regenerated. On the first try the second pass removed its gap sentence, judging "no test ran below 7.35 psi" unsupported when the facts state exactly that; without it the briefing described 33 to 40% oxygen tests with no warning that a suit runs at 100%, so it was discarded. The second try kept all four sentences, and every number was checked by hand against the facts.
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.
