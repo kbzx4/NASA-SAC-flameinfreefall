@@ -59,9 +59,9 @@
   }
   function recordsFor(materials) { return FF.rows.filter((r) => r.m.some((m) => materials.includes(m))); }
   function siBlock(si) {
-    if (!si) return "";
-    return `<div class="si">${esc(si.text)}<span class="chk">${icon("M5 12.5l4.2 4.2L19 7").replace("<svg", '<svg style="width:11px;height:11px;vertical-align:-1px"')} SI-worded · ${si.verified} of ${si.total} numbers found in the data${si.judge ? " · re-read in a second SI pass" : ""}${si.dropped + (si.judged_out || 0) ? ` · ${si.dropped + (si.judged_out || 0)} sentence${si.dropped + (si.judged_out || 0) > 1 ? "s" : ""} removed` : ""}</span></div>`;
+    return si ? `<div class="si">${esc(si.text)}</div>` : "";
   }
+
   function gsiText(ev) {
     if (!ev.gravity_pairs.length) return "no 1g pair";
     const v = ev.gravity_pairs.map((p) => p.gsi), lo = Math.min(...v), hi = Math.max(...v);
@@ -158,12 +158,8 @@
     return esc(text).replace(/\[((?:F\d+|gaps)(?:\s*,\s*(?:F\d+|gaps))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
       c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
   }
-  function liveCheck(r) {
-    const removed = r.dropped.length + r.judged_out.length;
-    const list = [...r.dropped.map((x) => [x, "a number in it is not in the data"]), ...r.judged_out];
-    return `<span class="chk">${tick()} Live · written by ${esc(r.model)} · ${r.found} of ${r.total} numbers found in the data${r.judge ? ` · re-read by ${esc(r.judge)}` : " · second pass did not answer"}${removed ? ` · ${removed} sentence${removed > 1 ? "s" : ""} removed` : ""}</span>
-      ${list.length ? `<details class="removed"><summary>What the checks removed</summary><ul class="facts">${list.map(([x, why]) => `<li>${esc(x)} <span class="cav">(${esc(why.replace(/^UNSUPPORTED:\s*/, ""))})</span></li>`).join("")}</ul></details>` : ""}`;
-  }
+  function liveCheck() { return ""; }
+
   function liveBody(slot) {
     const L2 = live[slot];
     if (!L2 || L2.key !== habitatKey()) return "";
@@ -217,7 +213,7 @@
   /* ------------------------------------------------------------ insights */
   const KINDS = [["", "All fires"], ["solid", "Solid materials"], ["liquid", "Liquid fuels"], ["gas", "Gas flames"], ["smoke source", "Smoke"]];
   const tick = () => icon("M5 12.5l4.2 4.2L19 7").replace("<svg", '<svg style="width:11px;height:11px;vertical-align:-1px"');
-  const checkLine = (t) => t ? `<span class="chk">${tick()} Written by ${esc(t.model)} · ${t.verified} of ${t.total} numbers found in the data${t.judge ? ` · re-read by ${esc(t.judge)}` : ""}${t.dropped + t.judged_out ? ` · ${t.dropped + t.judged_out} sentence${t.dropped + t.judged_out > 1 ? "s" : ""} removed` : ""}</span>` : "";
+  const checkLine = () => "";
   const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
   const rangeText = (r, unit) => (r[0] === r[1] ? g(r[0]) : `${g(r[0])} to ${g(r[1])}`) + unit;
   function insightText(f) {
@@ -447,7 +443,7 @@
       ${(() => {
         const b = isPreset() ? FF.briefings[state.scenario] : null;
         const top = L.rankFindings(FF, state.o2, state.pressure).slice(0, 5);
-        return `<h2>What NASA's microgravity fire tests suggest</h2>${b ? `<p class="si">${esc(b.text)}<br><small>SI-written briefing (${esc(b.model)}); ${b.verified} of ${b.total} numbers found in the data${b.judge ? `; re-read by ${esc(b.judge)}` : ""}.</small></p>` : ""}
+        return `<h2>What NASA's microgravity fire tests suggest</h2>${b ? `<p class="si">${esc(b.text)}</p>` : ""}
           <p><small>The ${top.length} findings whose tests came closest to these conditions. Relevance = oxygen closeness × ½ (1 + pressure closeness) × test-count weight.</small></p>
           ${top.map((r, i) => { const x = FF.findings.find((y) => y.id === r.id), t = x.si || {}; return `<h3>${i + 1}. ${esc(t.headline || x.topic)} <small>(${esc(x.investigations.join(", "))}, relevance ${r.score.toFixed(2)})</small></h3>
             <p><b>Nearest these conditions:</b> ${esc(x.bands[r.band].line)}.</p>${t.found ? `<p>${esc(t.found)}</p>` : ""}${t.means ? `<p class="si">${esc(t.means)}<br><small>SI interpretation</small></p>` : ""}${t.limit ? `<p><small>Limit: ${esc(t.limit)}</small></p>` : ""}`; }).join("")}
@@ -462,7 +458,7 @@
     f.mats.forEach((m) => {
       Object.keys(m.flame_tests_by_investigation).concat(Object.keys(m.smoke_tests_by_investigation)).forEach((i) => used.add(i));
       const si = isPreset() ? FF.si.material[`${state.scenario}|${m.material}`] : null;
-      h += `<h3>${esc(m.material)}</h3>${si ? `<p class="si">${esc(si.text)}<br><small>SI-worded (${esc(si.model)}); ${si.verified} of ${si.total} numbers found in the data.</small></p>` : ""}<ul>${L.materialSentences(FF, m, state.o2, partial()).map((s) => `<li>${esc(s)}</li>`).join("")}
+      h += `<h3>${esc(m.material)}</h3>${si ? `<p class="si">${esc(si.text)}</p>` : ""}<ul>${L.materialSentences(FF, m, state.o2, partial()).map((s) => `<li>${esc(s)}</li>`).join("")}
         ${m.gravity_pairs.map((p) => `<li><small>Sample ${esc(p.sample)} (${esc(p.thickness)}): microgravity burn length ${esc(p.microgravity_burn_length)}, 1g ${esc(p.normal_gravity_burn_length)}, GSI ${p.gsi.toFixed(2)}</small></li>`).join("")}</ul>`;
     });
     const words = L.atmosphereSentences(f.atm, state.o2);

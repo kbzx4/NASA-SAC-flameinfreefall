@@ -12,6 +12,6 @@ window.FF_LINKS = {
      key:   a Gemini API key. Anyone can read a key placed here and use its quota.
    With both empty, visitors can paste their own key, which stays in their browser. */
 window.FF_AI = {
-  proxy: "",
+  proxy: "https://script.google.com/macros/s/AKfycbx5BTA-i6M0SzTLDrynFsU8H5DvmYfRm-Jieud9DC8TGwQZdRkE-x57Ah1eHdVniHSB/exec",
   key: "",
 };
