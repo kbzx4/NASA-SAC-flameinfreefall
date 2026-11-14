@@ -1,0 +1,322 @@
+{
+ "376b443fed3b8de28ecd": {
+  "kind": "finding",
+  "id": "droplet-low-oxygen",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Droplet flames burned at 12% oxygen and lasted longer at higher oxygen.\nFOUND: In 48 microgravity tests at 12 to 15% oxygen, every droplet flame burned for some time, down to 12% oxygen: methanol burned for 0.3 to 26 s (median 8.5 s in 37 tests) and heptane for 1 to 3.8 s (median 1.6 s in 11 tests). At 30 to 34% oxygen, median burn times were 15.6 s for methanol and 13.6 s for heptane.\nMEANS: The results suggest that a fuel droplet fire in a closed cabin may still burn for some time at 12% oxygen, and may burn longer in a cabin running at 30% oxygen or more. This bears on what oxygen level to run the cabin at, because higher oxygen was seen with longer-lasting droplet fires, while even 12% oxygen still saw droplets burn for some time.\nLIMIT: Burn time depends on droplet size, which varied between tests.",
+  "total": 20,
+  "verified": 20,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Droplet flames burned at 12% oxygen and lasted longer at higher oxygen.",
+  "found": "In 48 microgravity tests at 12 to 15% oxygen, every droplet flame burned for some time, down to 12% oxygen: methanol burned for 0.3 to 26 s (median 8.5 s in 37 tests) and heptane for 1 to 3.8 s (median 1.6 s in 11 tests). At 30 to 34% oxygen, median burn times were 15.6 s for methanol and 13.6 s for heptane.",
+  "means": "The results suggest that a fuel droplet fire in a closed cabin may still burn for some time at 12% oxygen, and may burn longer in a cabin running at 30% oxygen or more. This bears on what oxygen level to run the cabin at, because higher oxygen was seen with longer-lasting droplet fires, while even 12% oxygen still saw droplets burn for some time.",
+  "limit": "Burn time depends on droplet size, which varied between tests."
+ },
+ "d1e880ced7fe918c6418": {
+  "kind": "finding",
+  "id": "droplet-oxygen",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Fewer droplet flames went out on their own at higher oxygen.\nFOUND: In microgravity tests of 274 burning methanol and heptane droplets from 12% to 34% oxygen, 45 of 48 droplet flames went out on their own before the fuel was used up at 12 to 15% oxygen, and 58 of 84 did so at 20 to 21% oxygen. At 30 to 34% oxygen, 2 of 24 droplet flames went out on their own, while 4 burned until the fuel was used up and 18 ended with the droplet disrupted.\nMEANS: The results suggest that a small fuel droplet fire in a cabin kept at 30% oxygen or more may rarely stop on its own, while at 20 to 21% or 12 to 15% oxygen it may go out before the fuel is used up. That makes the choice of what oxygen level and pressure to run the cabin at a choice about how often small droplet fires stop by themselves.\nLIMIT: At 30 to 34% oxygen, 18 of 24 tests ended with the droplet disrupted and only 4 burned until the fuel was used up, and the table does not say what happened to the droplet or whether its flame was still burning.",
+  "total": 27,
+  "verified": 27,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Fewer droplet flames went out on their own at higher oxygen.",
+  "found": "In microgravity tests of 274 burning methanol and heptane droplets from 12% to 34% oxygen, 45 of 48 droplet flames went out on their own before the fuel was used up at 12 to 15% oxygen, and 58 of 84 did so at 20 to 21% oxygen. At 30 to 34% oxygen, 2 of 24 droplet flames went out on their own, while 4 burned until the fuel was used up and 18 ended with the droplet disrupted.",
+  "means": "The results suggest that a small fuel droplet fire in a cabin kept at 30% oxygen or more may rarely stop on its own, while at 20 to 21% or 12 to 15% oxygen it may go out before the fuel is used up. That makes the choice of what oxygen level and pressure to run the cabin at a choice about how often small droplet fires stop by themselves.",
+  "limit": "At 30 to 34% oxygen, 18 of 24 tests ended with the droplet disrupted and only 4 burned until the fuel was used up, and the table does not say what happened to the droplet or whether its flame was still burning."
+ },
+ "0a25f657f2973fa757d3": {
+  "kind": "finding",
+  "id": "droplet-diluent",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Microgravity fuel droplets went out more often with added CO2 or helium.\nFOUND: In FLEX tests of 84 burning fuel droplets in microgravity at 20 to 21% oxygen, 17 of 34 went out on their own with nitrogen only. With CO2 added, 28 of 36 went out on their own, and with helium added, 13 of 14 went out on their own.\nMEANS: The results suggest that a burning fuel droplet fire in a closed cabin at 20 to 21% oxygen may go out on its own more often with CO2 or helium in the air than with nitrogen only. That bears on which gases to use to put a fire out, because different gas mixes in the air went along with different numbers of fuel fires stopping by themselves.\nLIMIT: The test groups also differed in fuel (methanol or heptane) and pressure, with the CO2 tests spanning 10.26 to 44.86 psi while the other tests stayed below 15 psi.",
+  "total": 14,
+  "verified": 14,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Microgravity fuel droplets went out more often with added CO2 or helium.",
+  "found": "In FLEX tests of 84 burning fuel droplets in microgravity at 20 to 21% oxygen, 17 of 34 went out on their own with nitrogen only. With CO2 added, 28 of 36 went out on their own, and with helium added, 13 of 14 went out on their own.",
+  "means": "The results suggest that a burning fuel droplet fire in a closed cabin at 20 to 21% oxygen may go out on its own more often with CO2 or helium in the air than with nitrogen only. That bears on which gases to use to put a fire out, because different gas mixes in the air went along with different numbers of fuel fires stopping by themselves.",
+  "limit": "The test groups also differed in fuel (methanol or heptane) and pressure, with the CO2 tests spanning 10.26 to 44.86 psi while the other tests stayed below 15 psi."
+ },
+ "023323024010234e75bb": {
+  "kind": "finding",
+  "id": "cool-flames",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: 7 of 179 gas-flame tests recorded faint, low-temperature cool flames\nFOUND: At 38.9 to 39.9% oxygen with 30% butane at about 29.39 psi, 7 of the 179 gas-flame tests recorded a faint, low-temperature cool flame, with burn times of 35 to 251 s. One test (21291 C1) was noted as having 5 transitions from hot to cool, 6 hot and 5 cool flames.\nMEANS: The results suggest that a gas fire in a spacecraft or habitat cabin may burn as a faint, low-temperature cool flame that is much harder to see than a normal hot flame, or switch between hot and cool flames. That bears on how to detect a fire and the gases it gives off, because a fire with a faint, low-temperature cool flame or shifts from hot to cool may be much harder to see than a normal hot flame.\nLIMIT: All of these tests used one fuel mix at one pressure and 38.9 to 39.9% oxygen, so the table cannot show where else cool flames occur.",
+  "total": 16,
+  "verified": 16,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "7 of 179 gas-flame tests recorded faint, low-temperature cool flames",
+  "found": "At 38.9 to 39.9% oxygen with 30% butane at about 29.39 psi, 7 of the 179 gas-flame tests recorded a faint, low-temperature cool flame, with burn times of 35 to 251 s. One test (21291 C1) was noted as having 5 transitions from hot to cool, 6 hot and 5 cool flames.",
+  "means": "The results suggest that a gas fire in a spacecraft or habitat cabin may burn as a faint, low-temperature cool flame that is much harder to see than a normal hot flame, or switch between hot and cool flames. That bears on how to detect a fire and the gases it gives off, because a fire with a faint, low-temperature cool flame or shifts from hot to cool may be much harder to see than a normal hot flame.",
+  "limit": "All of these tests used one fuel mix at one pressure and 38.9 to 39.9% oxygen, so the table cannot show where else cool flames occur."
+ },
+ "fdd2b11828712b8be539": {
+  "kind": "finding",
+  "id": "gas-oxygen",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Gas flames burned longer with hotter burner hardware at higher oxygen\nFOUND: In microgravity tests of 179 gas flames (ethane, propane and butane) on a spherical burner, 41 of 64 lit at 18 to 23.4% oxygen and all 41 went out on their own, with a median burn of 8 s and a median peak burner hardware temperature of 74 °C. At 33.2 to 40% oxygen, 91 of 115 flames lit, 61 went out on their own while 30 burned until the fuel was cut off, with a median burn of 50 s and a median peak burner hardware temperature of 298 °C.\nMEANS: The results suggest that a gas fire in a cabin kept at 30% oxygen or more may burn longer, keep going rather than dying out on its own, and leave hotter hardware than at 18 to 23.4% oxygen. That makes the choice of cabin oxygen level and pressure a choice about whether gas fires die out on their own or keep burning longer with hotter hardware.\nLIMIT: Fuel, fuel flow and pressure also varied between tests, so oxygen level was not the only thing changing.",
+  "total": 19,
+  "verified": 19,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Gas flames burned longer with hotter burner hardware at higher oxygen",
+  "found": "In microgravity tests of 179 gas flames (ethane, propane and butane) on a spherical burner, 41 of 64 lit at 18 to 23.4% oxygen and all 41 went out on their own, with a median burn of 8 s and a median peak burner hardware temperature of 74 °C. At 33.2 to 40% oxygen, 91 of 115 flames lit, 61 went out on their own while 30 burned until the fuel was cut off, with a median burn of 50 s and a median peak burner hardware temperature of 298 °C.",
+  "means": "The results suggest that a gas fire in a cabin kept at 30% oxygen or more may burn longer, keep going rather than dying out on its own, and leave hotter hardware than at 18 to 23.4% oxygen. That makes the choice of cabin oxygen level and pressure a choice about whether gas fires die out on their own or keep burning longer with hotter hardware.",
+  "limit": "Fuel, fuel flow and pressure also varied between tests, so oxygen level was not the only thing changing."
+ },
+ "57f6bd729542fbfcbbe9": {
+  "kind": "finding",
+  "id": "flow-direction",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Fabric sheet burned 6 times longer with airflow than against it.\nFOUND: In SAFFIRE-1 microgravity tests at 21.5 to 21.7% oxygen and 20 cm/s airflow, a 40.6 by 94 cm cotton-fiberglass fabric sheet burned for 420 s when the flame spread with the airflow and 70 s when it spread against it. The burn with the airflow lasted 6 times as long.\nMEANS: This suggests that a large fabric fire in a cabin with moving air may burn much longer when the flame spreads with the airflow than against it. That makes the question of how to move the air a choice about how long a fabric fire may burn depending on whether it spreads with or against the airflow.\nLIMIT: Each direction was tested only once, and the Saffire-III test of these sheets at 30 cm/s lists no result.",
+  "total": 11,
+  "verified": 11,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Fabric sheet burned 6 times longer with airflow than against it.",
+  "found": "In SAFFIRE-1 microgravity tests at 21.5 to 21.7% oxygen and 20 cm/s airflow, a 40.6 by 94 cm cotton-fiberglass fabric sheet burned for 420 s when the flame spread with the airflow and 70 s when it spread against it. The burn with the airflow lasted 6 times as long.",
+  "means": "This suggests that a large fabric fire in a cabin with moving air may burn much longer when the flame spreads with the airflow than against it. That makes the question of how to move the air a choice about how long a fabric fire may burn depending on whether it spreads with or against the airflow.",
+  "limit": "Each direction was tested only once, and the Saffire-III test of these sheets at 30 cm/s lists no result."
+ },
+ "7915e175947073f1bff5": {
+  "kind": "finding",
+  "id": "gravity",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Silicone and PMMA burned less in microgravity than in normal gravity\nFOUND: In tests of 9 spacecraft material samples at 21.5% to 22.1% oxygen with 20 cm/s airflow in microgravity alongside normal-gravity tests, 4 of 9 differed in burn length by half the sample length or more. None of the 4 silicone samples burned in microgravity (versus 2 burning completely, 1 burning 7.6 cm, and 1 not burning in normal gravity) and both PMMA samples burned about 10 cm while still alight after 600 to 900 s instead of completely, whereas both cotton-fiberglass fabric samples burned their whole 29 cm length in both (at 2.1 and 2.6 mm/s in microgravity) and Nomex did not burn in either.\nMEANS: The results suggest that in a closed cabin with moving air, materials like silicone may not burn and PMMA may stay alight while burning less than in normal gravity, while cotton-fiberglass fabric may still burn completely. This points to the choice of which materials to allow on board, because materials that burned completely in normal gravity burned less or did not burn in microgravity, while fabric burned its whole length in both.\nLIMIT: The table does not list the oxygen, pressure or airflow of the normal-gravity tests.",
+  "total": 17,
+  "verified": 17,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Silicone and PMMA burned less in microgravity than in normal gravity",
+  "found": "In tests of 9 spacecraft material samples at 21.5% to 22.1% oxygen with 20 cm/s airflow in microgravity alongside normal-gravity tests, 4 of 9 differed in burn length by half the sample length or more. None of the 4 silicone samples burned in microgravity (versus 2 burning completely, 1 burning 7.6 cm, and 1 not burning in normal gravity) and both PMMA samples burned about 10 cm while still alight after 600 to 900 s instead of completely, whereas both cotton-fiberglass fabric samples burned their whole 29 cm length in both (at 2.1 and 2.6 mm/s in microgravity) and Nomex did not burn in either.",
+  "means": "The results suggest that in a closed cabin with moving air, materials like silicone may not burn and PMMA may stay alight while burning less than in normal gravity, while cotton-fiberglass fabric may still burn completely. This points to the choice of which materials to allow on board, because materials that burned completely in normal gravity burned less or did not burn in microgravity, while fabric burned its whole length in both.",
+  "limit": "The table does not list the oxygen, pressure or airflow of the normal-gravity tests."
+ },
+ "3a6f52b00102683bc5b9": {
+  "kind": "finding",
+  "id": "carbon-monoxide",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: Carbon monoxide rose in 117 of 118 microgravity tests.\nFOUND: In 118 microgravity tests where small plastic films, slabs, rods, and cotton-fiberglass fabric burned, carbon monoxide rose in 117 tests by a median of 45 ppm, rose by 100 ppm or more in 41 tests, and had a largest rise of 575 ppm from a 3/8\" clear rod sample at 16.7% oxygen. Across oxygen levels, 21 tests started at 14.2 to 16.5% oxygen saw a median rise of 134 ppm, 59 tests at 16.7 to 19.3% oxygen saw a median of 40 ppm, and 38 tests at 20 to 22.2% oxygen saw a median of 25 ppm.\nMEANS: The results suggest that if small plastic or fabric items burn in a cabin, carbon monoxide in the air may rise, including large rises at lower oxygen levels. That bears on how to detect a fire and the gases it gives off, because burning these solid materials nearly always happened alongside rising carbon monoxide, even in the lower-oxygen tests.\nLIMIT: These carbon monoxide readings do not scale directly to a cabin because the table does not give the chamber volume.",
+  "total": 23,
+  "verified": 23,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "Carbon monoxide rose in 117 of 118 microgravity tests.",
+  "found": "In 118 microgravity tests where small plastic films, slabs, rods, and cotton-fiberglass fabric burned, carbon monoxide rose in 117 tests by a median of 45 ppm, rose by 100 ppm or more in 41 tests, and had a largest rise of 575 ppm from a 3/8\" clear rod sample at 16.7% oxygen. Across oxygen levels, 21 tests started at 14.2 to 16.5% oxygen saw a median rise of 134 ppm, 59 tests at 16.7 to 19.3% oxygen saw a median of 40 ppm, and 38 tests at 20 to 22.2% oxygen saw a median of 25 ppm.",
+  "means": "The results suggest that if small plastic or fabric items burn in a cabin, carbon monoxide in the air may rise, including large rises at lower oxygen levels. That bears on how to detect a fire and the gases it gives off, because burning these solid materials nearly always happened alongside rising carbon monoxide, even in the lower-oxygen tests.",
+  "limit": "These carbon monoxide readings do not scale directly to a cabin because the table does not give the chamber volume."
+ },
+ "6f98eaae5b1f627d6039": {
+  "kind": "finding",
+  "id": "smoke",
+  "model": "gemini-4-hydrogen",
+  "raw": "HEADLINE: 109 microgravity runs measured smoke from 5 overheated spacecraft materials\nFOUND: In microgravity, 109 runs measured smoke from 5 spacecraft materials heated until they smoked without being set alight: Kapton (29), Silicone (22), Lampwick (20), Pyrell (20), and Teflon (18). Together in those runs, airflow into the smoke chamber was 0 to 8.1 cm/s, with 22 runs having no airflow, and the smoke was held for 21 to 1923 s before being measured.\nMEANS: These tests suggest that in a closed cabin with moving air, overheated materials may release smoke without open flames across conditions with or without airflow and over times from 21 to 1923 s. This bears on how to detect a fire and the gases it gives off, because early detection depends on sensing smoke from overheated materials before flames start even as airflow and how long the smoke has been in the air vary.\nLIMIT: The most important limit is that this table only lists how each run was set up and does not include the smoke particle sizes, which are in NASA data files not loaded here.",
+  "total": 16,
+  "verified": 16,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "headline": "109 microgravity runs measured smoke from 5 overheated spacecraft materials",
+  "found": "In microgravity, 109 runs measured smoke from 5 spacecraft materials heated until they smoked without being set alight: Kapton (29), Silicone (22), Lampwick (20), Pyrell (20), and Teflon (18). Together in those runs, airflow into the smoke chamber was 0 to 8.1 cm/s, with 22 runs having no airflow, and the smoke was held for 21 to 1923 s before being measured.",
+  "means": "These tests suggest that in a closed cabin with moving air, overheated materials may release smoke without open flames across conditions with or without airflow and over times from 21 to 1923 s. This bears on how to detect a fire and the gases it gives off, because early detection depends on sensing smoke from overheated materials before flames start even as airflow and how long the smoke has been in the air vary.",
+  "limit": "The most important limit is that this table only lists how each run was set up and does not include the smoke particle sizes, which are in NASA data files not loaded here."
+ },
+ "9bf42761e85b7d4cd87f": {
+  "kind": "briefing",
+  "id": "ISS cabin",
+  "model": "gemini-4-hydrogen",
+  "raw": "Microgravity tests found that fewer droplet flames went out on their own and droplet flames lasted longer at higher oxygen, with 58 of 84 droplet flames going out on their own before the fuel was used up, methanol burning for a median of 14 s, and heptane burning for a median of 8.7 s at 20 to 21% oxygen. Tests also saw fuel droplets go out more often with added CO2 or helium at 20 to 21% oxygen (17 of 34 went out on their own with nitrogen only, 28 of 36 with CO2 added, and 13 of 14 with helium added), and saw gas flames burn longer with hotter burner hardware at higher oxygen, with 41 of 64 lighting and all 41 going out on their own with a median burn of 8 s at 18 to 23.4% oxygen. Together, these results suggest that droplet and gas flames can still light and burn near this oxygen level while often going out on their own, raising design questions about oxygen level, detection, and extinguishing gases. The most important gap for this habitat is that no solid-material flame test in the data lists its pressure, which points to an open design question on choice of materials.",
+  "facts": {
+   "habitat": {
+    "name": "ISS cabin",
+    "oxygen_pct": 21.0,
+    "pressure_psi": 14.7
+   },
+   "closest_findings": [
+    {
+     "finding": "Fewer droplet flames went out on their own at higher oxygen.",
+     "result_nearest_this_habitat": "at 20 to 21% oxygen, 58 of 84 droplet flames went out on their own before the fuel was used up"
+    },
+    {
+     "finding": "Microgravity fuel droplets went out more often with added CO2 or helium.",
+     "result_nearest_this_habitat": "at 20 to 21% oxygen, with nitrogen only, 17 of 34 went out on their own, with CO2 added, 28 of 36 went out on their own and with helium added, 13 of 14 went out on their own"
+    },
+    {
+     "finding": "Droplet flames burned at 12% oxygen and lasted longer at higher oxygen.",
+     "result_nearest_this_habitat": "at 20 to 21% oxygen, methanol droplet flames burned for a median of 14 s and heptane for 8.7 s"
+    },
+    {
+     "finding": "Gas flames burned longer with hotter burner hardware at higher oxygen",
+     "result_nearest_this_habitat": "at 18 to 23.4% oxygen, 41 of 64 gas flames lit; all 41 went out on their own, with a median burn of 8 s"
+    }
+   ],
+   "gaps": [
+    "no solid-material flame test in the data lists its pressure",
+    "no test in the data ran in Moon or Mars gravity"
+   ],
+   "context": {
+    "where_this_applies": "crewed spacecraft, Moon bases and Mars habitats are closed cabins with fans moving the air; NASA's challenge statement says exploration habitats may run at 30% oxygen or more at 10.2 psi or less",
+    "design_questions": "what oxygen level and pressure to run the cabin at; how to move the air; how to detect a fire and the gases it gives off; which materials to allow on board; which gases to use to put a fire out"
+   }
+  },
+  "total": 20,
+  "verified": 20,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "text": "Microgravity tests found that fewer droplet flames went out on their own and droplet flames lasted longer at higher oxygen, with 58 of 84 droplet flames going out on their own before the fuel was used up, methanol burning for a median of 14 s, and heptane burning for a median of 8.7 s at 20 to 21% oxygen. Tests also saw fuel droplets go out more often with added CO2 or helium at 20 to 21% oxygen (17 of 34 went out on their own with nitrogen only, 28 of 36 with CO2 added, and 13 of 14 with helium added), and saw gas flames burn longer with hotter burner hardware at higher oxygen, with 41 of 64 lighting and all 41 going out on their own with a median burn of 8 s at 18 to 23.4% oxygen. Together, these results suggest that droplet and gas flames can still light and burn near this oxygen level while often going out on their own, raising design questions about oxygen level, detection, and extinguishing gases. The most important gap for this habitat is that no solid-material flame test in the data lists its pressure, which points to an open design question on choice of materials."
+ },
+ "d4290b1ab0d2f003fb8e": {
+  "kind": "briefing",
+  "id": "Moon base / pressurized rover",
+  "model": "gemini-4-hydrogen",
+  "raw": "At 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up, and methanol droplet flames burned for a median of 15.6 s and heptane for 13.6 s. At 33.2 to 40% oxygen, 91 of 115 gas flames lit, 61 went out on their own, and 30 burned until the fuel was cut off for a median burn of 50 s together with hotter burner hardware, while at 20 to 21% oxygen, microgravity fuel droplets went out on their own more often with CO2 added (28 of 36) or helium added (13 of 14) than with nitrogen only (17 of 34). Together, these findings suggest that droplet and gas fires in this habitat may burn longer and go out on their own less often, pointing to design questions about oxygen level, detection, and extinguishing gases. The most important gap for this habitat is that no solid material like fabric or plastic was flame-tested above 22.2% oxygen, and the data also list no pressure for solid-material flame tests and include no tests in Moon or Mars gravity, raising a design question about choice of materials.",
+  "facts": {
+   "habitat": {
+    "name": "Moon base / pressurized rover",
+    "oxygen_pct": 30.0,
+    "pressure_psi": 10.2
+   },
+   "closest_findings": [
+    {
+     "finding": "Fewer droplet flames went out on their own at higher oxygen.",
+     "result_nearest_this_habitat": "at 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up"
+    },
+    {
+     "finding": "Droplet flames burned at 12% oxygen and lasted longer at higher oxygen.",
+     "result_nearest_this_habitat": "at 30 to 34% oxygen, methanol droplet flames burned for a median of 15.6 s and heptane for 13.6 s"
+    },
+    {
+     "finding": "Gas flames burned longer with hotter burner hardware at higher oxygen",
+     "result_nearest_this_habitat": "at 33.2 to 40% oxygen, 91 of 115 gas flames lit; 61 went out on their own and 30 burned until the fuel was cut off, with a median burn of 50 s"
+    },
+    {
+     "finding": "Microgravity fuel droplets went out more often with added CO2 or helium.",
+     "result_nearest_this_habitat": "at 20 to 21% oxygen, with nitrogen only, 17 of 34 went out on their own, with CO2 added, 28 of 36 went out on their own and with helium added, 13 of 14 went out on their own"
+    }
+   ],
+   "gaps": [
+    "no solid material (fabric, plastic) was flame-tested above 22.2% oxygen",
+    "no solid-material flame test in the data lists its pressure",
+    "no test in the data ran in Moon or Mars gravity"
+   ],
+   "context": {
+    "where_this_applies": "crewed spacecraft, Moon bases and Mars habitats are closed cabins with fans moving the air; NASA's challenge statement says exploration habitats may run at 30% oxygen or more at 10.2 psi or less",
+    "design_questions": "what oxygen level and pressure to run the cabin at; how to move the air; how to detect a fire and the gases it gives off; which materials to allow on board; which gases to use to put a fire out"
+   }
+  },
+  "total": 22,
+  "verified": 22,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "text": "At 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up, and methanol droplet flames burned for a median of 15.6 s and heptane for 13.6 s. At 33.2 to 40% oxygen, 91 of 115 gas flames lit, 61 went out on their own, and 30 burned until the fuel was cut off for a median burn of 50 s together with hotter burner hardware, while at 20 to 21% oxygen, microgravity fuel droplets went out on their own more often with CO2 added (28 of 36) or helium added (13 of 14) than with nitrogen only (17 of 34). Together, these findings suggest that droplet and gas fires in this habitat may burn longer and go out on their own less often, pointing to design questions about oxygen level, detection, and extinguishing gases. The most important gap for this habitat is that no solid material like fabric or plastic was flame-tested above 22.2% oxygen, and the data also list no pressure for solid-material flame tests and include no tests in Moon or Mars gravity, raising a design question about choice of materials."
+ },
+ "16e955a3c8b10cc10741": {
+  "kind": "briefing",
+  "id": "Exploration atmosphere",
+  "model": "gemini-4-hydrogen",
+  "raw": "In microgravity tests at 33.2 to 40% oxygen, 91 of 115 gas flames lit, with 61 going out on their own and 30 burning until the fuel was cut off, seen together with a median burn of 50 s and hotter burner hardware. At 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up, while methanol droplet flames burned for a median of 15.6 s and heptane burned for 13.6 s. Together with tests at 20 to 21% oxygen where droplet flames went out on their own in 28 of 36 tests with added CO2 and 13 of 14 with added helium compared with 17 of 34 with nitrogen only, these findings suggest that flames in this habitat may last longer and go out on their own less often, raising design questions about oxygen level, ventilation, detection, and extinguishing gases. The most important gap for this habitat is that no solid material such as fabric or plastic was flame-tested above 22.2% oxygen, while no solid-material flame test lists its pressure and no test ran in Moon or Mars gravity, leaving open the choice of materials to allow on board.",
+  "facts": {
+   "habitat": {
+    "name": "Exploration atmosphere",
+    "oxygen_pct": 34.0,
+    "pressure_psi": 8.2
+   },
+   "closest_findings": [
+    {
+     "finding": "Gas flames burned longer with hotter burner hardware at higher oxygen",
+     "result_nearest_this_habitat": "at 33.2 to 40% oxygen, 91 of 115 gas flames lit; 61 went out on their own and 30 burned until the fuel was cut off, with a median burn of 50 s"
+    },
+    {
+     "finding": "Fewer droplet flames went out on their own at higher oxygen.",
+     "result_nearest_this_habitat": "at 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up"
+    },
+    {
+     "finding": "Droplet flames burned at 12% oxygen and lasted longer at higher oxygen.",
+     "result_nearest_this_habitat": "at 30 to 34% oxygen, methanol droplet flames burned for a median of 15.6 s and heptane for 13.6 s"
+    },
+    {
+     "finding": "Microgravity fuel droplets went out more often with added CO2 or helium.",
+     "result_nearest_this_habitat": "at 20 to 21% oxygen, with nitrogen only, 17 of 34 went out on their own, with CO2 added, 28 of 36 went out on their own and with helium added, 13 of 14 went out on their own"
+    }
+   ],
+   "gaps": [
+    "no solid material (fabric, plastic) was flame-tested above 22.2% oxygen",
+    "no solid-material flame test in the data lists its pressure",
+    "no test in the data ran in Moon or Mars gravity"
+   ],
+   "context": {
+    "where_this_applies": "crewed spacecraft, Moon bases and Mars habitats are closed cabins with fans moving the air; NASA's challenge statement says exploration habitats may run at 30% oxygen or more at 10.2 psi or less",
+    "design_questions": "what oxygen level and pressure to run the cabin at; how to move the air; how to detect a fire and the gases it gives off; which materials to allow on board; which gases to use to put a fire out"
+   }
+  },
+  "total": 22,
+  "verified": 22,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "text": "In microgravity tests at 33.2 to 40% oxygen, 91 of 115 gas flames lit, with 61 going out on their own and 30 burning until the fuel was cut off, seen together with a median burn of 50 s and hotter burner hardware. At 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up, while methanol droplet flames burned for a median of 15.6 s and heptane burned for 13.6 s. Together with tests at 20 to 21% oxygen where droplet flames went out on their own in 28 of 36 tests with added CO2 and 13 of 14 with added helium compared with 17 of 34 with nitrogen only, these findings suggest that flames in this habitat may last longer and go out on their own less often, raising design questions about oxygen level, ventilation, detection, and extinguishing gases. The most important gap for this habitat is that no solid material such as fabric or plastic was flame-tested above 22.2% oxygen, while no solid-material flame test lists its pressure and no test ran in Moon or Mars gravity, leaving open the choice of materials to allow on board."
+ },
+ "5446bcaeaebe67de44bd": {
+  "kind": "briefing",
+  "id": "Spacesuit",
+  "model": "gemini-4-hydrogen",
+  "raw": "The closest microgravity tests saw gas flames burn longer alongside hotter burner hardware at higher oxygen, with 41 of 64 gas flames lighting at 18 to 23.4% oxygen and all 41 going out on their own after a median burn of 8 s. In droplet tests, flames burned at 12% oxygen and lasted longer while fewer went out on their own at higher oxygen: at 16 to 19% oxygen, 63 of 74 went out on their own before the fuel was used up, methanol burned for a median of 11.7 s and heptane for 3.5 s, and at 20 to 21% oxygen, 28 of 36 went out on their own with CO2 added and 13 of 14 with helium added compared to 17 of 34 with nitrogen only. Together, these results suggest that a fire at 100% oxygen could burn longer and go out on its own less often, pointing to design questions about oxygen level, choice of materials, and extinguishing gases. The most important gap is that no flame test in the data ran above 40% oxygen and no test ran below 7.35 psi, whereas this habitat is at 100% oxygen and 4.3 psi, and no solid material like fabric or plastic was flame-tested above 22.2% oxygen.",
+  "facts": {
+   "habitat": {
+    "name": "Spacesuit",
+    "oxygen_pct": 100.0,
+    "pressure_psi": 4.3
+   },
+   "closest_findings": [
+    {
+     "finding": "Gas flames burned longer with hotter burner hardware at higher oxygen",
+     "result_nearest_this_habitat": "at 18 to 23.4% oxygen, 41 of 64 gas flames lit; all 41 went out on their own, with a median burn of 8 s"
+    },
+    {
+     "finding": "Microgravity fuel droplets went out more often with added CO2 or helium.",
+     "result_nearest_this_habitat": "at 20 to 21% oxygen, with nitrogen only, 17 of 34 went out on their own, with CO2 added, 28 of 36 went out on their own and with helium added, 13 of 14 went out on their own"
+    },
+    {
+     "finding": "Fewer droplet flames went out on their own at higher oxygen.",
+     "result_nearest_this_habitat": "at 16 to 19% oxygen, 63 of 74 droplet flames went out on their own before the fuel was used up"
+    },
+    {
+     "finding": "Droplet flames burned at 12% oxygen and lasted longer at higher oxygen.",
+     "result_nearest_this_habitat": "at 16 to 19% oxygen, methanol droplet flames burned for a median of 11.7 s and heptane for 3.5 s"
+    }
+   ],
+   "gaps": [
+    "no flame test in the data ran above 40% oxygen, and this habitat is at 100%",
+    "no solid material (fabric, plastic) was flame-tested above 22.2% oxygen",
+    "no test in the data ran below 7.35 psi, and this habitat is at 4.3 psi",
+    "no solid-material flame test in the data lists its pressure",
+    "no test in the data ran in Moon or Mars gravity"
+   ],
+   "context": {
+    "where_this_applies": "crewed spacecraft, Moon bases and Mars habitats are closed cabins with fans moving the air; NASA's challenge statement says exploration habitats may run at 30% oxygen or more at 10.2 psi or less",
+    "design_questions": "what oxygen level and pressure to run the cabin at; how to move the air; how to detect a fire and the gases it gives off; which materials to allow on board; which gases to use to put a fire out"
+   }
+  },
+  "total": 27,
+  "verified": 27,
+  "dropped": [],
+  "judged_out": [],
+  "judge": "gemini-3.5-flash-lite",
+  "text": "The closest microgravity tests saw gas flames burn longer alongside hotter burner hardware at higher oxygen, with 41 of 64 gas flames lighting at 18 to 23.4% oxygen and all 41 going out on their own after a median burn of 8 s. In droplet tests, flames burned at 12% oxygen and lasted longer while fewer went out on their own at higher oxygen: at 16 to 19% oxygen, 63 of 74 went out on their own before the fuel was used up, methanol burned for a median of 11.7 s and heptane for 3.5 s, and at 20 to 21% oxygen, 28 of 36 went out on their own with CO2 added and 13 of 14 with helium added compared to 17 of 34 with nitrogen only. Together, these results suggest that a fire at 100% oxygen could burn longer and go out on its own less often, pointing to design questions about oxygen level, choice of materials, and extinguishing gases. The most important gap is that no flame test in the data ran above 40% oxygen and no test ran below 7.35 psi, whereas this habitat is at 100% oxygen and 4.3 psi, and no solid material like fabric or plastic was flame-tested above 22.2% oxygen."
+ }
+}

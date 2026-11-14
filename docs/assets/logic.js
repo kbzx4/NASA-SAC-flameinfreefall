@@ -188,5 +188,37 @@
     };
   }
 
-  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences };
+  /* ---- findings: ranked by how close their tests come to a habitat (build_findings.rank) ---- */
+  function rankFindings(FF, o2, pressure, fuelClass) {
+    const out = [];
+    FF.findings.forEach((f) => {
+      if (fuelClass && f.fuel_class !== fuelClass) return;
+      let best = null;
+      f.bands.forEach((b, i) => {
+        const mo = closeness(b.o2, o2, FF.range.o2), mp = closeness(b.p, pressure, FF.range.pressure);
+        const sc = ((mo + mp) / 2) * (b.n >= 10 ? 1 : 0.7);
+        if (!best || sc > best[0]) best = [sc, i, mo, mp];
+      });
+      out.push({ id: f.id, score: round(best[0], 2), band: best[1], m_o2: round(best[2], 2), m_p: round(best[3], 2) });
+    });
+    const n = (r) => FF.findings.find((f) => f.id === r.id).bands[r.band].n;
+    out.sort((a, b) => b.score - a.score || n(b) - n(a));
+    return out;
+  }
+
+  /* ---- what the loaded data cannot say about a habitat (build_insights.gaps) ---- */
+  function gaps(FF, o2, pressure) {
+    const t = FF.rows.filter((r) => r.g !== "1"), out = [];
+    const top = max(highs(t, "o"));
+    if (o2 > top + 2) out.push(`no flame test in the data ran above ${g(top)}% oxygen, and this habitat is at ${g(o2)}%`);
+    const solid = max(highs(t.filter((r) => r.c === "solid"), "o"));
+    if (o2 > solid + 2) out.push(`no solid material (fabric, plastic) was flame-tested above ${g(solid)}% oxygen`);
+    const low = min(lows(t, "P"));
+    if (pressure < low - 1) out.push(`no test in the data ran below ${g(low)} psi, and this habitat is at ${g(pressure)} psi`);
+    out.push("no solid-material flame test in the data lists its pressure");
+    out.push("no test in the data ran in Moon or Mars gravity");
+    return out;
+  }
+
+  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps };
 })(typeof window !== "undefined" ? window : globalThis);

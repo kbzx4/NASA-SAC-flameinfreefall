@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 import brief  # noqa: E402
 import core  # noqa: E402
-from scripts import build_si  # noqa: E402
+from scripts import build_findings, build_insights, build_si  # noqa: E402
 
 OUT = ROOT / "docs" / "assets"
 
@@ -47,6 +47,18 @@ def rows(cat):
     return out
 
 
+def shown(entry, fields):
+    """The part of a cached SI text the site shows, with what each check did."""
+    if not entry:
+        return None
+    out = {f: entry.get(f, "") for f in fields}
+    if out.get("headline"):
+        out["headline"] = out["headline"].rstrip(".")  # headlines take no full stop
+    return {**out, "model": entry["model"], "judge": entry.get("judge"),
+            "total": entry["total"], "verified": entry["verified"], "dropped": len(entry["dropped"]),
+            "judged_out": len(entry["judged_out"])}
+
+
 def main():
     cat, pairs = core.load_catalog(), core.load_pairs()
     cache = json.loads(build_si.CACHE.read_text(encoding="utf-8")) if build_si.CACHE.exists() else {}
@@ -61,6 +73,8 @@ def main():
     all_materials = brief.materials(cat)
     scenarios = [{"name": n, "o2": s["o2"], "pressure": s["pressure"], "note": s["note"]}
                  for n, s in core.SCENARIOS.items()]
+    found = build_findings.findings(cat)
+    texts, briefs = build_insights.load()
     expected = {}
     for s in scenarios:
         facts = brief.build_facts(cat, pairs, s["name"], s["o2"], s["pressure"], 10.0, "Moon (0.17 g)", all_materials)
@@ -71,6 +85,8 @@ def main():
             "materials": facts["materials"], "atmosphere": facts["atmosphere"],
             "near": facts["materials_flame_tested_near"],
             "ranking": [[r["Investigation"], r["HFRI"], r["Why"]] for r in rank.to_dict("records")],
+            "findings": build_findings.rank(found, s["o2"], s["pressure"]),
+            "gaps": build_insights.gaps(s["o2"], s["pressure"], cat),
         }
 
     investigations = []
@@ -93,13 +109,15 @@ def main():
         "materials": all_materials, "investigations": investigations,
         "rows": rows(cat), "pairs": pair_rows,
         "si": {"material": si["material"], "atmosphere": si["atmosphere"]},
+        "findings": [{**f, "si": shown(texts.get(f["id"]), ("headline", "found", "means", "limit"))} for f in found],
+        "briefings": {k: shown(v, ("text",)) for k, v in briefs.items()},
         "expected": expected,
     }
     OUT.mkdir(parents=True, exist_ok=True)
     text = "window.FF=" + json.dumps(bundle, ensure_ascii=False, separators=(",", ":")) + ";\n"
     (OUT / "data.js").write_text(text, encoding="utf-8")
     shutil.copy(ROOT / "data" / "catalog.csv", OUT / "psi-combustion-catalog.csv")
-    n_si = sum(len(v) for v in si.values())
+    n_si = sum(len(v) for v in si.values()) + len(texts) + len(briefs)
     print(f"data.js: {len(text) / 1024:.0f} KB, {len(bundle['rows'])} rows, "
           f"{len(investigations)} investigations, {n_si} SI texts")
 

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flamebound: your fire evidence brief</title>
-<meta name="description" content="Set a habitat's atmosphere, gravity and materials, and get the NASA microgravity fire evidence for it.">
+<title>Flamebound: fire safety insights</title>
+<meta name="description" content="Set a habitat's atmosphere, gravity and materials, and get the NASA microgravity fire findings ranked and interpreted for it.">
 <meta name="theme-color" content="#04060b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%235aa8ff' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,8 @@
   <div class="wrap">
     <a class="brand" href="./"><span class="orb"></span>Flamebound</a>
     <div class="nav-links" role="tablist" aria-label="Views">
-      <button class="tab" role="tab" data-view="brief">Your brief</button>
+      <button class="tab" role="tab" data-view="insights">Insights</button>
+      <button class="tab" role="tab" data-view="brief">Materials</button>
       <button class="tab" role="tab" data-view="gravity">Gravity bound</button>
       <button class="tab" role="tab" data-view="investigations">Investigations</button>
       <button class="tab" role="tab" data-view="compare">Compare</button>
@@ -45,6 +46,7 @@
   </aside>
 
   <div>
+    <section class="view" id="view-insights" style="padding:0"></section>
     <section class="view" id="view-brief" style="padding:0"></section>
     <section class="view" id="view-gravity" style="padding:0"></section>
     <section class="view" id="view-investigations" style="padding:0"></section>

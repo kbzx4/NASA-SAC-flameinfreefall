@@ -21,10 +21,10 @@
   const preset = FF.scenarios.find((s) => s.name === q.get("s")) || FF.scenarios[1];
   const state = {
     scenario: preset.name, o2: preset.o2, pressure: preset.pressure, flow: 10,
-    gravity: Math.min(2, Math.max(0, +q.get("g") || 1)),
+    gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g")))) : 1,
     materials: DEFAULT_MATERIALS.filter((m) => FF.materials.includes(m)),
-    view: ["brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "brief",
-    concern: "solid", compare: ["SAFFIRE-2", "BASS-II", "FLEX"], open: null,
+    view: ["insights", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    concern: "solid", compare: ["SAFFIRE-2", "BASS-II", "FLEX"], open: null, kind: "", find: "",
   };
   const partial = () => state.gravity > 0;
   const gravityLabel = () => FF.gravity[state.gravity];
@@ -139,6 +139,86 @@
     $("dl-records").onclick = () => save("fire-evidence-records.csv", "text/csv", toCsv(records));
   }
 
+  /* ------------------------------------------------------------ insights */
+  const KINDS = [["", "All fires"], ["solid", "Solid materials"], ["liquid", "Liquid fuels"], ["gas", "Gas flames"], ["smoke source", "Smoke"]];
+  const tick = () => icon("M5 12.5l4.2 4.2L19 7").replace("<svg", '<svg style="width:11px;height:11px;vertical-align:-1px"');
+  const checkLine = (t) => t ? `<span class="chk">${tick()} Written by ${esc(t.model)} · ${t.verified} of ${t.total} numbers found in the data${t.judge ? ` · re-read by ${esc(t.judge)}` : ""}${t.dropped + t.judged_out ? ` · ${t.dropped + t.judged_out} sentence${t.dropped + t.judged_out > 1 ? "s" : ""} removed` : ""}</span>` : "";
+  const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+  const rangeText = (r, unit) => (r[0] === r[1] ? g(r[0]) : `${g(r[0])} to ${g(r[1])}`) + unit;
+  function insightText(f) {
+    const t = f.si || {};
+    return [t.headline, t.found, t.means, t.limit, f.topic, f.investigations.join(" "), ...Object.values(f.facts), ...f.caveats].join(" ").toLowerCase();
+  }
+  function insightCard(f, r, i, pinned) {
+    const t = f.si, b = f.bands[r.band];
+    const near = b.o2 ? `Nearest your ${g(state.o2)}% oxygen` : "Applies to any habitat";
+    const why = [b.o2 ? `Oxygen ${rangeText(b.o2, "%")}: closeness ${r.m_o2.toFixed(2)}` : "No oxygen level listed: 0",
+      b.p ? `Pressure ${rangeText(b.p, " psi")}: closeness ${r.m_p.toFixed(2)}` : "No pressure listed: 0",
+      `${b.n} test${b.n === 1 ? "" : "s"} in this group${b.n >= 10 ? "" : ", fewer than 10: × 0.7"}`];
+    const legend = f.chart ? `<div class="legend">${f.chart.series.map(([l, c]) => `<span><i style="background:${c}"></i>${esc(l)}</span>`).join("")}</div>` : "";
+    const facts = `<ul class="facts">${Object.values(f.facts).map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul>`;
+    return `<article class="insight${pinned ? " pinned" : ""}">
+      <div class="ins-head"><span class="n">${i + 1}</span><span class="tag">${esc(f.topic)}</span>${f.investigations.map((inv, k) => `<a class="tag" href="${f.links[k]}" target="_blank" rel="noopener">${esc(inv)} · ${esc(f.psi[k])} ↗</a>`).join("")}
+        <span class="rel" tabindex="0" data-tip="<b>Relevance ${r.score.toFixed(2)}</b><span>${esc(why.join("|")).split("|").join("<br>")}</span>">${pinned ? "Pinned · relevance" : "Relevance"} <b>${r.score.toFixed(2)}</b><i><em style="width:${r.score * 100}%"></em></i></span></div>
+      <h3>${esc(t && t.headline ? t.headline : cap(f.topic))}</h3>
+      <p class="near-line"><b>${near}:</b> ${esc(cap(b.line))}.</p>
+      ${f.chart ? `<div class="ins-chart" id="ch-${f.id}"></div>${legend}` : ""}
+      ${t ? `<div class="ins-body">${t.found ? `<div><div class="k">What the tests found</div><p>${esc(t.found)}</p></div>` : ""}
+        ${t.means ? `<div class="si"><div class="k">What it suggests for a crewed habitat · SI interpretation</div>${esc(t.means)}${checkLine(t)}</div>` : ""}
+        ${t.limit ? `<p class="limit"><b>Limit:</b> ${esc(t.limit)}</p>` : ""}</div>` : facts}
+      <details><summary>The facts code computed from the NASA table</summary>${facts.replace("</ul>", f.caveats.map((x) => `<li class="cav">${esc(x)}</li>`).join("") + "</ul>")}</details>
+    </article>`;
+  }
+  function drawInsights() {
+    const el = $("view-insights"), habitat = state.scenario === "Custom" ? "your habitat" : state.scenario;
+    const byId = Object.fromEntries(FF.findings.map((f) => [f.id, f]));
+    const all = L.rankFindings(FF, state.o2, state.pressure);
+    let rank = state.kind ? all.filter((r) => byId[r.id].fuel_class === state.kind) : all;
+    const pin = partial() ? rank.find((r) => byId[r.id].gravity) : null;
+    if (pin) rank = [pin, ...rank.filter((r) => r !== pin)];
+    const words = state.find.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const shown = rank.filter((r) => words.every((w) => insightText(byId[r.id]).includes(w)));
+    const brief = isPreset() ? FF.briefings[state.scenario] : null, gaps = L.gaps(FF, state.o2, state.pressure);
+    const custom = all.slice(0, 3).map((r) => cap(byId[r.id].bands[r.band].line) + ".").join(" ");
+    const models = [...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", ");
+    el.innerHTML = `
+      <span class="eyebrow">Fire safety insights</span>
+      <h1 style="margin-top:12px">What NASA's microgravity fire tests suggest for ${esc(habitat)}</h1>
+      <p class="lede">${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${esc(gravityLabel())}. ${FF.findings.length} findings computed from the ${(() => { const inv = new Set(FF.findings.flatMap((f) => f.investigations)); return `${FF.rows.filter((r) => inv.has(r.i)).length.toLocaleString("en-US")} NASA test records of ${inv.size} investigations`; })()}, ranked by how close their tests came to these conditions, and interpreted by SI.</p>
+      <div class="briefing">
+        <div class="k">${brief ? "Briefing · SI-written from the ranked findings and the gaps" : "Closest results · computed for your custom values"}</div>
+        <p>${esc(brief ? brief.text : custom)}</p>${brief ? checkLine(brief) : `<span class="chk none">SI briefings are prepared for the four preset habitats. These lines are computed, not SI-written.</span>`}
+      </div>
+      ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence.</b> No finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. The findings below are the nearest there are; treat this habitat as a research gap.</div>` : ""}
+      ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No test in the data ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first.</div>` : ""}
+      <div class="ins-tools">
+        <div class="pills" id="kinds">${KINDS.map(([k, l]) => `<button class="pill" aria-pressed="${state.kind === k}" data-k="${k}">${l}</button>`).join("")}</div>
+        <input class="find" id="find" type="search" placeholder="Find: oxygen, CO2, smoke, gravity, PMMA" value="${esc(state.find)}" aria-label="Find a finding">
+      </div>
+      <div id="ins-list">${shown.length ? shown.map((r, i) => insightCard(byId[r.id], r, i, r === pin)).join("") : `<p class="muted">No finding matches "${esc(state.find)}".</p>`}</div>
+      <div class="h-sec"><h2>What this data cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</span></div>
+      <div class="card prose"><ul>${gaps.map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul></div>
+      <div class="cols-2" style="margin-top:18px">
+        <div class="card"><h3>How the findings are ranked</h3>
+          <div class="formula">Relevance = ½ (C<sub>oxygen</sub> + C<sub>pressure</sub>) × W<sub>tests</sub></div>
+          <p style="margin-top:14px">Each finding splits its tests into groups by oxygen level, and the group nearest your habitat is scored. C is 1 when your value is inside the group's tested range and falls to 0 at ${g(FF.range.o2)} points of oxygen or ${g(FF.range.pressure)} psi away. A value the table does not list scores 0, because it cannot be checked. W is 1 for 10 or more tests and 0.7 for fewer.</p></div>
+        <div class="card prose"><h3>Who did what</h3><ul>
+          <li>Code computed every finding, count, ranking and gap from the NASA tables. Open "The facts code computed" on any card to see them.</li>
+          <li>SI (${esc(models)}) wrote each headline, the summary of what the tests found, the interpretation, the limit and the briefing, reading only those facts.</li>
+          <li>Code then looked up every number in the facts, and a second model re-read every sentence and removed any that stated something the facts do not hold.</li>
+          <li>Relevance says how close the evidence is to your habitat. It does not say whether a fire would start or spread.</li></ul></div>
+      </div>`;
+    shown.forEach((r) => { const f = byId[r.id]; if (f.chart) CH.finding($("ch-" + f.id), f, r.band); });
+    CH.bindTips(el);
+    $("kinds").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; state.kind = b.dataset.k; drawInsights(); };
+    $("find").oninput = (e) => {
+      state.find = e.target.value;
+      const pos = e.target.selectionStart;
+      drawInsights();
+      const box = $("find"); box.focus(); box.setSelectionRange(pos, pos);
+    };
+  }
+
   /* ------------------------------------------------------------- gravity */
   function drawGravity() {
     const paired = FF.pairs.filter((p) => p.gsi != null), flips = paired.filter((p) => p.gsi >= 0.5).length, tight = paired.filter((p) => p.gsi === 0).length;
@@ -225,7 +305,8 @@
   /* ---------------------------------------------------------------- data */
   function drawData() {
     const unnamed = FF.rows.filter((r) => r.c === "solid" && !r.m.length).length;
-    const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean)];
+    const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean),
+      ...FF.findings.map((f) => f.si).filter(Boolean), ...Object.values(FF.briefings)];
     const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + (t.judged_out || 0), 0);
     $("view-data").innerHTML = `
       <span class="eyebrow">Data and method</span>
@@ -241,7 +322,8 @@
           <li>FLEX-2, SLICE, ACME BRE, ACME E-FIELD Flames and DAFT tables are summaries, not one row per test.</li>
           <li>No investigation here ran in partial gravity.</li></ul></div>
         <div class="card prose"><h3>How SI is used</h3><ul>
-          <li>Code works out every finding. A Gemini model then puts those findings into sentences for the material cards and the investigation summaries. It is asked to change nothing.</li>
+          <li>Insights: code computes each finding from the NASA tables and ranks the findings for your habitat. ${esc([...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", "))} then interprets each finding (headline, what the tests found, what it suggests, its limit) and writes a briefing for each preset habitat, reading only the facts code computed.</li>
+          <li>Material cards and investigation summaries: code works out every finding and a Gemini model only puts it into sentences. It is asked to change nothing.</li>
           <li>Code then looked up every number in each text in those facts and removed any sentence containing a number that was not there. Across ${texts.length} texts, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.</li>
           <li>A second SI pass then re-read each remaining sentence against the facts and removed any it judged unsupported. ${texts.filter((t) => t.judge && t.judge !== t.model).length} of the ${texts.length} texts were re-read by a different model${(() => { const j = [...new Set(texts.filter((t) => t.judge && t.judge !== t.model).map((t) => t.judge))]; return j.length ? " (" + esc(j.join(", ")) + ")" : ""; })()}, ${texts.filter((t) => t.judge && t.judge === t.model).length} by the same model in a fresh pass, and ${texts.filter((t) => !t.judge).length} got no second pass. The removed-sentence count above includes both checks.</li>
           <li>Neither check is proof, so the computed facts beside each text remain the reference.</li>
@@ -273,10 +355,19 @@
   }
   function briefHtml(f) {
     const css = "body{font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#1c1c1a;max-width:860px;margin:32px auto;padding:0 20px}h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}h3{font-size:15px;margin:18px 0 4px}.sub{color:#555;margin:0 0 16px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e4e4e0;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#555}.warn{background:#fff6e0;border:1px solid #e8c877;padding:10px 12px;border-radius:6px}.si{background:#f3f6fb;border-left:3px solid #3987e5;padding:8px 12px;margin:8px 0}ul{margin:4px 0 0 18px;padding:0}small{color:#666}@media print{body{margin:0}}";
-    const used = new Set(["FLEX", "CFI-G"]);
+    const used = new Set(["FLEX", "CFI-G", ...FF.findings.flatMap((x) => x.investigations)]);
     let h = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Fire Evidence Brief: ${esc(state.scenario)}</title><style>${css}</style></head><body>
       <h1>Fire Evidence Brief</h1><p class="sub">${esc(state.scenario)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${g(state.flow)} cm/s airflow, ${esc(gravityLabel())}. Generated ${new Date().toISOString().slice(0, 10)} with Flamebound.</p>
       <p class="warn"><b>This is an evidence summary, not a safety assessment.</b> It reports which NASA microgravity tests exist near these conditions. It does not predict whether a material will burn.</p>
+      ${(() => {
+        const b = isPreset() ? FF.briefings[state.scenario] : null;
+        const top = L.rankFindings(FF, state.o2, state.pressure).slice(0, 5);
+        return `<h2>What NASA's microgravity fire tests suggest</h2>${b ? `<p class="si">${esc(b.text)}<br><small>SI-written briefing (${esc(b.model)}); ${b.verified} of ${b.total} numbers found in the data${b.judge ? `; re-read by ${esc(b.judge)}` : ""}.</small></p>` : ""}
+          <p><small>The ${top.length} findings whose tests came closest to these conditions. Relevance = ½ (oxygen closeness + pressure closeness) × test-count weight.</small></p>
+          ${top.map((r, i) => { const x = FF.findings.find((y) => y.id === r.id), t = x.si || {}; return `<h3>${i + 1}. ${esc(t.headline || x.topic)} <small>(${esc(x.investigations.join(", "))}, relevance ${r.score.toFixed(2)})</small></h3>
+            <p><b>Nearest these conditions:</b> ${esc(x.bands[r.band].line)}.</p>${t.found ? `<p>${esc(t.found)}</p>` : ""}${t.means ? `<p class="si">${esc(t.means)}<br><small>SI interpretation</small></p>` : ""}${t.limit ? `<p><small>Limit: ${esc(t.limit)}</small></p>` : ""}`; }).join("")}
+          <h3>What this data cannot tell you</h3><ul>${L.gaps(FF, state.o2, state.pressure).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+      })()}
       <h2>${f.near} of ${f.mats.length} materials were flame-tested near ${g(state.o2)}% oxygen</h2>
       <table><tr><th>Material</th><th>Evidence</th><th>Flame tests</th><th>Oxygen tested</th><th>Gap to yours</th><th>Smoke tests</th></tr>
       ${f.mats.map((m) => `<tr><td>${esc(m.material)}</td><td>${GRADE[m.grade][0]}</td><td>${m.flame_tests}</td><td>${m.oxygen_tested_pct ? m.oxygen_tested_pct + "%" : "not listed"}</td><td>${m.oxygen_gap_points == null ? "" : g(m.oxygen_gap_points) + " points"}</td><td>${m.smoke_tests}</td></tr>`).join("")}</table>
@@ -298,7 +389,7 @@
   }
 
   /* ---------------------------------------------------------------- loop */
-  const DRAW = { brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
+  const DRAW = { insights: drawInsights, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
   function update() {
     drawControls();
     document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === state.view));

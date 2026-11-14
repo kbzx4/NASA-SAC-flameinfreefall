@@ -131,5 +131,47 @@
     return s;
   }
 
-  window.FFCharts = { dumbbell, lanes, materialStrip, mini, bindTips, esc, C };
+  /* One finding, split by oxygen band (or by group). Shares as a 100% bar, or medians as bars.
+     The row nearest the habitat is marked. Every mark has a tooltip with the counts. */
+  function finding(el, f, active) {
+    const ch = f.chart; if (!ch) return;
+    const byGroup = ch.by === "groups", rows = byGroup ? f.groups : f.bands, bars = ch.kind === "bars";
+    const top = Math.max(...rows.flatMap((r) => r.values.filter((v) => v != null)));
+    mount(el, (W) => {
+      const narrow = W < 560, labelW = narrow ? 0 : 128, right = narrow ? 8 : 74, per = bars ? ch.series.length : 1;
+      const barH = bars ? 9 : 14, rowH = narrow ? 30 + per * (barH + 4) : Math.max(34, per * (barH + 4) + 14), H = rows.length * rowH + 4;
+      const x0 = labelW + (narrow ? 0 : 14), x1 = W - right, X = (v) => x0 + (v / (bars ? top : 1)) * (x1 - x0);
+      let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(f.si && f.si.headline || f.topic)}, by ${byGroup ? "atmosphere" : "oxygen level"}">`;
+      rows.forEach((r, i) => {
+        const y = i * rowH, on = !byGroup && i === active, name = byGroup ? r.label : r.label + " O2";
+        const by = y + (narrow ? 22 : (rowH - per * (barH + 4) + 4) / 2);
+        if (on) s += `<rect x="0" y="${y + 1}" width="${W}" height="${rowH - 2}" rx="8" fill="rgba(255,255,255,0.06)"/>`;
+        s += narrow ? txt(4, y + 15, name + (on ? " · nearest yours" : ""), { fill: C.ink, size: 12.5, weight: on ? 600 : 400 })
+          : txt(labelW, y + rowH / 2 + 4, name, { anchor: "end", fill: on ? C.ink : C.ink2, size: 13, weight: on ? 600 : 400, mono: true });
+        if (bars) {
+          ch.series.forEach(([label, color], k) => {
+            const v = r.values[k], yy = by + k * (barH + 4);
+            if (v == null) return;
+            s += `<rect x="${x0}" y="${yy}" width="${Math.max(3, X(v) - x0)}" height="${barH}" rx="3" fill="${color}"/>`;
+            s += txt(Math.min(X(v) + 6, W - 2), yy + barH - 1, g(v) + " " + ch.unit, { fill: C.ink2, size: 11.5, mono: true, anchor: X(v) + 60 > W ? "end" : "start" });
+            s += `<rect x="${x0}" y="${yy - 2}" width="${x1 - x0}" height="${barH + 4}" fill="transparent" tabindex="0" data-tip="<b>${esc(name)}</b><span>${esc(label)}: ${g(v)} ${esc(ch.unit)}<br>${r.n} tests</span>"/>`;
+          });
+        } else {
+          const n = r.values.reduce((a, b) => a + b, 0) || 1;
+          let x = x0;
+          r.values.forEach((v, k) => {
+            if (!v) return;
+            const w = ((x1 - x0) * v) / n;
+            s += `<rect x="${x}" y="${by}" width="${Math.max(2, w - 2)}" height="${barH}" rx="3" fill="${ch.series[k][1]}"/>`;
+            s += `<rect x="${x}" y="${by - 4}" width="${w}" height="${barH + 8}" fill="transparent" tabindex="0" data-tip="<b>${esc(name)}</b><span>${esc(ch.series[k][0])}: ${v} of ${r.n} tests</span>"/>`;
+            x += w;
+          });
+          if (!narrow) s += txt(W - 4, by + barH - 2, r.n + " tests", { anchor: "end", fill: C.ink3, size: 12, mono: true });
+        }
+      });
+      return s + "</svg>";
+    });
+  }
+
+  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, bindTips, esc, C };
 })();

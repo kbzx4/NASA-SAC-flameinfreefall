@@ -35,7 +35,7 @@
     <div>
       <span class="eyebrow">NASA Space Apps 2026 · Flame in Freefall</span>
       <h1>Fire changes shape <span class="blue">when gravity does.</span></h1>
-      <p class="lede">Flamebound checks a crewed habitat's atmosphere and materials against <b><span data-n="records"></span> microgravity combustion records</b> from NASA, and shows how close that evidence comes to your design.</p>
+      <p class="lede">Flamebound reads <b><span data-n="records"></span> microgravity combustion records</b> from NASA, works out what the experiments found, ranks those findings for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit.</p>
       <div class="cta">
         <a class="btn primary" href="tool.html">Open the tool
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -91,16 +91,29 @@
   </div>
 </section>
 
+<section id="insights">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Ranked for a Moon base · 30% oxygen, 10.2 psi</span>
+      <h2>What the experiments found, ranked by how close they come to your design.</h2>
+      <p>Code computes each finding from the NASA tables. The findings are ranked by how close their tests came to the habitat's oxygen level and pressure. SI then explains what each one suggests, and every sentence it writes is checked twice.</p>
+    </div>
+    <div class="grid-3" id="top-insights"></div>
+    <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?s=Moon%20base%20%2F%20pressurized%20rover">See all <span data-n="findings"></span> findings for a Moon base
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </div>
+</section>
+
 <section id="how">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">How it works</span>
-      <h2>Describe a habitat. Get the evidence for it.</h2>
+      <h2>Describe a habitat. Get the findings for it.</h2>
     </div>
     <div class="grid-3">
       <div class="card reveal"><span class="step-n">01</span><h3>Describe the habitat</h3><p>Set oxygen, pressure, airflow and gravity, or start from the ISS, a Moon base or a spacesuit. Then pick the materials on board.</p></div>
-      <div class="card reveal"><span class="step-n">02</span><h3>See the evidence, graded</h3><p>Each material gets a plain grade: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested at all.</p></div>
-      <div class="card reveal"><span class="step-n">03</span><h3>Take the brief with you</h3><p>Download a printable brief and the exact test records behind it, with units harmonised and NASA's original text beside every number.</p></div>
+      <div class="card reveal"><span class="step-n">02</span><h3>Get the findings, ranked</h3><p>What the droplet, gas-flame, fabric and plastic fires showed, ranked by how close their tests came to your atmosphere, with the result nearest your oxygen level picked out.</p></div>
+      <div class="card reveal"><span class="step-n">03</span><h3>Read what they suggest</h3><p>SI interprets each finding for a crewed habitat, names its limit and writes a briefing. You also see what the data cannot tell you, each material graded, and the records to download.</p></div>
     </div>
   </div>
 </section>
@@ -135,7 +148,7 @@
     </div>
     <div class="grid-3">
       <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
-      <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding, and a Gemini model only puts the findings into sentences. Code then looks up every number it wrote in the data, a second SI pass re-reads each sentence against the findings, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
+      <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding and its ranking. A Gemini model then interprets the findings, reading only the facts code computed. Code looks up every number it wrote, a second model re-reads every sentence against the facts, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
       <div class="card reveal"><h3>Honest about limits</h3><p>Flamebound grades how much evidence exists near your conditions. It does not predict whether a material will burn, and it is not an operational safety system.</p></div>
     </div>
   </div>
@@ -145,7 +158,7 @@
   <div class="wrap">
     <div class="band reveal">
       <h2>What does NASA's data say about your habitat?</h2>
-      <p>Pick an atmosphere and a few materials. The brief takes about ten seconds.</p>
+      <p>Pick an atmosphere. The ranked findings take about ten seconds.</p>
       <div class="cta">
         <a class="btn primary" href="tool.html">Open the tool
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -171,7 +184,7 @@
     <div>
       <h4>Project</h4>
       <p><a data-link="repo" href="#" target="_blank" rel="noopener">Source code</a> · <a data-link="challenge" href="#" target="_blank" rel="noopener">Challenge page</a></p>
-      <p>SI use: a Gemini model worded the short notes on the material cards and the investigation summaries, from findings computed by code. An SI coding assistant (Claude) helped write the code and the site text.</p>
+      <p>SI use: Gemini models interpreted the findings and wrote the briefings, headlines and short notes, from facts computed by code, and a second model checked every sentence. An SI coding assistant (Claude) helped write the code and the site text.</p>
       <p>The flames on this site, including the ones drifting in the background and the one on your cursor, are illustrations drawn by code. They are not data and not SI-generated.</p>
     </div>
   </div>
@@ -179,6 +192,7 @@
 
 <script src="assets/config.js"></script>
 <script src="assets/data.js"></script>
+<script src="assets/logic.js"></script>
 <script src="assets/charts.js"></script>
 <script src="assets/flame.js"></script>
 <script>
@@ -196,10 +210,21 @@
     flips: paired.filter((p) => p.gsi >= 0.5).length,
     pairs: paired.length,
     built: FF.built,
+    findings: FF.findings.length,
   };
   document.querySelectorAll("[data-n]").forEach((el) => { el.textContent = n[el.dataset.n]; });
 
-  const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean)];
+  const texts = [...Object.values(FF.si.material), ...Object.values(FF.si.atmosphere), ...FF.investigations.map((i) => i.si).filter(Boolean),
+    ...FF.findings.map((f) => f.si).filter(Boolean), ...Object.values(FF.briefings)];
+
+  // the three findings ranked closest to a Moon base
+  const moon = FF.scenarios.find((sc) => sc.name.startsWith("Moon"));
+  const esc = FFCharts.esc, cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+  document.getElementById("top-insights").innerHTML = FFLogic.rankFindings(FF, moon.o2, moon.pressure).slice(0, 3).map((r, i) => {
+    const f = FF.findings.find((x) => x.id === r.id), t = f.si || {};
+    return `<div class="card reveal top-ins"><span class="step-n">${i + 1} · ${esc(f.topic.toUpperCase())} · RELEVANCE ${r.score.toFixed(2)}</span>
+      <h3>${esc(t.headline || cap(f.topic))}</h3><p class="near">${esc(cap(f.bands[r.band].line))}.</p>${t.means ? `<p class="si">${esc(t.means)}</p>` : ""}</div>`;
+  }).join("");
   if (texts.length) {
     const total = texts.reduce((a, t) => a + t.total, 0), dropped = texts.reduce((a, t) => a + t.dropped + (t.judged_out || 0), 0);
     document.getElementById("sistat").textContent = `Across the ${texts.length} texts on this site, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.`;

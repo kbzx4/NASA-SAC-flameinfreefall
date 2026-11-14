@@ -1,0 +1,732 @@
+[
+ {
+  "id": "droplet-oxygen",
+  "investigations": [
+   "FLEX"
+  ],
+  "fuel_class": "liquid",
+  "topic": "Oxygen level",
+  "tests": 274,
+  "o2": [
+   12.0,
+   34.0
+  ],
+  "p": [
+   10.18,
+   44.86
+  ],
+  "facts": {
+   "what_was_tested": "274 burning fuel droplets (methanol and heptane) in microgravity, from 12% to 34% oxygen",
+   "result_low_oxygen": "at 12 to 15% oxygen, 45 of 48 droplet flames went out on their own before the fuel was used up",
+   "result_air": "at 20 to 21% oxygen, 58 of 84 droplet flames went out on their own before the fuel was used up",
+   "result_high_oxygen": "at 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up",
+   "how_the_others_ended": "at 30 to 34% oxygen, 4 burned until the fuel was used up and 18 ended with the droplet disrupted"
+  },
+  "caveats": [
+   "The gas mixed in with the oxygen (nitrogen, CO2 or helium), the pressure and the fuel also vary between tests.",
+   "At 30 to 34% oxygen most tests (18 of 24) ended with the droplet disrupted and only 4 burned until the fuel was used up; the table does not say what happened to the droplet or whether its flame was still burning."
+  ],
+  "bands": [
+   {
+    "o2": [
+     12.0,
+     15.0
+    ],
+    "p": [
+     10.32,
+     14.93
+    ],
+    "n": 48,
+    "label": "12 to 15%",
+    "values": [
+     45,
+     3,
+     0
+    ],
+    "line": "at 12 to 15% oxygen, 45 of 48 droplet flames went out on their own before the fuel was used up"
+   },
+   {
+    "o2": [
+     16.0,
+     19.0
+    ],
+    "p": [
+     10.18,
+     14.97
+    ],
+    "n": 74,
+    "label": "16 to 19%",
+    "values": [
+     63,
+     7,
+     4
+    ],
+    "line": "at 16 to 19% oxygen, 63 of 74 droplet flames went out on their own before the fuel was used up"
+   },
+   {
+    "o2": [
+     20.0,
+     21.0
+    ],
+    "p": [
+     10.2,
+     44.86
+    ],
+    "n": 84,
+    "label": "20 to 21%",
+    "values": [
+     58,
+     8,
+     18
+    ],
+    "line": "at 20 to 21% oxygen, 58 of 84 droplet flames went out on their own before the fuel was used up"
+   },
+   {
+    "o2": [
+     23.0,
+     25.0
+    ],
+    "p": [
+     10.28,
+     14.86
+    ],
+    "n": 44,
+    "label": "23 to 25%",
+    "values": [
+     18,
+     5,
+     21
+    ],
+    "line": "at 23 to 25% oxygen, 18 of 44 droplet flames went out on their own before the fuel was used up"
+   },
+   {
+    "o2": [
+     30.0,
+     34.0
+    ],
+    "p": [
+     10.33,
+     14.91
+    ],
+    "n": 24,
+    "label": "30 to 34%",
+    "values": [
+     2,
+     4,
+     18
+    ],
+    "line": "at 30 to 34% oxygen, 2 of 24 droplet flames went out on their own before the fuel was used up"
+   }
+  ],
+  "chart": {
+   "unit": "tests",
+   "series": [
+    [
+     "Went out on its own",
+     "#3987e5"
+    ],
+    [
+     "Burned until the fuel was used up",
+     "#d95926"
+    ],
+    [
+     "Droplet disrupted",
+     "#9b6fd6"
+    ]
+   ]
+  },
+  "psi": [
+   "PSI-69"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69"
+  ]
+ },
+ {
+  "id": "droplet-low-oxygen",
+  "investigations": [
+   "FLEX"
+  ],
+  "fuel_class": "liquid",
+  "topic": "Low oxygen",
+  "tests": 266,
+  "o2": [
+   12.0,
+   34.0
+  ],
+  "p": [
+   10.18,
+   44.86
+  ],
+  "facts": {
+   "what_was_tested": "how long burning fuel droplets stayed alight in microgravity at different oxygen levels",
+   "result_lowest_oxygen": "48 droplet flames were lit at 12 to 15% oxygen and every one burned for some time: methanol for 0.3 to 26 s (median 8.5 s, 37 tests) and heptane for 1 to 3.8 s (median 1.6 s, 11 tests)",
+   "lowest_oxygen_with_a_flame": "12% oxygen",
+   "trend": "at 12 to 15% oxygen, methanol droplet flames burned for a median of 8.5 s and heptane for 1.6 s; at 30 to 34% oxygen, methanol droplet flames burned for a median of 15.6 s and heptane for 13.6 s"
+  },
+  "caveats": [
+   "Burn time depends on droplet size, which varies between tests.",
+   "Most of these flames still went out before the fuel was used up (see the oxygen-level finding)."
+  ],
+  "bands": [
+   {
+    "o2": [
+     12.0,
+     15.0
+    ],
+    "p": [
+     10.32,
+     14.93
+    ],
+    "n": 48,
+    "label": "12 to 15%",
+    "values": [
+     8.5,
+     1.6
+    ],
+    "line": "at 12 to 15% oxygen, methanol droplet flames burned for a median of 8.5 s and heptane for 1.6 s"
+   },
+   {
+    "o2": [
+     16.0,
+     19.0
+    ],
+    "p": [
+     10.18,
+     14.97
+    ],
+    "n": 73,
+    "label": "16 to 19%",
+    "values": [
+     11.7,
+     3.5
+    ],
+    "line": "at 16 to 19% oxygen, methanol droplet flames burned for a median of 11.7 s and heptane for 3.5 s"
+   },
+   {
+    "o2": [
+     20.0,
+     21.0
+    ],
+    "p": [
+     10.2,
+     44.86
+    ],
+    "n": 79,
+    "label": "20 to 21%",
+    "values": [
+     14.0,
+     8.7
+    ],
+    "line": "at 20 to 21% oxygen, methanol droplet flames burned for a median of 14 s and heptane for 8.7 s"
+   },
+   {
+    "o2": [
+     23.0,
+     25.0
+    ],
+    "p": [
+     10.28,
+     14.86
+    ],
+    "n": 43,
+    "label": "23 to 25%",
+    "values": [
+     16.9,
+     10.1
+    ],
+    "line": "at 23 to 25% oxygen, methanol droplet flames burned for a median of 16.9 s and heptane for 10.1 s"
+   },
+   {
+    "o2": [
+     30.0,
+     34.0
+    ],
+    "p": [
+     10.33,
+     14.91
+    ],
+    "n": 23,
+    "label": "30 to 34%",
+    "values": [
+     15.6,
+     13.6
+    ],
+    "line": "at 30 to 34% oxygen, methanol droplet flames burned for a median of 15.6 s and heptane for 13.6 s"
+   }
+  ],
+  "chart": {
+   "unit": "s",
+   "kind": "bars",
+   "series": [
+    [
+     "Methanol, median burn time",
+     "#3987e5"
+    ],
+    [
+     "Heptane, median burn time",
+     "#d95926"
+    ]
+   ]
+  },
+  "psi": [
+   "PSI-69"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69"
+  ]
+ },
+ {
+  "id": "droplet-diluent",
+  "investigations": [
+   "FLEX"
+  ],
+  "fuel_class": "liquid",
+  "topic": "Suppression gases",
+  "tests": 84,
+  "o2": [
+   20.0,
+   21.0
+  ],
+  "p": [
+   10.2,
+   44.86
+  ],
+  "facts": {
+   "what_was_tested": "84 burning fuel droplets in microgravity at 20 to 21% oxygen, where the rest of the atmosphere was nitrogen only, or had CO2 or helium added",
+   "result_nitrogen_only": "with nitrogen only, 17 of 34 went out on their own",
+   "result_co2_added": "with CO2 added, 28 of 36 went out on their own",
+   "result_helium_added": "with helium added, 13 of 14 went out on their own"
+  },
+  "caveats": [
+   "The fuel (methanol or heptane) and the pressure also differ between the three groups.",
+   "The CO2 tests span 10.26 to 44.86 psi; the others stay below 15 psi."
+  ],
+  "bands": [
+   {
+    "o2": [
+     20.0,
+     21.0
+    ],
+    "p": [
+     10.2,
+     44.86
+    ],
+    "n": 84,
+    "label": "all three",
+    "values": null,
+    "line": "at 20 to 21% oxygen, with nitrogen only, 17 of 34 went out on their own, with CO2 added, 28 of 36 went out on their own and with helium added, 13 of 14 went out on their own"
+   }
+  ],
+  "groups": [
+   {
+    "label": "nitrogen only",
+    "n": 34,
+    "values": [
+     17,
+     5,
+     12
+    ]
+   },
+   {
+    "label": "CO2 added",
+    "n": 36,
+    "values": [
+     28,
+     2,
+     6
+    ]
+   },
+   {
+    "label": "helium added",
+    "n": 14,
+    "values": [
+     13,
+     1,
+     0
+    ]
+   }
+  ],
+  "chart": {
+   "unit": "tests",
+   "by": "groups",
+   "series": [
+    [
+     "Went out on its own",
+     "#3987e5"
+    ],
+    [
+     "Burned until the fuel was used up",
+     "#d95926"
+    ],
+    [
+     "Droplet disrupted",
+     "#9b6fd6"
+    ]
+   ]
+  },
+  "psi": [
+   "PSI-69"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69"
+  ]
+ },
+ {
+  "id": "gas-oxygen",
+  "investigations": [
+   "CFI-G"
+  ],
+  "fuel_class": "gas",
+  "topic": "Oxygen level",
+  "tests": 179,
+  "o2": [
+   17.97,
+   39.97
+  ],
+  "p": [
+   7.35,
+   44.09
+  ],
+  "facts": {
+   "what_was_tested": "179 gas flames (ethane, propane and butane) on a spherical burner in microgravity",
+   "result_near_air": "at 18 to 23.4% oxygen, 41 of 64 gas flames lit; all 41 went out on their own, with a median burn of 8 s",
+   "result_high_oxygen": "at 33.2 to 40% oxygen, 91 of 115 gas flames lit; 61 went out on their own and 30 burned until the fuel was cut off, with a median burn of 50 s",
+   "burner_temperature": "the burner hardware itself (not the flame) reached a median peak temperature of 74 °C at 18 to 23.4% oxygen and 298 °C at 33.2 to 40% oxygen"
+  },
+  "caveats": [
+   "Fuel, fuel flow and pressure also vary between tests.",
+   "Cutting the fuel flow is a test procedure; the table does not say how long those flames would have burned."
+  ],
+  "bands": [
+   {
+    "o2": [
+     18.0,
+     23.4
+    ],
+    "p": [
+     7.35,
+     44.09
+    ],
+    "n": 64,
+    "label": "18 to 23.4%",
+    "values": [
+     41,
+     0,
+     23
+    ],
+    "median_burn_s": 8.0,
+    "peak_burner_c": 74,
+    "line": "at 18 to 23.4% oxygen, 41 of 64 gas flames lit; all 41 went out on their own, with a median burn of 8 s"
+   },
+   {
+    "o2": [
+     33.2,
+     40.0
+    ],
+    "p": [
+     7.35,
+     29.39
+    ],
+    "n": 115,
+    "label": "33.2 to 40%",
+    "values": [
+     61,
+     30,
+     24
+    ],
+    "median_burn_s": 50.0,
+    "peak_burner_c": 298,
+    "line": "at 33.2 to 40% oxygen, 91 of 115 gas flames lit; 61 went out on their own and 30 burned until the fuel was cut off, with a median burn of 50 s"
+   }
+  ],
+  "chart": {
+   "unit": "tests",
+   "series": [
+    [
+     "Went out on its own",
+     "#3987e5"
+    ],
+    [
+     "Burned until the fuel was cut off",
+     "#d95926"
+    ],
+    [
+     "Did not light",
+     "#9b6fd6"
+    ]
+   ]
+  },
+  "psi": [
+   "PSI-159"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-159"
+  ]
+ },
+ {
+  "id": "cool-flames",
+  "investigations": [
+   "CFI-G"
+  ],
+  "fuel_class": "gas",
+  "topic": "Hard-to-see flames",
+  "tests": 7,
+  "o2": [
+   38.9,
+   39.9
+  ],
+  "p": [
+   29.39,
+   29.39
+  ],
+  "facts": {
+   "definition": "a cool flame is a faint, low-temperature flame, much harder to see than a normal hot flame; the table records it separately from the hot flame",
+   "result": "at 38.9 to 39.9% oxygen, 7 of the 179 gas-flame tests recorded a cool flame, with burn times of 35 to 251 s",
+   "conditions": "every one burned 30% butane at about 29.39 psi",
+   "one_test": "one test (21291 C1) is noted as \"5 transitions from hot to cool, 6 hot and 5 cool flames\""
+  },
+  "caveats": [
+   "All of these tests used one fuel mix at one pressure and 38.9 to 39.9% oxygen, so the table cannot show where else cool flames occur.",
+   "The table does not say whether the burn time includes the cool-flame phase."
+  ],
+  "bands": [
+   {
+    "o2": [
+     38.9,
+     39.9
+    ],
+    "p": [
+     29.39,
+     29.39
+    ],
+    "n": 7,
+    "label": "38.9 to 39.9%",
+    "values": null,
+    "line": "at 38.9 to 39.9% oxygen, 7 of the 179 gas-flame tests recorded a cool flame, with burn times of 35 to 251 s"
+   }
+  ],
+  "chart": null,
+  "psi": [
+   "PSI-159"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-159"
+  ]
+ },
+ {
+  "id": "gravity",
+  "investigations": [
+   "SAFFIRE-2"
+  ],
+  "fuel_class": "solid",
+  "topic": "Gravity",
+  "tests": 9,
+  "o2": [
+   21.5,
+   22.1
+  ],
+  "p": null,
+  "facts": {
+   "what_was_tested": "9 spacecraft material samples burned in microgravity at about 21.5% to 22.1% oxygen with 20 cm/s airflow, and the same samples burned in normal gravity",
+   "result_overall": "for 4 of 9 samples burned in both microgravity and normal gravity, the burn length differed by half the sample length or more",
+   "silicone": "none of the 4 silicone samples burned in microgravity; in normal gravity 2 burned completely, 1 burned 7.6 cm and 1 did not burn",
+   "pmma": "both PMMA (acrylic) samples burned about 10 cm in microgravity, with the flame still alight after 600 to 900 s, and burned completely in normal gravity",
+   "fabric": "both cotton-fiberglass fabric samples burned their whole 29 cm length in microgravity and in normal gravity, spreading at 2.1 and 2.6 mm/s in microgravity",
+   "nomex": "the Nomex sample did not burn in either"
+  },
+  "caveats": [
+   "The table does not list the oxygen, pressure or airflow of the normal-gravity tests.",
+   "No test in the data ran in Moon or Mars gravity."
+  ],
+  "bands": [
+   {
+    "o2": [
+     21.5,
+     22.1
+    ],
+    "p": null,
+    "n": 9,
+    "label": "about 22%",
+    "values": null,
+    "line": "for 4 of 9 samples burned in both microgravity and normal gravity, the burn length differed by half the sample length or more"
+   }
+  ],
+  "chart": null,
+  "gravity": true,
+  "psi": [
+   "PSI-99"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-99"
+  ]
+ },
+ {
+  "id": "flow-direction",
+  "investigations": [
+   "SAFFIRE-1"
+  ],
+  "fuel_class": "solid",
+  "topic": "Airflow",
+  "tests": 2,
+  "o2": [
+   21.5,
+   21.7
+  ],
+  "p": null,
+  "facts": {
+   "what_was_tested": "two large fabric fires in microgravity, at 21.5 to 21.7% oxygen with 20 cm/s airflow",
+   "result": "a 40.6 by 94 cm cotton-fiberglass fabric sheet burned for 420 s when the flame spread with the airflow and 70 s when it spread against it",
+   "ratio": "the burn with the airflow lasted 6 times as long"
+  },
+  "caveats": [
+   "Two tests only, one in each direction.",
+   "Saffire-III repeated these sheets at 30 cm/s, but its table lists no result."
+  ],
+  "bands": [
+   {
+    "o2": [
+     21.5,
+     21.7
+    ],
+    "p": null,
+    "n": 2,
+    "label": "21.5 to 21.7%",
+    "values": null,
+    "line": "a 40.6 by 94 cm cotton-fiberglass fabric sheet burned for 420 s when the flame spread with the airflow and 70 s when it spread against it"
+   }
+  ],
+  "chart": null,
+  "psi": [
+   "PSI-98"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-98"
+  ]
+ },
+ {
+  "id": "carbon-monoxide",
+  "investigations": [
+   "BASS-II"
+  ],
+  "fuel_class": "solid",
+  "topic": "Toxic gases",
+  "tests": 118,
+  "o2": [
+   14.2,
+   22.2
+  ],
+  "p": null,
+  "facts": {
+   "what_was_tested": "carbon monoxide in the test chamber before and after 118 small solid samples (plastic films, slabs and rods, and cotton-fiberglass fabric) burned in microgravity",
+   "result": "carbon monoxide rose in 117 of the 118 tests, by a median of 45 ppm; it rose by 100 ppm or more in 41 tests",
+   "largest_rise": "the largest rise was 575 ppm, from a 3/8\" clear rod sample at 16.7% oxygen",
+   "by_oxygen": "in 21 tests started at 14.2 to 16.5% oxygen, carbon monoxide rose by a median of 134 ppm; in 59 tests started at 16.7 to 19.3% oxygen, carbon monoxide rose by a median of 40 ppm; in 38 tests started at 20 to 22.2% oxygen, carbon monoxide rose by a median of 25 ppm"
+  },
+  "caveats": [
+   "The table does not give the chamber volume, so these readings do not scale directly to a cabin.",
+   "Different sample types were burned at different oxygen levels, so the oxygen split is not a controlled comparison."
+  ],
+  "bands": [
+   {
+    "o2": [
+     14.2,
+     16.5
+    ],
+    "p": null,
+    "n": 21,
+    "label": "14.2 to 16.5%",
+    "values": [
+     134
+    ],
+    "median_rise_ppm": 134,
+    "line": "in 21 tests started at 14.2 to 16.5% oxygen, carbon monoxide rose by a median of 134 ppm"
+   },
+   {
+    "o2": [
+     16.7,
+     19.3
+    ],
+    "p": null,
+    "n": 59,
+    "label": "16.7 to 19.3%",
+    "values": [
+     40
+    ],
+    "median_rise_ppm": 40,
+    "line": "in 59 tests started at 16.7 to 19.3% oxygen, carbon monoxide rose by a median of 40 ppm"
+   },
+   {
+    "o2": [
+     20.0,
+     22.2
+    ],
+    "p": null,
+    "n": 38,
+    "label": "20 to 22.2%",
+    "values": [
+     25
+    ],
+    "median_rise_ppm": 25,
+    "line": "in 38 tests started at 20 to 22.2% oxygen, carbon monoxide rose by a median of 25 ppm"
+   }
+  ],
+  "chart": {
+   "unit": "ppm",
+   "kind": "bars",
+   "series": [
+    [
+     "Median rise in carbon monoxide",
+     "#d95926"
+    ]
+   ]
+  },
+  "psi": [
+   "PSI-25"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25"
+  ]
+ },
+ {
+  "id": "smoke",
+  "investigations": [
+   "SAME-R",
+   "SAME"
+  ],
+  "fuel_class": "smoke source",
+  "topic": "Smoke detection",
+  "tests": 109,
+  "o2": null,
+  "p": null,
+  "facts": {
+   "what_was_tested": "smoke from spacecraft materials heated until they smoked, without being set alight, in microgravity",
+   "result": "smoke from 5 overheated spacecraft materials was measured in 109 runs: Kapton (29), Silicone (22), Lampwick (20), Pyrell (20), Teflon (18)",
+   "airflow": "the airflow into the smoke chamber was 0 to 8.1 cm/s, and 22 runs had no airflow",
+   "aging": "the smoke was held for 21 to 1923 s before it was measured"
+  },
+  "caveats": [
+   "This table lists how each run was set up, not the smoke particle sizes; those are in NASA data files not loaded here.",
+   "The table lists no oxygen level or pressure."
+  ],
+  "bands": [
+   {
+    "o2": null,
+    "p": null,
+    "n": 109,
+    "label": "",
+    "values": null,
+    "line": "smoke from 5 overheated spacecraft materials was measured in 109 runs"
+   }
+  ],
+  "chart": null,
+  "psi": [
+   "PSI-101",
+   "PSI-102"
+  ],
+  "links": [
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-101",
+   "https://psi.nasa.gov/physci/repo/data/investigations/PSI-102"
+  ]
+ }
+]

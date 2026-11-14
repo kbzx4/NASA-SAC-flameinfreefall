@@ -34,6 +34,13 @@ for (const sc of FF.scenarios) {
   }
   checks++;
   if (rank[0].hfri !== exp.ranking[0][1]) fail(`${sc.name} / top score`, rank[0].hfri, exp.ranking[0][1]);
+
+  const fr = L.rankFindings(FF, sc.o2, sc.pressure);
+  checks++;
+  if (!same(fr, exp.findings)) fail(`${sc.name} / findings ranking`, fr, exp.findings);
+  const gp = L.gaps(FF, sc.o2, sc.pressure);
+  checks++;
+  if (!same(gp, exp.gaps)) fail(`${sc.name} / gaps`, gp, exp.gaps);
 }
 console.log(`${checks - failures} of ${checks} checks match`);
 process.exit(failures ? 1 : 0);

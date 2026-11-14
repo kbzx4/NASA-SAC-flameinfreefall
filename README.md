@@ -13,22 +13,29 @@ NASA's Physical Science Informatics (PSI) archive holds decades of microgravity 
 ## What it does
 
 1. **You describe a habitat**: oxygen, pressure, airflow, gravity, and the materials on board.
-2. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
-3. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Flamebound shows where that bound is tight and where it is wide open.
-4. **It ranks and compares investigations** by how close their test conditions come to yours.
-5. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
+2. **It ranks what NASA's experiments found.** Code computes nine fire-safety findings from the NASA tables (how often droplet and gas flames went out on their own at each oxygen level, how long they burned at low oxygen, what CO2 and helium did, cool flames, what gravity changed, flame spread with and against the airflow, carbon monoxide from burning samples, and the smoke tests). They are ranked by how close their tests came to your habitat, with the result nearest your oxygen level picked out and charted.
+3. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
+4. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
+5. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Flamebound shows where that bound is tight and where it is wide open.
+6. **It ranks and compares investigations** by how close their test conditions come to yours.
+7. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
 
-## Two scores, both shown with their formulas
+## Three scores, each shown with its formula
 
 | Score | Formula | What it means |
 |---|---|---|
 | Gravity Sensitivity Index | `GSI = \|L_1g − L_µg\| ÷ L_sample` (L is burn length) | 0: microgravity and normal gravity agree. 1: the sample burned fully in one and not at all in the other. |
 | Habitat Fire Relevance Index | `HFRI = M_conditions × M_fuel × W_evidence` | How close an investigation's tests come to your conditions. A condition the NASA table does not list counts as 0. |
+| Finding relevance | `½ (C_oxygen + C_pressure) × W_tests` | How close the group of tests nearest your oxygen level comes to your habitat. W is 1 for 10 or more tests, 0.7 for fewer. |
 
-Neither score predicts flammability.
+None of the scores predicts flammability.
 
 ## What the data shows
 
+- In FLEX, 58 of 84 droplet flames at 20 to 21% oxygen went out on their own before the fuel was used up; at 30 to 34% oxygen, 2 of 24 did.
+- In CFI-G, every gas flame that lit at 18 to 23.4% oxygen went out on its own (median burn 8 s); at 33.2 to 40% oxygen, 30 of the 91 that lit burned until the fuel was cut off (median burn 50 s).
+- At about 21% oxygen, 13 of 14 droplet flames went out on their own with helium added and 28 of 36 with CO2 added, against 17 of 34 with nitrogen only.
+- In BASS-II, carbon monoxide rose in 117 of 118 burns, by up to 575 ppm.
 - Gravity changed the outcome for 4 of 9 Saffire-II samples. Thin silicone did not burn in microgravity and burned completely in normal gravity. Cotton-fiberglass fabric burned completely in both.
 - In the 16 investigations loaded, no solid-material flame test lists an oxygen level above 22.2%. Liquid-droplet tests reach 34% and gas-flame tests 40%.
 - No loaded investigation ran in partial gravity.
@@ -43,16 +50,18 @@ Source: [NASA Physical Science Informatics](https://psi.nasa.gov/physci/repo/sea
 
 | Tool | Used for |
 |---|---|
+| Gemini 4 Hydrogen | Interpreted each of the nine findings (headline, what the tests found, what it suggests for a crewed habitat, its limit) and wrote the briefing for each preset habitat, from facts computed by code. |
+| Gemini 3.5 Flash Lite | Second pass on those texts: re-read every sentence against the facts and flagged any that stated something the facts do not hold, claimed cause and effect, or overstated them. Also the second pass on the material notes and investigation summaries below. |
 | Gemini 3.1 Flash Lite | Worded the short note on each material card and the summary of each investigation. Code works out every finding first (counts, gaps, what gravity changed); the model only turns the findings into sentences. |
 | Gemini 3.5 Flash Lite | Second pass: re-read each of those sentences against the facts and flagged unsupported ones for removal. When it did not answer, Gemma 4 31B or Gemini 3.1 Flash Lite (in a fresh pass) was used instead. `data/si_cache.json` records which model re-read each text. |
 | Claude (Claude Code) | Wrote the data pipeline, the site code and the site and repository text, working with the team. |
 
-Checks on the SI-worded text:
+Checks on all SI text:
 
 1. Code looks up every number in a text in the facts it was written from, and removes any sentence containing a number that is not there.
 2. A second SI pass re-reads each remaining sentence against the facts and removes any it judges unsupported.
 
-Neither check is proof. [data/si_cache.json](data/si_cache.json) holds every SI-worded text the site shows, with the sentences each check removed. Grades, counts, rankings and charts are computed without SI.
+Neither check is proof. [data/insight_cache.json](data/insight_cache.json) and [data/si_cache.json](data/si_cache.json) hold every SI text the site shows, with what each check removed, and every text was also read by hand. Findings, grades, counts, rankings and charts are computed without SI.
 
 ## Run it
 
@@ -69,7 +78,9 @@ To rebuild the data from the raw NASA tables:
 ```
 pip install -r requirements.txt
 python scripts/build_catalog.py     # raw tables -> data/catalog.csv
+python scripts/build_findings.py    # findings and their ranking -> data/findings.json
 python scripts/build_si.py          # optional; needs GEMINI_API_KEY in keys.env
+python scripts/build_insights.py    # optional; SI interpretation of the findings
 python scripts/build_site.py        # catalog + SI text -> docs/assets/data.js
 node tests/parity.mjs               # checks the site's JavaScript against the Python
 ```
@@ -83,7 +94,7 @@ An earlier Streamlit version of the tool is kept in `app.py` (`streamlit run app
 | `docs/` | The site: `index.html` (home), `tool.html` (the tool), `assets/` |
 | `data/raw/` | NASA PSI experiment tables, as downloaded |
 | `data/catalog.csv` | One row per test, harmonised units, source text kept |
-| `scripts/` | `build_catalog.py`, `build_si.py`, `build_site.py` |
+| `scripts/` | `build_catalog.py`, `build_findings.py`, `build_si.py`, `build_insights.py`, `build_site.py` |
 | `core.py`, `brief.py`, `si.py` | Scores, evidence logic, SI calls and checks |
 | `tests/parity.mjs` | Fails if the site's JavaScript and the Python disagree |
 
