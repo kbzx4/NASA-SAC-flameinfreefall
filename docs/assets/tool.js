@@ -296,7 +296,7 @@
         <h3 style="margin-top:10px">ISS air against the droplet tests nearest your oxygen: watch how many flames go out on their own</h3>
         <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
         <div id="ins-rp"></div>
-        <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
+        <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. Both sides include tests with CO2 or helium added, which went out on their own more often. <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
       </div>
       ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence.</b> No finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. The findings below are the nearest there are; treat this habitat as a research gap.</div>` : ""}
       ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No test in the data ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first.</div>` : ""}
@@ -645,8 +645,8 @@
     const by = Object.entries(c.by).sort((a, b) => b[1] - a[1]).map(([i, n]) => `${n} ${esc(i)}`).join(", ");
     el.innerHTML = `
       <span class="eyebrow">Atmosphere map</span>
-      <h1 style="margin-top:12px">${open.length} of ${L.ATMOS.length} crew atmospheres, past and planned, have no microgravity fire test anywhere near them</h1>
-      <p class="lede">Every dot is a NASA microgravity fire test, placed at its oxygen level and pressure. Every numbered pin is a real crew atmosphere, from Mercury to the Moon-base plans. All ${pts.length} tests sit at ${g(topO)}% oxygen or less and ${r1(lowP)} psi or more. Every US spacewalk, and every US crewed flight before Skylab, happened outside that zone. Click a pin, or anywhere on the map, to check that atmosphere.</p>
+      <h1 style="margin-top:12px">${open.length} of ${L.ATMOS.length} crew atmospheres, past and planned, have no microgravity fire test near them in the loaded data</h1>
+      <p class="lede">Every dot is a NASA microgravity fire test, placed at its oxygen level and pressure. Every numbered pin is a real crew atmosphere, from Mercury to the Moon-base plans. All ${pts.length} tests sit at ${g(topO)}% oxygen or less and ${r1(lowP)} psi or more. Every US spacewalk, and every US crewed flight before Skylab, happened outside that zone. NASA's CFI-G inverse-flame tests did flow up to 85% oxygen, but from the burner into a chamber of fuel and nitrogen, not as the surrounding air; that table is not loaded here. Click a pin, or anywhere on the map, to check that atmosphere.</p>
       <div class="tiles">
         <div class="tile"><div class="k">${esc(habitat)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi</div><div class="v">${c.n} <small>tests within ${FF.near} points of oxygen and 25% of this pressure</small></div></div>
         <div class="tile"><div class="k">Nearest test</div><div class="v">${nr ? `${r1(nr.o)}% <small>at ${r1(nr.p)} psi · ${esc(nr.i)} ${esc(nr.t || "")}</small>` : "none"}</div></div>
@@ -656,7 +656,7 @@
       <div class="figure" style="margin-top:18px">
         <div id="atlas"></div>
         <div class="legend"><span><i style="background:${CH.C.g1}"></i>Liquid droplets (FLEX, FLEX-2, CFI)</span><span><i style="background:${CH.C.third}"></i>Gas flames (CFI-G, ACME)</span><span><i class="tick" style="background:${CH.C.ug}"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span><span><i class="dia" style="background:#fff"></i>${esc(habitat)}</span></div>
-        <p class="note">Bigger dots are several tests at the same spot. Pressure is on a log scale. "Near" means within ${FF.near} points of oxygen and 25% of the pressure. Only tests run in microgravity are shown. Crew atmospheres: NASA history and NASA's Exploration Atmospheres Working Group; the Apollo 1 cabin was pure oxygen at about 16.7 psi.</p>
+        <p class="note">Bigger dots are several tests at the same spot. Pressure is on a log scale. "Near" means within ${FF.near} points of oxygen and 25% of the pressure. Only tests run in microgravity, with the oxygen of the surrounding air recorded, are shown. Crew atmospheres: NASA history and NASA's Exploration Atmospheres Working Group; the Apollo 1 cabin was pure oxygen at about 16.7 psi.</p>
       </div>
       <h2 style="margin:28px 0 12px">The atmospheres, and the tests near each</h2>
       ${CH.atlasTable(FF, true)}`;

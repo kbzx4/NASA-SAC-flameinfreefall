@@ -212,8 +212,8 @@
       const topO = Math.max(...pts.map((x) => x.o));
       s += txt(X(topO) + 12, Y(56), `${pts.length} tests`, { fill: C.ink, size: narrow ? 12.5 : 14, weight: 600, extra: halo });
       s += txt(X(topO) + 12, Y(56) + 17, `all at ${g(topO)}% oxygen or less`, { fill: C.ink2, size: narrow ? 11.5 : 12.5, extra: halo });
-      if (narrow) s += txt(X(73), Y(10.5), "No microgravity", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "fire test out here", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
-      else s += txt(X(70), Y(28), "No microgravity fire test out here", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
+      if (narrow) s += txt(X(73), Y(10.5), "No test in the", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "loaded data out here", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
+      else s += txt(X(70), Y(28), "No test in the loaded data out here", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
       // tests
       [...bins.values()].sort((a, b) => b.n - a.n).forEach((b) => {
         const o = b.o / b.n, p = b.p / b.n, r = Math.min(8, 2.6 + Math.sqrt(b.n) * 0.9), [col, lab] = cls[b.c] || [C.ug, b.c];
@@ -282,5 +282,85 @@
     return lo.slice(0, -1).concat(up.slice(0, -1));
   }
 
-  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, bindTips, esc, C };
+  /* The self-extinction line: the chance a burning droplet's flame goes out on its own, by oxygen
+     level, from the droplet model (scripts/build_models.py), with the real nitrogen-only FLEX tests
+     beside it. Everything is computed from the data bundle. */
+  function crossoverData(FF) {
+    if (FF._xo) return FF._xo;
+    const MD = window.FFModels, D = FF.models.droplets, P = 14.7, d0 = 3;
+    const fuels = [["Methanol", C.ug], ["Heptane", C.g1]];
+    const curves = fuels.map(([fuel, col]) => {
+      const pts = [];
+      for (let o = 10; o <= 40.001; o += 0.5) { const r = MD.classify(D.ending, MD.dropletX(o, "N2", P, d0, fuel)); pts.push([o, r.fit[0], r.lo[0], r.hi[0]]); }
+      return { fuel, col, pts, ff: MD.fiftyFifty(D.ending, MD.dropletX(21, "N2", P, d0, fuel), 0) };
+    });
+    const f = FF.findings.find((x) => x.id === "droplet-oxygen");
+    const inBand = (p, b) => p[4] === 0 && p[0] >= b.o2[0] - 0.05 && p[0] <= b.o2[1] + 0.05; // nitrogen only
+    const obs = [];
+    f.bands.forEach((b) => fuels.forEach(([fuel, col], k) => {
+      const r = D.points.filter((p) => inBand(p, b) && p[2] === k);
+      if (r.length) obs.push({ fuel, col, band: b.label, n: r.length, e: r.filter((p) => p[1] === "E").length, o: r.reduce((a, p) => a + p[0], 0) / r.length });
+    }));
+    const tally = (o2) => {
+      const b = f.bands.find((x) => x.o2[0] <= o2 && x.o2[1] >= o2), r = D.points.filter((p) => inBand(p, b));
+      return { label: b.label, n: r.length, e: r.filter((p) => p[1] === "E").length };
+    };
+    const gb = FF.findings.find((x) => x.id === "gas-oxygen").bands;
+    const gas = [gb[0], gb[gb.length - 1]].map((b) => ({ label: b.label, lit: b.values[0] + b.values[1], out: b.values[0], cut: b.values[1] }));
+    return (FF._xo = { curves, obs, iss: tally(21), moon: tally(30), gas, P, d0, range: D.range.o2, score: D.ending.score });
+  }
+  function crossover(el, FF) {
+    const d = crossoverData(FF), X0 = 10, X1 = 40, R = d.range;
+    const fits = d.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null), z0 = Math.min(...fits), z1 = Math.max(...fits);
+    const pc = (v) => Math.round(v * 100) + "%";
+    mount(el, (W) => {
+      const narrow = W < 620, left = narrow ? 40 : 52, right = narrow ? 12 : 22, top = 40, plotH = Math.round(Math.max(250, Math.min(380, W * 0.4))), H = top + plotH + 46;
+      const X = (o) => left + ((o - X0) / (X1 - X0)) * (W - left - right), Y = (p) => top + plotH - p * plotH;
+      const halo = ` paint-order="stroke" stroke="${C.bg}" stroke-width="4" stroke-linejoin="round"`;
+      let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Chance a burning droplet's flame goes out on its own, by oxygen level, for methanol and heptane, with NASA's nitrogen-only tests">`;
+      [0, 0.25, 0.5, 0.75, 1].forEach((t) => { s += `<line x1="${left}" x2="${W - right}" y1="${Y(t)}" y2="${Y(t)}" stroke="${C.line}"/>` + txt(left - 8, Y(t) + 4, pc(t), { anchor: "end", fill: C.ink3, size: 12, mono: true }); });
+      (narrow ? [10, 20, 30, 40] : [10, 15, 20, 25, 30, 35, 40]).forEach((t) => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${top}" y2="${top + plotH}" stroke="${C.line}"/>` + txt(X(t), top + plotH + 20, t + "%", { anchor: "middle", fill: C.ink3, size: 12, mono: true }); });
+      s += txt(W - right, top + plotH + 40, "Oxygen, % by volume", { anchor: "end", fill: C.ink3, size: 12 });
+      // the line itself: between the two fuels' 50-50 points
+      s += `<rect x="${X(z0)}" y="${top}" width="${Math.max(3, X(z1) - X(z0))}" height="${plotH}" fill="rgba(255,255,255,0.07)"/>`;
+      s += `<line x1="${left}" x2="${W - right}" y1="${Y(0.5)}" y2="${Y(0.5)}" stroke="${C.line2}" stroke-dasharray="3 5"/>`;
+      // habitats
+      [[21, narrow ? "ISS" : "ISS air · 21%", "end", -6], [30, narrow ? "Moon base" : "Moon base · 30%", "start", 6]].forEach(([o, lab, anc, dx]) => {
+        s += `<line x1="${X(o)}" x2="${X(o)}" y1="${top - 14}" y2="${top + plotH}" stroke="${C.you}" stroke-width="1.3" stroke-dasharray="4 4" opacity="0.75"/>`;
+        s += txt(X(o) + dx, top - 18, lab, { anchor: anc, fill: C.ink, size: 12.5, weight: 600 });
+      });
+      // model: 90% band, then the line (dashed beyond the tested oxygen range)
+      d.curves.forEach((c) => {
+        const band = c.pts.map((p) => `${X(p[0]).toFixed(1)},${Y(p[3]).toFixed(1)}`).concat(c.pts.slice().reverse().map((p) => `${X(p[0]).toFixed(1)},${Y(p[2]).toFixed(1)}`));
+        s += `<path d="M${band.join("L")}Z" fill="${c.col}" opacity="0.16"/>`;
+      });
+      d.curves.forEach((c) => {
+        const seg = (keep) => { const q = c.pts.filter(keep); return q.length > 1 ? "M" + q.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("L") : ""; };
+        s += `<path d="${seg((p) => p[0] >= R[0] && p[0] <= R[1])}" fill="none" stroke="${c.col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+        s += `<path d="${seg((p) => p[0] <= R[0])}" fill="none" stroke="${c.col}" stroke-width="2" stroke-dasharray="4 4"/><path d="${seg((p) => p[0] >= R[1])}" fill="none" stroke="${c.col}" stroke-width="2" stroke-dasharray="4 4"/>`;
+      });
+      // direct labels, where the two lines are furthest apart
+      let best = -1, bi = 0;
+      d.curves[0].pts.forEach((p, i) => { const gap = Math.abs(p[1] - d.curves[1].pts[i][1]); if (p[0] >= 23 && p[0] <= 28 && gap > best) { best = gap; bi = i; } });
+      const lx = X(d.curves[0].pts[bi][0]) + 8;
+      s += txt(lx, Y(d.curves[0].pts[bi][1]) - 10, "Methanol", { fill: C.ink, size: 12.5, weight: 600, extra: halo });
+      s += txt(lx, Y(d.curves[1].pts[bi][1]) + 20, "Heptane", { fill: C.ink, size: 12.5, weight: 600, extra: halo });
+      if (!narrow) s += txt(X(z0) - 8, Y(0.5) - 8, `50-50 at ${g(Math.round(z0 * 10) / 10)} to ${g(Math.round(z1 * 10) / 10)}% oxygen`, { anchor: "end", fill: C.ink2, size: 12, extra: halo });
+      // hover columns with both lines' values
+      const step = X(10.5) - X(10);
+      d.curves[0].pts.forEach((p, i) => {
+        const q = d.curves[1].pts[i];
+        const tip = `<b>${g(p[0])}% oxygen · model</b><span>Methanol: ${pc(p[1])} (90% range ${pc(p[2])} to ${pc(p[3])})<br>Heptane: ${pc(q[1])} (${pc(q[2])} to ${pc(q[3])})${p[0] < R[0] || p[0] > R[1] ? "<br>Beyond the tested oxygen range" : ""}</span>`;
+        s += `<rect x="${(X(p[0]) - step / 2).toFixed(1)}" y="${top}" width="${step.toFixed(1)}" height="${plotH}" fill="transparent" data-tip="${esc(tip)}"/>`;
+      });
+      // real tests, drawn last so they sit above the hover columns
+      d.obs.forEach((o) => {
+        const r = Math.min(11, 3.5 + Math.sqrt(o.n) * 1.4), tip = `<b>${o.e} of ${o.n} ${o.fuel.toLowerCase()} droplet flames went out on their own</b><span>NASA FLEX tests at ${esc(o.band)} oxygen, nitrogen only, all droplet sizes</span>`;
+        s += `<circle cx="${X(o.o).toFixed(1)}" cy="${Y(o.e / o.n).toFixed(1)}" r="${r.toFixed(1)}" fill="${C.bg}" stroke="${o.col}" stroke-width="2.4" tabindex="0" data-tip="${esc(tip)}"/>`;
+      });
+      return s + "</svg>";
+    });
+  }
+
+  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, bindTips, esc, C };
 })();

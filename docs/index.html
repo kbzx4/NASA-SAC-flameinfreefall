@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115d">
+<link rel="stylesheet" href="assets/style.css?v=20261115e">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -21,9 +21,9 @@
   <div class="wrap">
     <a class="brand" href="./"><span class="orb"></span>Flamebound</a>
     <div class="nav-links">
+      <a class="hide-s" href="#finding">The finding</a>
       <a class="hide-s" href="#problem">The gap</a>
-      <a class="hide-s" href="#how">How it works</a>
-      <a class="hide-s" href="#findings">Findings</a>
+      <a class="hide-s" href="#findings">Gravity</a>
       <a class="hide-s" href="#method">Method</a>
       <a class="btn primary small" href="tool.html">Open the tool</a>
     </div>
@@ -35,7 +35,7 @@
     <div>
       <span class="eyebrow">NASA Space Apps 2026 · Flame in Freefall</span>
       <h1>Fire changes shape <span class="blue">when gravity does.</span></h1>
-      <p class="lede">Flamebound reads <b><span data-n="records"></span> microgravity combustion records</b> from NASA, works out what the experiments found, ranks those findings for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit.</p>
+      <p class="lede">Flamebound reads <b><span data-n="records"></span> combustion test records</b> from NASA, works out what the experiments found, ranks those findings for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit.</p>
       <div class="cta">
         <a class="btn primary" href="tool.html">Open the tool
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -68,10 +68,34 @@
     <div class="figure reveal">
       <span class="eyebrow">Real NASA tests, replayed</span>
       <h3 style="margin-top:10px">ISS air against Moon-base oxygen: watch how many flames go out on their own</h3>
-      <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
+      <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Only tests with nothing added to the nitrogen, so CO2 and helium do not tip the count. Hover over one to see it.</p>
       <div id="replay"></div>
       <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse.</p>
     </div>
+  </div>
+</section>
+
+<section id="finding">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The finding · the self-extinction line</span>
+      <h2>Somewhere between ISS air and Moon-base air, flames stop putting themselves out.</h2>
+      <p>In NASA's FLEX tests with nothing added to the nitrogen, about half the burning fuel droplets in ISS air went out on their own before the fuel was used up. At the 30% oxygen planned for Moon bases, almost none did. A model fitted to <span data-x="tests"></span> FLEX tests puts the 50-50 point at <span data-x="line"></span> oxygen, depending on the fuel: at or just above the air astronauts breathe today.</p>
+    </div>
+    <div class="tiles reveal xo-tiles">
+      <div class="tile"><div class="k">ISS air · <span data-x="issband"></span> oxygen</div><div class="v"><span data-x="iss"></span> <small>droplet flames went out on their own</small></div></div>
+      <div class="tile"><div class="k">Moon-base oxygen · <span data-x="moonband"></span></div><div class="v"><span data-x="moon"></span> <small>went out on their own</small></div></div>
+      <div class="tile"><div class="k">Model's 50-50 point</div><div class="v"><span data-x="line"></span> <small>oxygen, for a 3 mm droplet</small></div></div>
+    </div>
+    <div class="figure reveal" style="margin-top:18px">
+      <h3>The chance a burning droplet's flame goes out on its own, by oxygen level</h3>
+      <p class="sub">Lines: a model fitted to NASA's FLEX tests, for a 3 mm droplet with nothing added to the nitrogen. Rings: the real tests in each oxygen band, nitrogen only, all sizes. Hover anywhere for the numbers.</p>
+      <div id="crossover"></div>
+      <div class="legend"><span><i style="background:#3987e5"></i>Methanol</span><span><i style="background:#d95926"></i>Heptane</span><span><i style="background:transparent;border:2px solid #aab3c5;width:9px;height:9px"></i>Real tests (bigger ring, more tests)</span><span><i style="background:rgba(170,179,197,0.35);border-radius:2px"></i>Model's 90% range</span><span><i class="tick" style="background:transparent;border-left:2px dashed #aab3c5"></i>Dashed: beyond the tested oxygen range</span></div>
+      <p class="note">Checked on tests it never saw, the model ranks flames that went out above those that did not with AUC <span data-x="auc"></span> (0.5 is guessing, 1 is perfect). It also learned that bigger droplets go out more often, consistent with large droplet flames losing more heat by radiation. Pressure barely matters here: at Moon-base pressure the lines move by under 2 points. Gas flames point the same way: at <span data-x="gaslowband"></span> oxygen all <span data-x="gaslow"></span> lit gas flames went out on their own; at <span data-x="gashighband"></span>, <span data-x="gashigh"></span> of the <span data-x="gashighlit"></span> that lit burned until the fuel was cut off. These are droplets and gas flames in a test chamber, not cabin materials, and the tests changed several things at once: the line is a pattern to design around, not a proven cause. Sources: FLEX (PSI-69), CFI-G (PSI-159).</p>
+    </div>
+    <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?view=model">Run the fire model for your habitat
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
   </div>
 </section>
 
@@ -79,7 +103,7 @@
   <div class="wrap">
     <div class="stats reveal">
       <div class="stat"><div class="num" data-n="records"></div><div class="lbl">records from NASA experiment tables, in one harmonised table</div></div>
-      <div class="stat"><div class="num" data-n="investigations"></div><div class="lbl">ISS combustion investigations, from candle flames to cargo-ship fires</div></div>
+      <div class="stat"><div class="num" data-n="investigations"></div><div class="lbl">NASA microgravity combustion investigations, from candle flames to cargo-ship fires</div></div>
       <div class="stat"><div class="num"><span data-n="solidmax"></span>%</div><div class="lbl">the highest oxygen level in any solid-material flame test loaded</div></div>
       <div class="stat"><div class="num zero">0</div><div class="lbl">tests in Moon or Mars gravity. NASA's archive has none yet</div></div>
     </div>
@@ -90,11 +114,11 @@
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">The gap</span>
-      <h2>Every spacewalk happens in an atmosphere no microgravity fire test has come near.</h2>
-      <p>NASA's open microgravity fire data stops at <span data-n="topo2"></span>% oxygen. Crews have lived far past that: pure oxygen from Mercury to Apollo, three-quarters oxygen on Skylab, and pure oxygen inside every US spacesuit today. Apollo 1 burned in pure oxygen. Moon-base plans move back toward richer air, and solid materials, the things that actually burn in a cabin, were flame-tested in orbit only up to <span data-n="solidmax"></span>%.</p>
+      <h2>Past that line, the data thins out. Crews have lived far beyond it.</h2>
+      <p>In the NASA tables loaded here, every microgravity fire test that records its surrounding air ran at <span data-n="topo2"></span>% oxygen or less. Crews have breathed pure oxygen from Mercury to Apollo, about three-quarters oxygen on Skylab, and pure oxygen inside every US spacesuit today; Apollo 1 burned in pure oxygen. Solid materials, the things that actually burn in a cabin, were flame-tested in orbit only up to <span data-n="solidmax"></span>%. NASA's CFI-G inverse-flame tests did flow up to 85% oxygen, but from the burner into a chamber of fuel and nitrogen, not as the surrounding air, and that table is not loaded here.</p>
     </div>
     <div class="figure reveal">
-      <h3><span data-n="open"></span> of <span data-n="atmos"></span> crew atmospheres, past and planned, have no microgravity fire test anywhere near them.</h3>
+      <h3><span data-n="open"></span> of <span data-n="atmos"></span> crew atmospheres, past and planned, have no test near them in the loaded data.</h3>
       <p class="sub">Every dot is a NASA microgravity fire test at its oxygen level and pressure. Every numbered pin is an atmosphere crews have breathed, or will. Hover over a pin for its story; click it to check it in the tool.</p>
       <div id="atlas"></div>
       <div class="legend"><span><i style="background:#d95926"></i>Liquid droplets</span><span><i style="background:#199e70"></i>Gas flames</span><span><i class="tick" style="background:#3987e5"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span></div>
@@ -124,7 +148,7 @@
     </div>
     <div class="grid-3">
       <div class="card reveal"><span class="step-n">01</span><h3>Describe the habitat</h3><p>Set oxygen, pressure, airflow and gravity, or start from the ISS, a Moon base or a spacesuit. Then pick the materials on board.</p></div>
-      <div class="card reveal"><span class="step-n">02</span><h3>Get the findings, ranked</h3><p>What the droplet, gas-flame, fabric and plastic fires showed, ranked by how close their tests came to your atmosphere, with the result nearest your oxygen level picked out.</p></div>
+      <div class="card reveal"><span class="step-n">02</span><h3>Get the findings, ranked and modelled</h3><p>What the droplet, gas-flame, fabric and plastic fires showed, ranked by how close their tests came to your atmosphere, and what models fitted to the tests predict at your exact conditions, with their uncertainty.</p></div>
       <div class="card reveal"><span class="step-n">03</span><h3>Read what they suggest, then ask</h3><p>SI interprets each finding for a crewed habitat, names its limit and writes a briefing. Ask your own question and SI answers from the findings, citing each one, with every sentence checked as it arrives.</p></div>
     </div>
   </div>
@@ -161,7 +185,7 @@
     <div class="grid-3">
       <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
       <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding and its ranking. A Gemini model then interprets the findings, reading only the facts code computed. Code looks up every number it wrote, a second model re-reads every sentence against the facts, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
-      <div class="card reveal"><h3>Honest about limits</h3><p>Flamebound grades how much evidence exists near your conditions. It does not predict whether a material will burn, and it is not an operational safety system.</p></div>
+      <div class="card reveal"><h3>Honest about limits</h3><p>Flamebound shows how much evidence exists near your conditions and what models fitted to NASA's droplet and gas-flame tests predict there. The models cover only the conditions tested and say nothing directly about cabin materials. It is not an operational safety system.</p></div>
     </div>
   </div>
 </section>
@@ -202,12 +226,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115d"></script>
-<script src="assets/data.js?v=20261115d"></script>
-<script src="assets/logic.js?v=20261115d"></script>
-<script src="assets/charts.js?v=20261115d"></script>
-<script src="assets/flame.js?v=20261115d"></script>
-<script src="assets/replay.js?v=20261115d"></script>
+<script src="assets/config.js?v=20261115e"></script>
+<script src="assets/data.js?v=20261115e"></script>
+<script src="assets/logic.js?v=20261115e"></script>
+<script src="assets/charts.js?v=20261115e"></script>
+<script src="assets/models.js?v=20261115e"></script>
+<script src="assets/flame.js?v=20261115e"></script>
+<script src="assets/replay.js?v=20261115e"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -293,7 +318,16 @@
   });
   safe(() => FFCharts.atlas(document.getElementById("atlas"), FF, { onPin: (id) => { const a = FFLogic.ATMOS.find((x) => x.id === id); location.href = `tool.html?view=map&o2=${a.o2}&p=${a.p}`; } }));
   safe(() => FFCharts.dumbbell(document.getElementById("dumbbell"), FF.pairs));
-  safe(() => FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, compact: true, loop: true }));
+  safe(() => FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, gas: "N2", compact: true, loop: true }));
+  safe(() => { // the self-extinction line, every number from the data bundle
+    const x = FFCharts.crossoverData(FF), r1 = (v) => String(Math.round(v * 10) / 10);
+    const fits = x.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null);
+    const set = { tests: x.score.tests, line: `${r1(Math.min(...fits))} to ${r1(Math.max(...fits))}%`, iss: `${x.iss.e} of ${x.iss.n}`, moon: `${x.moon.e} of ${x.moon.n}`,
+      issband: x.iss.label, moonband: x.moon.label, auc: x.score.auc_goes_out.toFixed(2),
+      gaslowband: x.gas[0].label, gaslow: x.gas[0].lit, gashighband: x.gas[1].label, gashigh: x.gas[1].cut, gashighlit: x.gas[1].lit };
+    document.querySelectorAll("[data-x]").forEach((el) => { if (set[el.dataset.x] != null) el.textContent = set[el.dataset.x]; });
+    FFCharts.crossover(document.getElementById("crossover"), FF);
+  });
   reveal(); // the cards drawn above
 })();
 </script>

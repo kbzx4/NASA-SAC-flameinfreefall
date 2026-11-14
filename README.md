@@ -4,7 +4,7 @@
 
 Built for the NASA International Space Apps Challenge 2026, challenge [Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data](https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/).
 
-Flamebound is an evidence summary, not a safety assessment. It reports which NASA tests exist near a set of conditions. It does not predict whether a material will burn.
+Flamebound is an evidence summary, not a safety assessment. It reports which NASA tests exist near a set of conditions, and its models predict how NASA's droplet and gas-flame tests would end there, only within the conditions tested. It does not predict whether a cabin material will burn.
 
 ## The problem
 
@@ -36,13 +36,14 @@ None of the scores predicts flammability.
 
 ## What the data shows
 
+- **The self-extinction line.** Somewhere between ISS air and Moon-base air, flames stop putting themselves out. In FLEX tests with nothing added to the nitrogen, 17 of 32 burning droplets went out on their own at 20 to 21% oxygen, against 2 of 23 at 30 to 34%. A model fitted to 261 FLEX tests (AUC 0.88 on unseen tests) puts the 50-50 point at 20.4% oxygen for a 3 mm heptane droplet and 23.4% for methanol: at or just above the air astronauts breathe today. Pressure moves it by under 2 points. CFI-G gas flames point the same way. These are droplets and gas flames in a test chamber, not cabin materials.
 - In FLEX, 58 of 84 droplet flames at 20 to 21% oxygen went out on their own before the fuel was used up; at 30 to 34% oxygen, 2 of 24 did.
 - In CFI-G, every gas flame that lit at 18 to 23.4% oxygen went out on its own (median burn 8 s); at 33.2 to 40% oxygen, 30 of the 91 that lit burned until the fuel was cut off (median burn 50 s).
 - At about 21% oxygen, 13 of 14 droplet flames went out on their own with helium added and 28 of 36 with CO2 added, against 17 of 34 with nitrogen only.
 - In BASS-II, carbon monoxide rose in 117 of 118 burns, by up to 575 ppm.
 - Gravity changed the outcome for 4 of 9 Saffire-II samples. Thin silicone did not burn in microgravity and burned completely in normal gravity. Cotton-fiberglass fabric burned completely in both.
 - In the 16 investigations loaded, no solid-material flame test lists an oxygen level above 22.2%. Liquid-droplet tests reach 34% and gas-flame tests 40%.
-- All 754 microgravity tests that list both oxygen and pressure sit at 40% oxygen or less and 7.35 psi or more. The atmospheres of Mercury to Apollo (100%, 5 psi), Apollo 1 (100%, 16.7 psi), Skylab (about 74%, 5 psi) and the spacesuit (100%, 4.3 psi) have no test near them; the nearest is 35 to 61 points of oxygen away.
+- In the tables loaded here, all 754 microgravity tests that list both the oxygen of the surrounding air and the pressure sit at 40% oxygen or less and 7.35 psi or more (CFI-G's inverse-flame tests, which flowed up to 85% oxygen from the burner, are not loaded). The atmospheres of Mercury to Apollo (100%, 5 psi), Apollo 1 (100%, 16.7 psi), Skylab (about 74%, 5 psi) and the spacesuit (100%, 4.3 psi) have no test near them; the nearest is 35 to 61 points of oxygen away.
 - No loaded investigation ran in partial gravity.
 
 ## NASA data used

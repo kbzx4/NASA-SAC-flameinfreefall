@@ -102,6 +102,13 @@ Changes made:
 
 - The Spacesuit briefing was regenerated. On the first try the second pass removed its gap sentence, judging "no test ran below 7.35 psi" unsupported when the facts state exactly that; without it the briefing described 33 to 40% oxygen tests with no warning that a suit runs at 100%, so it was discarded. The second try kept all four sentences, and every number was checked by hand against the facts.
 
+## Nov 15, early morning: leading with the self-extinction line
+
+- A review against the judging guide, past winners and 77 public competitor repos found that at least five other entries lead with the same coverage gap (no solid tested above 22.2% oxygen, an oxygen-pressure map with mission pins), and one shares the name. The agent brief had warned against leading with it.
+- The home page now leads with a finding no competitor seen leads with: between ISS air and Moon-base air, droplet flames stop going out on their own. The first raw comparison (58 of 84 against 2 of 24) mixed in tests with CO2 or helium added, which go out more often; the page uses nitrogen-only tests (17 of 32 against 2 of 23), and the home replay now shows only those, so its counters end on the same numbers.
+- Checks before publishing: each FLEX oxygen band spans about 10 to 15 psi, so oxygen and pressure are not confounded; Moon-base pressure moves the model's lines by at most 1.6 points; the real nitrogen-only tests sit on or near the model lines (methanol 11 of 15 at 21% against 74% predicted for a 3 mm droplet).
+- The coverage map stays as supporting evidence, reworded: the challenge statement says CFI-G inverse flames flowed up to 85% oxygen, so claims are now limited to "the loaded data" and the 85% tests are named. Other fixes: "1,196 microgravity records" (9 are normal-gravity) is now "combustion test records"; the disclaimers no longer say the site never predicts, since the Fire model does.
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.
