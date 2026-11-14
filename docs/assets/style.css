@@ -420,3 +420,13 @@ table.atlas-t td.zero { color: #ff9b73; font-weight: 600; }
 table.atlas-t tr[data-pin] { cursor: pointer; }
 table.atlas-t tr[data-pin]:hover td, table.atlas-t tr[data-pin]:focus-visible td { background: rgba(255, 255, 255, 0.04); }
 .tag.fire { display: inline-block; font: 600 10.5px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #ffb38f; border: 1px solid rgba(255, 140, 90, 0.45); border-radius: 999px; padding: 3px 7px; margin-left: 6px; vertical-align: 1px; }
+
+/* one-word evidence badge on the briefing */
+.briefing { position: relative; }
+.briefing .verdict { float: right; margin: -4px -6px 8px 14px; display: inline-flex; align-items: center; gap: 8px; font: 700 15px/1 var(--display); letter-spacing: 0.01em; padding: 9px 14px 9px 12px; border-radius: 999px; border: 1px solid; text-decoration: none; }
+.verdict i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.verdict.ok { color: #4fd1a1; border-color: rgba(79, 209, 161, 0.45); background: rgba(79, 209, 161, 0.1); }
+.verdict.thin { color: #f2b84b; border-color: rgba(242, 184, 75, 0.45); background: rgba(242, 184, 75, 0.1); }
+.verdict.none { color: #ff8a5c; border-color: rgba(255, 138, 92, 0.5); background: rgba(255, 138, 92, 0.1); }
+.verdict:hover { filter: brightness(1.15); }
+.ins-replay { margin: 18px 0; }

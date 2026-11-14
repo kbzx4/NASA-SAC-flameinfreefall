@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115b">
+<link rel="stylesheet" href="assets/style.css?v=20261115c">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -63,6 +63,18 @@
   </div>
 </header>
 
+<section id="replay-sec" style="padding-top:0;padding-bottom:28px">
+  <div class="wrap">
+    <div class="figure reveal">
+      <span class="eyebrow">Real NASA tests, replayed</span>
+      <h3 style="margin-top:10px">ISS air against Moon-base oxygen: watch how many flames go out on their own</h3>
+      <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
+      <div id="replay"></div>
+      <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse.</p>
+    </div>
+  </div>
+</section>
+
 <section style="padding-top:0">
   <div class="wrap">
     <div class="stats reveal">
@@ -97,12 +109,6 @@
       <span class="eyebrow">Ranked for a Moon base · 30% oxygen, 10.2 psi</span>
       <h2>What the experiments found, ranked by how close they come to your design.</h2>
       <p>Code computes each finding from the NASA tables. The findings are ranked by how close their tests came to the habitat's oxygen level and pressure. SI then explains what each one suggests, and every sentence it writes is checked twice.</p>
-    </div>
-    <div class="figure reveal" style="margin-bottom:18px">
-      <h3>Real NASA tests, replayed: ISS air against Moon-base oxygen</h3>
-      <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
-      <div id="replay"></div>
-      <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse.</p>
     </div>
     <div class="grid-3" id="top-insights"></div>
     <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?s=Moon%20base%20%2F%20pressurized%20rover">See all <span data-n="findings"></span> findings for a Moon base
@@ -196,12 +202,12 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115b"></script>
-<script src="assets/data.js?v=20261115b"></script>
-<script src="assets/logic.js?v=20261115b"></script>
-<script src="assets/charts.js?v=20261115b"></script>
-<script src="assets/flame.js?v=20261115b"></script>
-<script src="assets/replay.js?v=20261115b"></script>
+<script src="assets/config.js?v=20261115c"></script>
+<script src="assets/data.js?v=20261115c"></script>
+<script src="assets/logic.js?v=20261115c"></script>
+<script src="assets/charts.js?v=20261115c"></script>
+<script src="assets/flame.js?v=20261115c"></script>
+<script src="assets/replay.js?v=20261115c"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;

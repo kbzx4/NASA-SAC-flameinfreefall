@@ -246,6 +246,24 @@
       <details><summary>The facts code computed from the NASA table</summary>${facts.replace("</ul>", f.caveats.map((x) => `<li class="cav">${esc(x)}</li>`).join("") + "</ul>")}</details>
     </article>`;
   }
+  /* one word on how much test evidence sits near this habitat, beside the briefing */
+  function verdict() {
+    const c = L.coverage(FF, state.o2, state.pressure);
+    const [word, cls] = c.n >= 20 ? ["Tested", "ok"] : c.n > 0 ? ["Sparse", "thin"] : ["Untested", "none"];
+    const why = c.n ? `${c.n} microgravity tests within ${FF.near} points of oxygen and 25% of this pressure.` : `No microgravity test within ${FF.near} points of oxygen and 25% of this pressure. The nearest is at ${g(Math.round(c.nearest.o * 10) / 10)}% oxygen and ${g(Math.round(c.nearest.p * 10) / 10)} psi.`;
+    return `<a class="verdict ${cls}" href="?view=map" data-view-link="map" data-tip="<b>${word}</b><span>${esc(why)} Open the Atmosphere map.</span>"><i></i>${word}</a>`;
+  }
+  /* the replay on the Insights view: kept across redraws (live SI redraws the view) and restarted
+     only when the oxygen group nearest the habitat changes */
+  let insRp = null, insRpHost = null, insRpKey = null;
+  function insReplay(rank) {
+    const slot = $("ins-rp"); if (!slot) return;
+    const key = rank ? rank.band : -1;
+    if (insRpHost && insRpKey === key) { slot.appendChild(insRpHost); return; }
+    if (insRp) insRp.destroy();
+    insRpHost = document.createElement("div"); insRpKey = key; slot.appendChild(insRpHost);
+    insRp = FFReplay.mount(insRpHost, FF, { kind: "droplets", compact: true, loop: true, o2: state.o2 });
+  }
   function drawInsights() {
     const el = $("view-insights"), habitat = state.scenario === "Custom" ? "your habitat" : state.scenario;
     const byId = Object.fromEntries(FF.findings.map((f) => [f.id, f]));
@@ -266,13 +284,20 @@
       <p class="lede">${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${esc(gravityLabel())}. ${FF.findings.length} findings computed from the ${(() => { const inv = new Set(FF.findings.flatMap((f) => f.investigations)); return `${FF.rows.filter((r) => inv.has(r.i)).length.toLocaleString("en-US")} NASA test records of ${inv.size} investigations`; })()}, ranked by how close their tests came to these conditions, and interpreted by SI.</p>
       <div class="briefing">${(() => {
         const lb = live.brief && live.brief.key === habitatKey() ? live.brief : null;
-        if (lb) return `<div class="k">Briefing · written live by SI for these values</div>${liveBody("brief")}`;
-        if (brief) return `<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}`;
-        return `<div class="k">Closest results · computed, not SI-written</div><p>${esc(custom)}</p>
+        if (lb) return `${verdict()}<div class="k">Briefing · written live by SI for these values</div>${liveBody("brief")}`;
+        if (brief) return `${verdict()}<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}`;
+        return `${verdict()}<div class="k">Closest results · computed, not SI-written</div><p>${esc(custom)}</p>
           ${AI.configured() ? `<button class="btn small" id="brief-live" style="margin-top:12px">Write an SI briefing for these values</button>` : `<span class="chk none">Turn on live SI below to get an SI-written briefing for these values.</span>`}`;
       })()}
       </div>
       ${askPanel()}
+      <div class="figure ins-replay">
+        <span class="eyebrow">Real NASA tests, replayed</span>
+        <h3 style="margin-top:10px">ISS air against the droplet tests nearest your oxygen: watch how many flames go out on their own</h3>
+        <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
+        <div id="ins-rp"></div>
+        <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
+      </div>
       ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence.</b> No finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. The findings below are the nearest there are; treat this habitat as a research gap.</div>` : ""}
       ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No test in the data ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first.</div>` : ""}
       <div class="ins-tools">
@@ -293,6 +318,7 @@
           <li>Relevance says how close the evidence is to your habitat. It does not say whether a fire would start or spread.</li></ul></div>
       </div>`;
     shown.forEach((r) => { const f = byId[r.id]; if (f.chart) CH.finding($("ch-" + f.id), f, r.band); });
+    insReplay(all.find((r) => r.id === "droplet-oxygen"));
     CH.bindTips(el);
     bindLive();
     $("kinds").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; state.kind = b.dataset.k; drawInsights(); };
@@ -670,6 +696,7 @@
     document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === state.view));
     document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + state.view));
     if (state.view !== "replay" && replayCtl) { replayCtl.destroy(); replayCtl = null; }
+    if (state.view !== "insights" && insRp) { insRp.destroy(); insRp = insRpHost = insRpKey = null; }
     if (simCtl) { simCtl.destroy(); simCtl = null; }
     DRAW[state.view]();
   }
