@@ -410,3 +410,13 @@ a.tag:hover { color: var(--ink); border-color: var(--ug); }
 @media (max-width: 760px) { .model-ctl { align-items: flex-start; } .model-ctl .pills { justify-content: flex-start; } }
 .model-line.big { font-size: 17px; margin-top: 16px; }
 .model-line.big b { color: var(--ug-hi); }
+
+/* Atmosphere map */
+#atlas.pick { cursor: crosshair; }
+#atlas [data-pin] { cursor: pointer; }
+#atlas [data-pin]:focus-visible circle:nth-child(2) { stroke-width: 3.5; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+table.atlas-t td.zero { color: #ff9b73; font-weight: 600; }
+table.atlas-t tr[data-pin] { cursor: pointer; }
+table.atlas-t tr[data-pin]:hover td, table.atlas-t tr[data-pin]:focus-visible td { background: rgba(255, 255, 255, 0.04); }
+.tag.fire { display: inline-block; font: 600 10.5px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #ffb38f; border: 1px solid rgba(255, 140, 90, 0.45); border-radius: 999px; padding: 3px 7px; margin-left: 6px; vertical-align: 1px; }

@@ -21,7 +21,7 @@
   <div class="wrap">
     <a class="brand" href="./"><span class="orb"></span>Flamebound</a>
     <div class="nav-links">
-      <a class="hide-s" href="#problem">The problem</a>
+      <a class="hide-s" href="#problem">The gap</a>
       <a class="hide-s" href="#how">How it works</a>
       <a class="hide-s" href="#findings">Findings</a>
       <a class="hide-s" href="#method">Method</a>
@@ -77,16 +77,16 @@
 <section id="problem">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">The problem</span>
-      <h2>Moon bases will run richer in oxygen than any solid we have burned in orbit.</h2>
-      <p>NASA expects Moon bases and pressurized rovers to hold 30% oxygen or more, at 10.2 psi or less. More oxygen makes materials more flammable. The test data that exists is scattered across tables with different units, and it is hard to tell how close any of it comes to a new design.</p>
+      <span class="eyebrow">The gap</span>
+      <h2>Every spacewalk happens in an atmosphere no microgravity fire test has come near.</h2>
+      <p>NASA's open microgravity fire data stops at <span data-n="topo2"></span>% oxygen. Crews have lived far past that: pure oxygen from Mercury to Apollo, three-quarters oxygen on Skylab, and pure oxygen inside every US spacesuit today. Apollo 1 burned in pure oxygen. Moon-base plans move back toward richer air, and solid materials, the things that actually burn in a cabin, were flame-tested in orbit only up to <span data-n="solidmax"></span>%.</p>
     </div>
     <div class="figure reveal">
-      <h3>Solid materials were flame-tested up to <span data-n="solidmax"></span>% oxygen. Droplets and gases go further.</h3>
-      <p class="sub">Every line is one microgravity test, placed at its oxygen level. The shaded zone is where Moon bases and rovers are expected to operate.</p>
-      <div id="lanes"></div>
-      <div class="legend"><span><i class="tick" style="background:#3987e5"></i>Solid materials</span><span><i class="tick" style="background:#d95926"></i>Liquid droplets</span><span><i class="tick" style="background:#199e70"></i>Gas flames</span></div>
-      <p class="note">Covers the <span data-n="investigations"></span> investigations loaded here, not all of NASA's archive. Spacesuits run at 100% oxygen, off this scale. Source: NASA PSI experiment tables.</p>
+      <h3><span data-n="open"></span> of <span data-n="atmos"></span> crew atmospheres, past and planned, have no microgravity fire test anywhere near them.</h3>
+      <p class="sub">Every dot is a NASA microgravity fire test at its oxygen level and pressure. Every numbered pin is an atmosphere crews have breathed, or will. Hover over a pin for its story; click it to check it in the tool.</p>
+      <div id="atlas"></div>
+      <div class="legend"><span><i style="background:#d95926"></i>Liquid droplets</span><span><i style="background:#199e70"></i>Gas flames</span><span><i class="tick" style="background:#3987e5"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span></div>
+      <p class="note">"Near" means within 2 points of oxygen and 25% of the pressure. Covers the <span data-n="investigations"></span> investigations loaded here, not all of NASA's archive. Sources: NASA PSI experiment tables; crew atmospheres from NASA history and NASA's Exploration Atmospheres Working Group.</p>
     </div>
   </div>
 </section>
@@ -218,6 +218,9 @@
     pairs: paired.length,
     built: FF.built,
     findings: FF.findings.length,
+    topo2: Math.max(...FFLogic.placed(FF).map((x) => x.o)),
+    open: FFLogic.ATMOS.filter((a) => FFLogic.coverage(FF, a.o2, a.p).n === 0).length,
+    atmos: FFLogic.ATMOS.length,
   };
   document.querySelectorAll("[data-n]").forEach((el) => { el.textContent = n[el.dataset.n]; });
 
@@ -243,11 +246,7 @@
     else { a.setAttribute("aria-disabled", "true"); a.removeAttribute("href"); const s = a.querySelector("span"); if (s) s.textContent = "Demo video soon"; }
   });
 
-  FFCharts.lanes(document.getElementById("lanes"), FF, [
-    { o2: 21, label: "ISS · 21%", short: "ISS 21% ", shortAnchor: "end" },
-    { o2: 30, label: "Moon base · 30% or more", short: " Moon base 30%+", shortAnchor: "start", anchor: "end", strong: true },
-    { o2: 34, label: "Exploration atmosphere · 34%", anchor: "start", wideOnly: true },
-  ]);
+  FFCharts.atlas(document.getElementById("atlas"), FF, { onPin: (id) => { const a = FFLogic.ATMOS.find((x) => x.id === id); location.href = `tool.html?view=map&o2=${a.o2}&p=${a.p}`; } });
   FFCharts.dumbbell(document.getElementById("dumbbell"), FF.pairs);
   FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, compact: true, loop: true });
 

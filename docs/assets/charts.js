@@ -173,5 +173,114 @@
     });
   }
 
-  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, bindTips, esc, C };
+  /* Atmosphere map: oxygen against pressure. Every microgravity test that lists both is a dot; the
+     atmospheres crews have breathed are pins. opts: you {o2, p, label}, onPin(id), onPick(o2, p). */
+  const AX = { o: [10, 100], p: [3.5, 80] };
+  function atlas(el, FF, opts = {}) {
+    const L = window.FFLogic, pts = L.placed(FF), atm = L.ATMOS;
+    const cls = { liquid: [C.g1, "Liquid droplets"], gas: [C.third, "Gas flames"] };
+    const bins = new Map(); // one dot per fuel class and spot, sized by how many tests share it
+    pts.forEach((x) => {
+      const k = `${x.c}|${Math.round(x.o * 2) / 2}|${Math.round(Math.log(x.p) * 40)}`;
+      const b = bins.get(k) || { c: x.c, o: 0, p: 0, n: 0, by: {} };
+      b.o += x.o; b.p += x.p; b.n++; b.by[x.i] = (b.by[x.i] || 0) + 1; bins.set(k, b);
+    });
+    const solids = FF.rows.filter((r) => r.g !== "1" && r.c === "solid" && r.o).map((r) => (r.o[0] + r.o[1]) / 2);
+    const cov = Object.fromEntries(atm.map((a) => [a.id, L.coverage(FF, a.o2, a.p)]));
+    mount(el, (W) => {
+      const narrow = W < 620, left = narrow ? 40 : 58, right = narrow ? 14 : 24, top = 26;
+      const plotH = Math.round(Math.max(300, Math.min(500, W * 0.5))), H = top + plotH + 106;
+      const X = (o) => left + ((o - AX.o[0]) / (AX.o[1] - AX.o[0])) * (W - left - right);
+      const Y = (p) => top + plotH - (Math.log(p / AX.p[0]) / Math.log(AX.p[1] / AX.p[0])) * plotH;
+      el._inv = { left, right, top, plotH, W };
+      const halo = ` paint-order="stroke" stroke="${C.bg}" stroke-width="4" stroke-linejoin="round"`;
+      let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Oxygen and pressure of every microgravity fire test that lists both, with the atmospheres crews have breathed">`;
+      // grid
+      (narrow ? [20, 40, 60, 80, 100] : [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]).forEach((t) => {
+        s += `<line x1="${X(t)}" x2="${X(t)}" y1="${top}" y2="${top + plotH}" stroke="${C.line}"/>` + txt(X(t), top + plotH + 20, t + "%", { anchor: "middle", fill: C.ink3, size: 12, mono: true });
+      });
+      [4, 7, 10, 15, 20, 30, 50, 75].forEach((t) => {
+        s += `<line x1="${left}" x2="${W - right}" y1="${Y(t)}" y2="${Y(t)}" stroke="${C.line}"/>` + txt(left - 8, Y(t) + 4, String(t), { anchor: "end", fill: C.ink3, size: 12, mono: true });
+      });
+      s += txt(left - 8, top - 10, "psi", { anchor: "end", fill: C.ink3, size: 12 });
+      s += txt(W - right, top + plotH + 40, "Oxygen, % by volume", { anchor: "end", fill: C.ink3, size: 12 });
+      s += `<line x1="${left}" x2="${W - right}" y1="${Y(14.7)}" y2="${Y(14.7)}" stroke="${C.line2}" stroke-dasharray="2 5"/>`;
+      if (!narrow) s += txt(X(62), Y(14.7) - 6, "sea-level pressure", { anchor: "middle", fill: C.ink3, size: 11.5 });
+      // the tested zone: hull of every placed test
+      const hp = hull([...bins.values()].map((b) => [X(b.o / b.n), Y(b.p / b.n)]));
+      s += `<path d="M${hp.map((q) => q.map((v) => v.toFixed(1)).join(",")).join("L")}Z" fill="rgba(255,255,255,0.05)" stroke="${C.line2}" stroke-dasharray="4 4" stroke-linejoin="round" transform="translate(0,0)"/>`;
+      const topO = Math.max(...pts.map((x) => x.o));
+      s += txt(X(topO) + 12, Y(56), `${pts.length} tests`, { fill: C.ink, size: narrow ? 12.5 : 14, weight: 600, extra: halo });
+      s += txt(X(topO) + 12, Y(56) + 17, `all at ${g(topO)}% oxygen or less`, { fill: C.ink2, size: narrow ? 11.5 : 12.5, extra: halo });
+      if (narrow) s += txt(X(73), Y(10.5), "No microgravity", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "fire test out here", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
+      else s += txt(X(70), Y(28), "No microgravity fire test out here", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
+      // tests
+      [...bins.values()].sort((a, b) => b.n - a.n).forEach((b) => {
+        const o = b.o / b.n, p = b.p / b.n, r = Math.min(8, 2.6 + Math.sqrt(b.n) * 0.9), [col, lab] = cls[b.c] || [C.ug, b.c];
+        const who = Object.entries(b.by).map(([i, n]) => `${esc(i)}: ${n}`).join("<br>");
+        s += `<circle cx="${X(o).toFixed(1)}" cy="${Y(p).toFixed(1)}" r="${r.toFixed(1)}" fill="${col}" fill-opacity="0.72" stroke="${C.bg}" stroke-width="1" tabindex="0" data-tip="<b>${b.n} ${esc(lab.toLowerCase())} test${b.n > 1 ? "s" : ""}</b><span>${g(Math.round(o * 10) / 10)}% oxygen, ${g(Math.round(p * 10) / 10)} psi<br>${who}</span>"/>`;
+      });
+      // solid materials: oxygen only, on a rail under the axis
+      const ry = top + plotH + 78;
+      s += txt(left, ry - 12, narrow ? "Solid materials · pressure not listed" : "Solid materials (fabric, plastic) · their tables list oxygen but not pressure", { fill: C.ink2, size: 12 });
+      [...new Set(solids.map((v) => Math.round(v * 10) / 10))].forEach((v) => { s += `<line x1="${X(v)}" x2="${X(v)}" y1="${ry - 2}" y2="${ry + 12}" stroke="${C.ug}" stroke-width="2" opacity="0.6"/>`; });
+      const sMax = Math.max(...solids);
+      s += txt(X(sMax) + 8, ry + 10, `${solids.length} tests, up to ${g(sMax)}%`, { fill: C.ink, size: 12, weight: 600 });
+      s += `<rect x="${left}" y="${ry - 4}" width="${X(sMax) - left + 4}" height="20" fill="transparent" tabindex="0" data-tip="<b>${solids.length} solid-material flame tests</b><span>Fabric and plastic samples, ${g(Math.min(...solids))}% to ${g(sMax)}% oxygen. Their NASA tables do not list pressure, so they cannot be placed on the map.</span>"/>`;
+      // you
+      if (opts.you) {
+        const ux = X(Math.min(100, Math.max(10, opts.you.o2))), uy = Y(Math.min(AX.p[1], Math.max(AX.p[0], opts.you.p)));
+        s += `<line x1="${ux}" x2="${ux}" y1="${top}" y2="${top + plotH}" stroke="${C.you}" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.7"/>`;
+        s += `<line x1="${left}" x2="${W - right}" y1="${uy}" y2="${uy}" stroke="${C.you}" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.7"/>`;
+        s += `<rect x="${ux - 7}" y="${uy - 7}" width="14" height="14" transform="rotate(45 ${ux} ${uy})" fill="${C.you}" stroke="${C.bg}" stroke-width="2"/>`;
+      }
+      // pins
+      const LAB = { mga: ["end", -14, 5], suit: ["end", -14, 18], a1: ["end", -14, 5], sky: ["middle", 0, -15], iss: ["end", -13, -11], eva: ["end", -8, 22], moon: ["start", 12, -10], exp: ["start", 12, 16] };
+      atm.forEach((a, k) => {
+        const x = X(a.o2), y = Y(a.p), c = cov[a.id], none = c.n === 0;
+        const tipHtml = `<b>${esc(a.name)} · ${esc(a.when)}</b><span>${g(a.o2)}% oxygen, ${g(a.p)} psi<br>${esc(a.note)}<br><br>${none ? `No microgravity test within ${FF.near} points of oxygen and 25% of this pressure. Nearest: ${g(Math.round(c.nearest.o * 10) / 10)}% at ${g(Math.round(c.nearest.p * 10) / 10)} psi (${esc(c.nearest.i)}).` : `${c.n} microgravity tests within ${FF.near} points of oxygen and 25% of this pressure.`}${opts.onPin ? "<br><i>Click to check this atmosphere</i>" : ""}</span>`;
+        s += `<g data-pin="${a.id}" tabindex="0" role="button" aria-label="${esc(a.name)}" style="cursor:${opts.onPin ? "pointer" : "default"}" data-tip="${esc(tipHtml)}">`;
+        s += `<circle cx="${x}" cy="${y}" r="16" fill="transparent"/>`;
+        s += `<circle cx="${x}" cy="${y}" r="8.5" fill="${none ? C.bg : C.you}" stroke="${C.you}" stroke-width="2"${none ? ` stroke-dasharray="3 2.4"` : ""}/>`;
+        s += txt(x, y + 4, String(k + 1), { anchor: "middle", fill: none ? C.ink : C.bg, size: 11, mono: true, weight: 600 });
+        if (!narrow) {
+          const [anc, dx, dy] = LAB[a.id] || ["start", 12, 4];
+          s += `<text x="${x + dx}" y="${y + dy}" fill="${C.ink}" font-size="12.5" font-weight="600" text-anchor="${anc}" font-family="Inter, system-ui, sans-serif"${halo}>${esc(a.short)} <tspan fill="${none ? "#ff9b73" : C.ink2}" font-weight="500">· ${c.n} test${c.n === 1 ? "" : "s"}</tspan></text>`;
+        }
+        s += `</g>`;
+      });
+      return s + "</svg>";
+    });
+    el.classList.toggle("pick", !!opts.onPick);
+    el.onclick = (e) => {
+      const pin = e.target.closest("[data-pin]");
+      if (pin && opts.onPin) return opts.onPin(pin.dataset.pin);
+      if (!opts.onPick || !el._inv) return;
+      const r = el.querySelector("svg").getBoundingClientRect(), k = el._inv.W / r.width;
+      const x = (e.clientX - r.left) * k, y = (e.clientY - r.top) * k, I = el._inv;
+      if (x < I.left || x > I.W - I.right || y < I.top || y > I.top + I.plotH) return;
+      const o = AX.o[0] + ((x - I.left) / (I.W - I.left - I.right)) * (AX.o[1] - AX.o[0]);
+      const p = AX.p[0] * Math.exp(((I.top + I.plotH - y) / I.plotH) * Math.log(AX.p[1] / AX.p[0]));
+      opts.onPick(Math.round(o * 2) / 2, Math.round(p * 10) / 10);
+    };
+    el.onkeydown = (e) => { const pin = e.target.closest && e.target.closest("[data-pin]"); if (pin && opts.onPin && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); opts.onPin(pin.dataset.pin); } };
+  }
+  /* the same atmospheres as a table: the map's text view */
+  function atlasTable(FF, link) {
+    const L = window.FFLogic;
+    return `<div class="table-wrap"><table class="t atlas-t"><thead><tr><th>#</th><th>Atmosphere</th><th>Oxygen</th><th>Pressure</th><th>When</th><th>Tests near it</th><th>Nearest test</th></tr></thead><tbody>${L.ATMOS.map((a, k) => {
+      const c = L.coverage(FF, a.o2, a.p), nr = c.nearest;
+      return `<tr${link ? ` data-pin="${a.id}" tabindex="0"` : ""}><td class="mono">${k + 1}</td><td><b>${esc(a.name)}</b>${a.fire ? ` <span class="tag fire">fire</span>` : ""}</td><td class="mono">${g(a.o2)}%</td><td class="mono">${g(a.p)} psi</td><td>${esc(a.when)}</td><td class="mono ${c.n ? "" : "zero"}">${c.n}</td><td>${c.n ? `${g(Math.round(nr.o * 10) / 10)}% at ${g(Math.round(nr.p * 10) / 10)} psi` : `${g(Math.round(nr.o * 10) / 10)}% at ${g(Math.round(nr.p * 10) / 10)} psi, <b>${g(c.o2_gap)} points</b> of oxygen away`}</td></tr>`;
+    }).join("")}</tbody></table></div>`;
+  }
+  function hull(P) { // monotone chain
+    P = P.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], up = [];
+    P.forEach((p) => { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); });
+    P.slice().reverse().forEach((p) => { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); });
+    return lo.slice(0, -1).concat(up.slice(0, -1));
+  }
+
+  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, bindTips, esc, C };
 })();

@@ -128,7 +128,9 @@ SENTENCES:
 habitats. Code computed CONTEXT from NASA microgravity combustion test tables: the user's habitat, the
 findings ranked for it (each with an id such as F1, its facts, the result nearest the habitat and its
 caveats), what the data cannot tell, the materials the user picked, and model_predictions from models
-fitted to the tests. When you use a model prediction, say once that it is a model prediction, and cite it as [model].
+fitted to the tests, and test_coverage: how close the tests come to this habitat and to the atmospheres crews have
+breathed. When you use a model prediction, say once that it is a model prediction, and cite it as [model]. Cite
+test_coverage as [map].
 
 Answer QUESTION in at most 110 words.
 
@@ -141,7 +143,8 @@ CONTEXT:
 
   const BRIEF = `You are writing the opening briefing of a fire-safety evidence dashboard for one crewed
 habitat design. Code computed CONTEXT from NASA microgravity combustion test tables: the habitat, the
-findings ranked by how close their tests came to it (each with an id such as F1), and the gaps.
+findings ranked by how close their tests came to it (each with an id such as F1), the gaps, and
+test_coverage: how close the tests come to this habitat (cite it as [map]).
 
 Write three or four sentences: what the closest evidence shows for this habitat, with its key numbers;
 what that suggests for a fire in this habitat; and the most important gap. If the closest tests are far
@@ -174,6 +177,20 @@ CONTEXT:
   }
 
   /* The facts sent to the model: everything the page shows for this habitat, and nothing else. */
+  /* the Atmosphere map's numbers: how close NASA's microgravity tests come to this habitat, and to the
+     atmospheres crews have breathed */
+  function coverageFacts(FF, L, st) {
+    const c = L.coverage(FF, st.o2, st.pressure), pts = L.placed(FF), r1 = (v) => Math.round(v * 10) / 10;
+    return {
+      tests_with_oxygen_and_pressure: pts.length,
+      highest_oxygen_tested_pct: Math.max(...pts.map((x) => x.o)), lowest_pressure_tested_psi: r1(Math.min(...pts.map((x) => x.p))),
+      tests_near_this_habitat: c.n, near_means: `within ${FF.near} points of oxygen and 25% of the pressure`,
+      nearest_test: c.nearest ? { investigation: c.nearest.i, oxygen_pct: r1(c.nearest.o), pressure_psi: r1(c.nearest.p) } : null,
+      solid_material_tests_near_this_oxygen: c.solids,
+      crew_atmospheres: L.ATMOS.map((a) => ({ name: a.name, when: a.when, oxygen_pct: a.o2, pressure_psi: a.p, tests_near: L.coverage(FF, a.o2, a.p).n })),
+    };
+  }
+
   function context(FF, L, st) {
     const ranked = L.rankFindings(FF, st.o2, st.pressure);
     const ids = Object.fromEntries(FF.findings.map((f, i) => [f.id, "F" + (i + 1)]));
@@ -194,6 +211,7 @@ CONTEXT:
       }),
       gaps: L.gaps(FF, st.o2, st.pressure),
       model_predictions: modelFacts(FF, st),
+      test_coverage: coverageFacts(FF, L, st),
       materials_on_board: st.materials.map((m) => {
         const ev = L.materialEvidence(FF, m, st.o2);
         return { material: m, flame_tests_in_microgravity: ev.flame_tests, oxygen_tested_pct: ev.oxygen_tested_pct || "not listed",

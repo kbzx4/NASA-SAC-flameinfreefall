@@ -92,6 +92,14 @@ Changes made:
 - A simulation draws 60 droplets from the model (each from a random bootstrap refit, with the burning-rate scatter) and plays them next to the real tests nearest the user's oxygen level, so the model can be compared with the data by eye.
 - Live SI now receives the model's predictions for the habitat, labelled as model output, and cites them as [model].
 
+## Nov 15, night: the Atmosphere map
+
+- Feedback: still not a winner. The tool had many views and no single result to remember. The data had one: every microgravity test that lists oxygen and pressure (754) sits at 40% oxygen or less and 7.35 psi or more, and half the atmospheres crews have breathed sit outside that.
+- The Atmosphere map plots those tests by oxygen and pressure (pressure on a log scale) with eight crew atmospheres pinned. "Near" is within 2 points of oxygen (the site's existing window) and 25% of pressure. Solid-material tests list oxygen but not pressure, so they sit on a rail under the axis instead of being placed at a guessed pressure.
+- Counts near each atmosphere: ISS 191, Shuttle pre-spacewalk 6, Moon base 8, exploration atmosphere 9; Mercury to Apollo, Apollo 1, Skylab and the spacesuit 0.
+- It is the landing page's lead figure and a tool tab, where clicking a pin or a point sets the habitat. Live SI receives the coverage numbers and cites them as [map]; asked about a spacesuit, it answered that no test came near, from the 40% and 7.4 psi limits.
+- Crew atmospheres come from NASA history (the Apollo 1 cabin was pure oxygen at about 16.7 psi) and the Exploration Atmospheres Working Group (34%, 8.2 psi). They are context, not data, and are not used in any score.
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.

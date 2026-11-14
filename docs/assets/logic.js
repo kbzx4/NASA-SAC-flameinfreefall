@@ -221,5 +221,33 @@
     return out;
   }
 
-  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps };
+  /* ---- the atmospheres crews have breathed, or are planned to (Atmosphere map) ---- */
+  const ATMOS = [
+    { id: "mga", name: "Mercury, Gemini and Apollo in flight", short: "Mercury to Apollo", o2: 100, p: 5, when: "1961 to 1975", note: "Pure oxygen at about a third of sea-level pressure, for every US crew until Skylab." },
+    { id: "a1", name: "Apollo 1 ground test", short: "Apollo 1", o2: 100, p: 16.7, when: "January 1967", note: "Pure oxygen above sea-level pressure, during a launch-pad rehearsal. A fire spread through the cabin in seconds and killed the three crew.", fire: true },
+    { id: "sky", name: "Skylab", short: "Skylab", o2: 74, p: 5, when: "1973 to 1974", note: "About three-quarters oxygen and one quarter nitrogen, at 5 psi." },
+    { id: "iss", name: "Space Shuttle, Mir and ISS cabin", short: "ISS", o2: 21, p: 14.7, when: "1981 to today", note: "Sea-level air. Mir had a fire in air like this in 1997, from an oxygen generator.", fire: true },
+    { id: "eva", name: "Shuttle cabin before a spacewalk", short: "Shuttle pre-spacewalk", o2: 26.5, p: 10.2, when: "1981 to 2011", note: "The cabin was lowered to 10.2 psi with extra oxygen, so crews could get into suits faster." },
+    { id: "moon", name: "Moon base or pressurized rover", short: "Moon base", o2: 30, p: 10.2, when: "planned", note: "The oxygen level and pressure NASA expects for Moon bases and rovers.", scenario: "Moon base / pressurized rover" },
+    { id: "exp", name: "NASA exploration atmosphere", short: "Exploration", o2: 34, p: 8.2, when: "proposed 2006", note: "The atmosphere NASA's Exploration Atmospheres Working Group proposed for exploration vehicles.", scenario: "Exploration atmosphere" },
+    { id: "suit", name: "Spacesuit", short: "Spacesuit", o2: 100, p: 4.3, when: "every US spacewalk", note: "Pure oxygen at 4.3 psi, inside the suit.", scenario: "Spacesuit" },
+  ];
+  const NEAR_P = 1.25; // "near" in pressure: within 25% either way
+  /* microgravity tests that list both oxygen and pressure, as points */
+  function placed(FF) {
+    return FF._placed || (FF._placed = FF.rows.filter((r) => r.g !== "1" && r.o && r.P).map((r) => ({ o: (r.o[0] + r.o[1]) / 2, p: (r.P[0] + r.P[1]) / 2, c: r.c, i: r.i, t: r.t, out: r.out })));
+  }
+  /* how much test evidence sits near one atmosphere: tests within FF.near points of oxygen and 25% of
+     pressure, and the nearest test (distance: 5 points of oxygen counts the same as 25% of pressure) */
+  function coverage(FF, o2, p) {
+    const pts = placed(FF), lp = Math.log(NEAR_P);
+    const near = pts.filter((x) => Math.abs(x.o - o2) <= FF.near && Math.abs(Math.log(x.p / p)) <= lp);
+    let best = null, bd = Infinity;
+    pts.forEach((x) => { const d = Math.hypot((x.o - o2) / 5, Math.log(x.p / p) / lp); if (d < bd) { bd = d; best = x; } });
+    const by = {}; near.forEach((x) => { by[x.i] = (by[x.i] || 0) + 1; });
+    const solids = FF.rows.filter((r) => r.g !== "1" && r.c === "solid" && r.o && Math.abs((r.o[0] + r.o[1]) / 2 - o2) <= FF.near).length;
+    return { n: near.length, by, nearest: best, o2_gap: best ? round(Math.abs(best.o - o2), 1) : null, solids };
+  }
+
+  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P };
 })(typeof window !== "undefined" ? window : globalThis);

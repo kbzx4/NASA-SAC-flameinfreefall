@@ -18,12 +18,13 @@
   const DL = icon("M12 4v11M7 11l5 5 5-5M5 20h14");
 
   const q = new URLSearchParams(location.search);
-  const preset = FF.scenarios.find((s) => s.name === q.get("s")) || FF.scenarios[1];
+  const atQ = q.has("o2") && q.has("p") && !isNaN(+q.get("o2")) && !isNaN(+q.get("p")); // e.g. ?o2=100&p=16.7 from the map
+  const preset = (atQ && FF.scenarios.find((s) => s.o2 === +q.get("o2") && s.pressure === +q.get("p"))) || (atQ ? { ...FF.scenarios.find((s) => s.name === "Custom"), o2: Math.min(100, Math.max(10, +q.get("o2"))), pressure: Math.min(45, Math.max(3, +q.get("p"))) } : null) || FF.scenarios.find((s) => s.name === q.get("s")) || FF.scenarios[1];
   const state = {
     scenario: preset.name, o2: preset.o2, pressure: preset.pressure, flow: 10,
     gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g")))) : 1,
     materials: DEFAULT_MATERIALS.filter((m) => FF.materials.includes(m)),
-    view: ["insights", "model", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    view: ["insights", "map", "model", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
     model: { fuel: "Methanol", gas: "N2", d0: 3, gfuel: "propane", flow: 1, xf: 1 },
     replay: { kind: "droplets" },
     concern: "solid", compare: ["SAFFIRE-2", "BASS-II", "FLEX"], open: null, kind: "", find: "",
@@ -157,8 +158,8 @@
     return true;
   }
   function cites(text, r) {
-    return esc(text).replace(/\[((?:F\d+|gaps|model)(?:\s*,\s*(?:F\d+|gaps|model))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
-      c === "model" ? `<a class="cite" href="?view=model" data-view-link="model">model</a>` : c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
+    return esc(text).replace(/\[((?:F\d+|gaps|model|map)(?:\s*,\s*(?:F\d+|gaps|model|map))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+      c === "model" ? `<a class="cite" href="?view=model" data-view-link="model">model</a>` : c === "map" ? `<a class="cite" href="?view=map" data-view-link="map">map</a>` : c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
   }
   function liveCheck() { return ""; }
 
@@ -605,6 +606,39 @@
     };
   }
 
+  /* ------------------------------------------------------ atmosphere map */
+  function setAt(o2, p) {
+    const s = FF.scenarios.find((x) => x.o2 === o2 && x.pressure === p && x.name !== "Custom");
+    state.scenario = s ? s.name : "Custom"; state.o2 = Math.min(100, Math.max(10, o2)); state.pressure = Math.min(45, Math.max(3, p));
+  }
+  function drawMap() {
+    const el = $("view-map"), c = L.coverage(FF, state.o2, state.pressure), nr = c.nearest, pts = L.placed(FF);
+    const topO = Math.max(...pts.map((x) => x.o)), lowP = Math.min(...pts.map((x) => x.p));
+    const open = L.ATMOS.filter((a) => L.coverage(FF, a.o2, a.p).n === 0);
+    const r1 = (v) => g(Math.round(v * 10) / 10), habitat = state.scenario === "Custom" ? "Your habitat" : state.scenario;
+    const by = Object.entries(c.by).sort((a, b) => b[1] - a[1]).map(([i, n]) => `${n} ${esc(i)}`).join(", ");
+    el.innerHTML = `
+      <span class="eyebrow">Atmosphere map</span>
+      <h1 style="margin-top:12px">${open.length} of ${L.ATMOS.length} crew atmospheres, past and planned, have no microgravity fire test anywhere near them</h1>
+      <p class="lede">Every dot is a NASA microgravity fire test, placed at its oxygen level and pressure. Every numbered pin is a real crew atmosphere, from Mercury to the Moon-base plans. All ${pts.length} tests sit at ${g(topO)}% oxygen or less and ${r1(lowP)} psi or more. Every US spacewalk, and every US crewed flight before Skylab, happened outside that zone. Click a pin, or anywhere on the map, to check that atmosphere.</p>
+      <div class="tiles">
+        <div class="tile"><div class="k">${esc(habitat)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi</div><div class="v">${c.n} <small>tests within ${FF.near} points of oxygen and 25% of this pressure</small></div></div>
+        <div class="tile"><div class="k">Nearest test</div><div class="v">${nr ? `${r1(nr.o)}% <small>at ${r1(nr.p)} psi · ${esc(nr.i)} ${esc(nr.t || "")}</small>` : "none"}</div></div>
+        <div class="tile"><div class="k">Solid-material tests near this oxygen</div><div class="v">${c.solids} <small>${c.solids ? "pressure not listed" : `none above ${g(Math.max(...FF.rows.filter((r) => r.g !== "1" && r.c === "solid" && r.o).map((r) => r.o[1])))}% oxygen`}</small></div></div>
+      </div>
+      ${c.n ? `<p class="model-line">Near this atmosphere: ${by}.</p>` : `<div class="callout" style="margin-top:16px"><b>Open territory.</b> No microgravity test in the loaded data is this close. The nearest is ${nr ? `${r1(Math.abs(nr.o - state.o2))} points of oxygen and ${r1(Math.abs(nr.p - state.pressure))} psi away` : "missing"}. Anything said about fire here is an extrapolation.</div>`}
+      <div class="figure" style="margin-top:18px">
+        <div id="atlas"></div>
+        <div class="legend"><span><i style="background:${CH.C.g1}"></i>Liquid droplets (FLEX, FLEX-2, CFI)</span><span><i style="background:${CH.C.third}"></i>Gas flames (CFI-G, ACME)</span><span><i class="tick" style="background:${CH.C.ug}"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span><span><i class="dia" style="background:#fff"></i>${esc(habitat)}</span></div>
+        <p class="note">Bigger dots are several tests at the same spot. Pressure is on a log scale. "Near" means within ${FF.near} points of oxygen and 25% of the pressure. Only tests run in microgravity are shown. Crew atmospheres: NASA history and NASA's Exploration Atmospheres Working Group; the Apollo 1 cabin was pure oxygen at about 16.7 psi.</p>
+      </div>
+      <h2 style="margin:28px 0 12px">The atmospheres, and the tests near each</h2>
+      ${CH.atlasTable(FF, true)}`;
+    const pin = (id) => { const a = L.ATMOS.find((x) => x.id === id); setAt(a.o2, a.p); update(); };
+    CH.atlas($("atlas"), FF, { you: { o2: state.o2, p: state.pressure }, onPin: pin, onPick: (o, p) => { setAt(o, p); update(); } });
+    el.querySelectorAll("tr[data-pin]").forEach((tr) => { tr.onclick = () => pin(tr.dataset.pin); tr.onkeydown = (e) => { if (e.key === "Enter") pin(tr.dataset.pin); }; });
+  }
+
   /* --------------------------------------------------------------- replay */
   const REPLAYABLE = { "droplet-oxygen": ["droplets", ""], "droplet-low-oxygen": ["droplets", ""], "droplet-diluent": ["droplets", "He"],
     "gas-oxygen": ["gas", ""], "cool-flames": ["gas", ""] };
@@ -630,7 +664,7 @@
     replayCtl = FFReplay.mount($("rp"), FF, { kind: rp.kind, right: rp.right, gas: rp.gas || "", o2: state.o2 });
   }
 
-  const DRAW = { insights: drawInsights, model: drawModel, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
+  const DRAW = { insights: drawInsights, map: drawMap, model: drawModel, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
   function update() {
     drawControls();
     document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === state.view));
