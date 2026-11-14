@@ -225,7 +225,7 @@
     flame.set(v, jump);
     gval.textContent = v.toFixed(2) + " g";
     const near = (x) => Math.abs(v - x) < 0.025;
-    if (v < 0.025) { gwhere.textContent = "Orbit · tested"; gnote.innerHTML = "<b>Microgravity.</b> Hot gas does not rise, so the flame becomes a sphere fed by slow diffusion. NASA has burned this on the space station."; }
+    if (v < 0.025) { gwhere.textContent = "Orbit · tested"; gnote.innerHTML = "<b>Microgravity.</b> Hot gas does not rise, so the flame becomes a dim blue ball around the wick, fed only by slow diffusion. NASA has burned candles like this on the space station."; }
     else if (v > 0.975) { gwhere.textContent = "Earth · tested"; gnote.innerHTML = "<b>Normal gravity.</b> Hot gas rises, pulls fresh air in from below and stretches the flame into a teardrop."; }
     else {
       gwhere.textContent = (near(0.17) ? "Moon" : near(0.38) ? "Mars" : "Partial gravity") + " · no data";

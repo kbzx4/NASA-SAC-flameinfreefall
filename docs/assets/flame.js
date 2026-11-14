@@ -12,7 +12,8 @@
     const n = stops.length - 1, i = Math.min(n - 1, Math.floor(clamp(t) * n)), f = clamp(t) * n - i;
     return mix(stops[i], stops[i + 1], f);
   }
-  const BLUE = [[185, 232, 255], [84, 165, 255], [38, 96, 245], [20, 44, 150]];
+  // the dim violet-blue of a candle flame in orbit, which makes little glowing soot
+  const BLUE = [[176, 184, 255], [124, 136, 255], [86, 92, 240], [48, 44, 170]];
   const WARM = [[255, 244, 205], [255, 196, 80], [255, 120, 36], [170, 38, 14]];
   const PER_FRAME = 9;
 
@@ -30,10 +31,22 @@
     return sprites.get(key);
   }
 
+  /* A random point on a sphere's surface, seen from the side. Drawing a ball this way fills the
+     whole disc and makes the edge slightly brighter, as a real spherical flame looks. */
+  function onSphere() {
+    const z = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, s = Math.sqrt(1 - z * z);
+    return [s * Math.cos(a), s * Math.sin(a)];
+  }
+
   function Flame(canvas) {
     const ctx = canvas.getContext("2d");
     let parts = [], W = 0, H = 0, dpr = 1, g = 0, t = 0, raf = 0, visible = true;
-    const geo = () => ({ R: Math.min(W, H) * 0.2, cx: W / 2, cy: H * lerp(0.4, 0.66, g) });
+    // The same candle at every gravity, as in NASA's side-by-side photos: only the flame changes.
+    const geo = () => {
+      const R = Math.min(W, H) * 0.2, wick = H * 0.52;
+      // in orbit the ball's centre sits above the wick tip, so the ball wraps the wick
+      return { R, cx: W / 2, wick, top: wick + R * 0.34, cy: wick - R * lerp(0.3, 0.02, g) };
+    };
 
     function resize() {
       dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -41,14 +54,15 @@
       canvas.width = Math.max(1, W * dpr); canvas.height = Math.max(1, H * dpr);
     }
     function spawn({ R, cx, cy }) {
-      const a = Math.random() * Math.PI * 2, shell = R * Math.pow(1 - g, 1.4) * (0.94 + Math.random() * 0.12);
+      // a thick shell: the glow fills the ball, a little brighter near its edge
+      const [ux, uy] = onSphere(), shell = R * 0.76 * Math.pow(1 - g, 1.4) * (0.62 + Math.random() * 0.4);
       const out = (0.04 + Math.random() * 0.08) * (1 - g) * R * 0.02;
       parts.push({
-        x: cx + Math.cos(a) * shell + R * 0.3 * g * (Math.random() - 0.5) * 2,
-        y: cy + Math.sin(a) * shell * lerp(1, 0.2, g),
-        vx: Math.cos(a) * out,
-        vy: Math.sin(a) * out - Math.pow(g, 0.8) * R * (0.03 + Math.random() * 0.024),
-        age: 0, life: lerp(110, 62, g) * (0.65 + Math.random() * 0.7), seed: Math.random() * 10,
+        x: cx + ux * shell + R * 0.3 * g * (Math.random() - 0.5) * 2,
+        y: cy + uy * shell * lerp(1, 0.2, g),
+        vx: ux * out,
+        vy: uy * out - Math.pow(g, 0.8) * R * (0.03 + Math.random() * 0.024),
+        age: 0, life: lerp(110, 50, g) * (0.65 + Math.random() * 0.7), seed: Math.random() * 10,
       });
     }
     function step() {
@@ -68,7 +82,7 @@
       parts = alive;
     }
     function draw() {
-      const { R, cx, cy } = geo();
+      const { R, cx, cy, wick, top } = geo();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
@@ -76,31 +90,47 @@
 
       const gy = cy - R * 1.2 * g, glowR = Math.max(1, Math.min(R * lerp(2.3, 2.7, g), W / 2, gy, H - gy));
       const glow = ctx.createRadialGradient(cx, gy, 0, cx, gy, glowR);
-      const gc = mix([50, 120, 255], [255, 130, 50], Math.pow(g, 0.7)).map(Math.round).join(",");
-      glow.addColorStop(0, `rgba(${gc},0.2)`); glow.addColorStop(0.6, `rgba(${gc},0.05)`); glow.addColorStop(1, `rgba(${gc},0)`);
+      const gc = mix([90, 100, 255], [255, 130, 50], Math.pow(g, 0.7)).map(Math.round).join(",");
+      glow.addColorStop(0, `rgba(${gc},0.16)`); glow.addColorStop(0.6, `rgba(${gc},0.04)`); glow.addColorStop(1, `rgba(${gc},0)`);
       ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
 
+      // the candle, faintly lit by its own flame and fading into the dark below
+      const cw = R * 0.46, bottom = Math.min(H, top + R * 0.62);  // ends above the slider
+      const body = ctx.createLinearGradient(cx - cw / 2, 0, cx + cw / 2, 0);
+      body.addColorStop(0, "rgba(46,50,66,1)"); body.addColorStop(0.42, "rgba(104,110,134,1)"); body.addColorStop(1, "rgba(38,42,56,1)");
+      ctx.fillStyle = body; ctx.fillRect(cx - cw / 2, top, cw, bottom - top);
+      const fade = ctx.createLinearGradient(0, top + R * 0.08, 0, bottom);
+      fade.addColorStop(0, "rgba(5,8,16,0)"); fade.addColorStop(1, "rgba(5,8,16,1)");
+      ctx.fillStyle = fade; ctx.fillRect(cx - cw / 2 - 1, top, cw + 2, bottom - top + 1);
+      const lit = mix([150, 160, 255], [255, 196, 120], Math.pow(g, 0.7)).map(Math.round).join(",");
+      ctx.fillStyle = `rgba(${lit},0.38)`;
+      ctx.beginPath(); ctx.ellipse(cx, top, cw / 2, R * 0.05, 0, 0, Math.PI * 2); ctx.fill();
+
+      // the flame; it goes out just above the cool wax
+      const q0 = top - R * 0.24, q1 = top - R * 0.03;
       ctx.globalCompositeOperation = "lighter";
       for (const p of parts) {
         const k = p.age / p.life;
         const warm = Math.pow(g, 0.55) * smooth(0.03, 0.26, k);
         const rgb = mix(ramp(BLUE, k), ramp(WARM, k), warm);
-        const size = R * lerp(lerp(0.36, 0.3, k), lerp(0.3, 0.07, k), g);
-        ctx.globalAlpha = Math.sin(Math.PI * Math.pow(k, lerp(1, 0.72, g))) * lerp(0.15, 0.1, g) * (1 - 0.62 * Math.pow(Math.sin(Math.PI * Math.min(1, g * 1.25)), 0.7));
+        const size = R * lerp(lerp(0.32, 0.26, k), lerp(0.3, 0.07, k), g);
+        ctx.globalAlpha = Math.sin(Math.PI * Math.pow(k, lerp(1, 0.72, g))) * lerp(0.02, 0.1, Math.pow(g, 0.6))
+          * (1 - 0.62 * Math.pow(Math.sin(Math.PI * Math.min(1, g * 1.25)), 0.7))
+          * (1 - smooth(q0, q1, p.y));
         ctx.drawImage(sprite(rgb), p.x - size, p.y - size, size * 2, size * 2);
       }
-      ctx.globalAlpha = 1;
+      // in orbit a pale glow sits low inside the ball, around the wick
+      const cyc = wick - R * 0.06, core = ctx.createRadialGradient(cx, cyc, 0, cx, cyc, R * 0.42);
+      core.addColorStop(0, `rgba(255,232,214,${0.14 * (1 - g)})`); core.addColorStop(1, "rgba(255,232,214,0)");
+      ctx.globalAlpha = 1; ctx.fillStyle = core; ctx.fillRect(cx - R * 0.42, cyc - R * 0.42, R * 0.84, R * 0.84);
       ctx.globalCompositeOperation = "source-over";
 
-      // the fuel: a droplet in orbit, a wick on Earth
-      const fr = R * lerp(0.13, 0.06, g);
-      const fuel = ctx.createRadialGradient(cx - fr * 0.3, cy - fr * 0.3, 0, cx, cy, fr);
-      fuel.addColorStop(0, "rgba(120,150,190,0.95)"); fuel.addColorStop(1, "rgba(10,16,28,0.98)");
-      ctx.fillStyle = fuel; ctx.beginPath(); ctx.arc(cx, cy, fr, 0, Math.PI * 2); ctx.fill();
-      if (g > 0.02) {
-        ctx.strokeStyle = `rgba(150,165,190,${0.6 * smooth(0, 0.4, g)})`; ctx.lineWidth = 2; ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(cx, cy + fr); ctx.lineTo(cx, cy + fr + R * 0.45 * g); ctx.stroke();
-      }
+      // the wick, dark against the flame, with a glowing tip
+      ctx.strokeStyle = "rgba(16,18,24,0.95)"; ctx.lineWidth = Math.max(2, R * 0.035); ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx + R * 0.02 * g, wick); ctx.stroke();
+      const tip = ctx.createRadialGradient(cx, wick, 0, cx, wick, R * 0.06);
+      tip.addColorStop(0, "rgba(255,150,70,0.85)"); tip.addColorStop(1, "rgba(255,150,70,0)");
+      ctx.fillStyle = tip; ctx.fillRect(cx - R * 0.06, wick - R * 0.06, R * 0.12, R * 0.12);
     }
     function warm() { parts = []; for (let i = 0; i < 130; i++) step(); } // start fully formed, not from nothing
     function frame() {
@@ -145,9 +175,9 @@
     const ctx = canvas.getContext("2d");
     const ball = document.createElement("canvas"); ball.width = ball.height = 128;
     const bx = ball.getContext("2d"), gr = bx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    gr.addColorStop(0, "rgba(150,205,255,0.30)"); gr.addColorStop(0.46, "rgba(84,160,255,0.34)");
-    gr.addColorStop(0.68, "rgba(96,176,255,0.78)"); gr.addColorStop(0.8, "rgba(38,96,245,0.30)");
-    gr.addColorStop(1, "rgba(20,44,150,0)");
+    gr.addColorStop(0, "rgba(200,206,255,0.42)"); gr.addColorStop(0.5, "rgba(140,152,255,0.44)");
+    gr.addColorStop(0.78, "rgba(112,124,250,0.5)"); gr.addColorStop(0.92, "rgba(64,70,210,0.18)");
+    gr.addColorStop(1, "rgba(44,46,160,0)");
     bx.fillStyle = gr; bx.fillRect(0, 0, 128, 128);
     let W = 0, H = 0, balls = [], last = 0, mx = -1e4, my = -1e4;
     const make = () => {
@@ -215,8 +245,8 @@
       if (inside) {
         const n = 3 + Math.min(4, Math.floor(speed / 14));  // moving through air feeds the flame
         for (let i = 0; i < n; i++) {
-          const a = Math.random() * Math.PI * 2, shell = 9 * (0.85 + Math.random() * 0.3), out = 0.07 + Math.random() * 0.13;
-          parts.push({ x: x + Math.cos(a) * shell, y: y + Math.sin(a) * shell, vx: Math.cos(a) * out, vy: Math.sin(a) * out,
+          const [ux, uy] = onSphere(), shell = 9 * (0.9 + Math.random() * 0.2), out = 0.07 + Math.random() * 0.13;
+          parts.push({ x: x + ux * shell, y: y + uy * shell, vx: ux * out, vy: uy * out,
                        age: 0, life: 30 + Math.random() * 34, s: 7 + Math.random() * 5 });
         }
       }
