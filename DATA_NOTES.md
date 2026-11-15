@@ -47,9 +47,21 @@ Every decision made in turning the NASA PSI experiment tables into `data/catalog
 
 **CFI (PSI-39).** 87 tests. Pressure cells such as "1 atm" are converted to psi.
 
-**CFI-G (PSI-159, "Normal Flames" table).** 179 tests. Oxygen is "XO2 before test". Outcome combines "Hot ignition" and "Self-ext or flow term" (SE = self-extinguished, FT = flow terminated). This table reaches about 40% oxygen; the challenge statement mentions tests up to 85%, which are not in this table.
+**CFI-G (PSI-159, "Normal Flames" table).** 179 tests. Oxygen is "XO2 before test". Outcome combines "Hot ignition" and "Self-ext or flow term" (SE = self-extinguished, FT = flow terminated). This table reaches about 40% oxygen; the tests up to 85% that the challenge statement mentions are in the Inverse Flames table below.
 
 **ACME Flame Design (PSI-10, "Normal Flame" table).** 207 tests. Oxygen is "XO2 (init)", pressure "pinit". "RAMPED" cells are kept as text.
+
+**CFI-G inverse flames (PSI-159, "Inverse Flames" table).** 154 tests; the PSI table view pads the file with 862 empty lines, which are dropped. In an inverse flame, oxygen (diluted with nitrogen) flows out of the spherical burner into a chamber of fuel and nitrogen. The surrounding gas holds no oxygen, so `o2_pct`, `o2_min` and `o2_max` stay empty and the burner's oxygen (XO2, 12 to 85%) goes in `o2_supply_pct`. These tests are not placed on the Atmosphere map and are not used by the models. Hot ignition is read case-insensitively ("Yes", "yes"); "flash" is kept as listed.
+
+**ACME Flame Design inverse flames (PSI-10, "Inverse Flame" table).** 120 tests, ethylene in the chamber, 21 to 85% oxygen from the burner, handled as above. The table lists no outcome.
+
+**ACME CLD Flame (PSI-21).** One line per test day: fuel bottle, fuel dilution range and flames ignited. No oxygen, pressure or outcome per flame.
+
+**ACME s-Flame (PSI-23).** One line per test day. Oxygen is read from the "Atmosphere" cell ("~21% O2 with N2"); the "~" is dropped as elsewhere. The table notes the chamber is about 1 atm, with pressure rising and oxygen falling as products build up; no per-line pressure is stored.
+
+**SPICE (PSI-107).** 469 lines, one per flame setting: fuel, nozzle, fuel rate and coflow air speed (stored as airflow, cm/s). The table lists no oxygen, pressure or outcome. 34 lines repeat an earlier line exactly; they are scattered through the table, not at page boundaries, and are kept as listed. Air rates listed below zero are kept as source text and not used as a speed.
+
+The five tables above were read from the experiment-table view on each PSI investigation page on Nov 15, 2026, which shows the same CSV files offered for download.
 
 **ACME BRE (PSI-20).** One line per test day. Oxygen cells list several approximate levels ("21; 26.5; 40"); stored as min and max. Two cells read "3400%" and "2100%"; read as 34% and 21%, on the assumption that a spreadsheet percent format was applied to 34 and 21.
 

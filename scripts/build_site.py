@@ -43,6 +43,7 @@ def rows(cat):
             "dr": clean(r["flow_direction"]), "g": "1" if r["gravity"] == "1g" else "u",
             "out": clean(r["outcome"]), "s": clean(r["sensors"]), "n": clean(r["notes"]),
             "src": r["source_file"],
+            **({"os": float(r["o2_supply_pct"])} if not pd.isna(r.get("o2_supply_pct")) else {}),
         })
     return out
 

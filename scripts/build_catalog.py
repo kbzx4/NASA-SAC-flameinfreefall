@@ -33,13 +33,18 @@ INV = {
     "BASS-II": ("PSI-25", "10.60555/4qc4-de67"),
     "FLEX": ("PSI-69", "10.60555/mbq8-0451"),
     "FLEX-2": ("PSI-68", "10.60555/byp8-h018"),
-    "CFI-G": ("PSI-159", ""),
+    "CFI-G": ("PSI-159", "10.60555/cyt1-kh64"),
+    "CFI-G inverse": ("PSI-159", "10.60555/cyt1-kh64"),
     "SAME": ("PSI-102", ""),
     "SAME-R": ("PSI-101", ""),
     "SLICE": ("PSI-106", "10.60555/pm12-rg61"),
     "BASS": ("PSI-26", ""),
     "CFI": ("PSI-39", "10.60555/m6pj-a914"),
     "ACME Flame Design": ("PSI-10", "10.60555/w4zy-bt45"),
+    "ACME Flame Design inverse": ("PSI-10", "10.60555/w4zy-bt45"),
+    "ACME CLD Flame": ("PSI-21", ""),
+    "ACME s-Flame": ("PSI-23", ""),
+    "SPICE": ("PSI-107", ""),
     "ACME BRE": ("PSI-20", ""),
     "ACME E-FIELD Flames": ("PSI-22", ""),
     "DAFT": ("PSI-47", ""),
@@ -48,7 +53,7 @@ INV = {
 COLS = [
     "investigation", "psi_id", "doi", "row_level", "test_id",
     "fuel_class", "fuel", "material",
-    "o2_pct", "o2_min", "o2_max", "o2_raw",
+    "o2_pct", "o2_min", "o2_max", "o2_raw", "o2_supply_pct",
     "diluent",
     "pressure_psi", "pressure_min", "pressure_max", "pressure_raw",
     "flow_cm_s", "flow_min", "flow_max", "flow_raw", "flow_direction",
@@ -353,6 +358,102 @@ def cfi():
     return out
 
 
+def cfig_inverse():
+    """Inverse flames: oxygen flows out of the burner into a chamber of fuel and nitrogen.
+    The surrounding gas holds no oxygen, so o2_* stays empty; the burner's oxygen goes in o2_supply_pct."""
+    src = "PSI-159_Experimental table_CFI-G_Inverse Flames.csv"
+    out = []
+    for d in read(src):
+        if not d["Test"]:
+            continue
+        o = num(d["XO2"])
+        p = num(d["approx p (bar)"])
+        extra = span("pressure", p * BAR_TO_PSI, p * BAR_TO_PSI) if p is not None else {}
+        ign = d["Hot ignition"].lower()
+        end = {"SE": "self-extinguished", "FT": "flow terminated"}.get(d["Self -ext or flow term"], "")
+        outcome = f"Hot ignition: {ign.capitalize()}" if ign else ""
+        if end and ign == "yes":
+            outcome += f"; {end}"
+        if d["burn time (sec)"] and ign == "yes":
+            outcome += f'; burn time {d["burn time (sec)"]} s'
+        out.append(row(
+            "CFI-G inverse", src, test_id=d["Test"], fuel_class="gas",
+            fuel=f'{d["Fuel"].lower()} in the surrounding gas, fuel mole fraction {d["Xf before test"]}; oxygen flow {d["O2 flow rate (mg/s)"]} mg/s from a spherical burner (inverse flame)',
+            o2_raw=f'XO2 {d["XO2"]} (oxygen supplied from the burner; the surrounding gas is fuel and nitrogen)',
+            o2_supply_pct=fmt(o * 100) if o is not None else "", diluent="N2",
+            pressure_raw=f'{d["approx p (bar)"]} bar', gravity="µg", outcome=outcome,
+            sensors="Burner temperature (peak burner T)",
+            notes="; ".join(x for x in (f'Flame colour: {d["Color"]}' if d["Color"] not in ("", "-") else "", d["Comments"]) if x), **extra,
+        ))
+    return out
+
+
+def flame_design_inverse():
+    src = "PSI-10_Experimental table_Flame Design_Inverse Flame.csv"
+    out = []
+    for d in read(src):
+        o = num(d["XO2"])
+        p = num(d["pinit (atm)"])
+        extra = span("pressure", p * ATM_TO_PSI, p * ATM_TO_PSI) if p is not None else {}
+        out.append(row(
+            "ACME Flame Design inverse", src, test_id=d["Test"], fuel_class="gas",
+            fuel=f'ethylene in the surrounding gas, mole fraction {d["XC2H4 initial"]}; oxygen flow {d["mO2 (mg/s)"]} mg/s from a spherical burner (inverse flame)',
+            o2_raw=f'XO2 {d["XO2"]} (oxygen supplied from the burner; the surrounding gas is ethylene and nitrogen)',
+            o2_supply_pct=fmt(o * 100) if o is not None else "", diluent="N2",
+            pressure_raw=f'{d["pinit (atm)"]} atm', gravity="µg",
+            notes="Table lists no outcome.", **extra,
+        ))
+    return out
+
+
+def cld():
+    src = "PSI-21_Experimental table_CLD Flame.csv"
+    out = []
+    for d in read(src):
+        out.append(row(
+            "ACME CLD Flame", src, row_level="summary (one line per test day)",
+            test_id=d["Test Day"], fuel_class="gas",
+            fuel=f'{d["Fuel Bottle"]}, diluted with nitrogen to {d["Fuel conc. Range"]} (coflow burner)',
+            diluent="N2", gravity="µg", outcome=f'Flames ignited: {d["Flames ignited"]}' if d["Flames ignited"] else "",
+            notes="Table lists test days, fuel mixes and flame counts; no O2, pressure or outcome per flame.",
+        ))
+    return out
+
+
+def sflame():
+    src = "PSI-23_Experimental table_ACME s-Flame.csv"
+    out = []
+    for d in read(src):
+        atm = d["Atmosphere*"]
+        m = re.search(r"(\d+\.?\d*)\s*%\s*O2", atm)
+        extra = span("o2", float(m.group(1)), float(m.group(1))) if m else {}
+        out.append(row(
+            "ACME s-Flame", src, row_level="summary (one line per test day)",
+            test_id=d["Test Day*"], fuel_class="gas", fuel=f'{d["Fuel Bottle"]} (spherical burner)',
+            o2_raw=atm, gravity="µg", outcome=f'Flames ignited: {d["Flames Ignited*"]}' if d["Flames Ignited*"] else "",
+            notes="Atmosphere is about 1 atm; pressure rises and oxygen falls as the chamber fills with combustion products (table note).", **extra,
+        ))
+    return out
+
+
+def spice():
+    """Smoke-point flames on a coflow nozzle. The table lists the coflow air speed, not its oxygen level."""
+    src = "PSI-107_Experimental table_Spice.csv"
+    out = []
+    for i, d in enumerate(read(src), 1):
+        a = num(d["Air Rate (cm/s)"])
+        extra = span("flow", a, a) if a is not None and a >= 0 else {}
+        out.append(row(
+            "SPICE", src, test_id=f'{i}: day {d["GMT date"]}, ignition {d["GMT ignition"]}', fuel_class="gas",
+            fuel=f'{d["Fuel"]}, {d["Fuel Rate (mg/s)"]} mg/s from a {d["Nozzle (mm)"]} mm nozzle (coflow)',
+            flow_raw=d["Air Rate (cm/s)"], flow_direction="coflow", gravity="µg",
+            notes="Smoke-point study; the table lists fuel and air rates, not oxygen, pressure or outcome."
+                  + (" Air rate is listed below zero and is not used as a speed." if a is not None and a < 0 else ""),
+            **extra,
+        ))
+    return out
+
+
 def flame_design():
     src = "PSI-10_Experimental table_Flame Design_Normal Flame.csv"
     out = []
@@ -438,8 +539,8 @@ def daft():
 
 def main():
     saf, pairs = saffire()
-    rows = (saf + bass2() + bass() + flex() + flex2() + cfi() + cfig() + flame_design()
-            + bre() + efield() + slice_() + same() + daft())
+    rows = (saf + bass2() + bass() + flex() + flex2() + cfi() + cfig() + cfig_inverse() + flame_design()
+            + flame_design_inverse() + bre() + efield() + cld() + sflame() + slice_() + spice() + same() + daft())
     for r in rows:
         if r["fuel_class"] in ("solid", "smoke source"):
             r["material"] = tag_material(r["fuel"])

@@ -430,5 +430,65 @@
   "judge": "gemini-3.5-flash-lite",
   "judge_removed": [],
   "text": "This was a dust-particle measurement in microgravity; nothing was burned, and every row of the table has the same sample description, \"Arizona Road Dust (ARD Fine) in combination with ISS GN2 to create an aerosol for measurement purposes.\" Oxygen, pressure and airflow are not listed."
+ },
+ "b7a965fecfbb8cc1a7e0": {
+  "kind": "investigation",
+  "label": "CFI-G inverse",
+  "model": "gemini-3.1-flash-lite",
+  "raw": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 146 different fuel or sample descriptions, for example \"ethane in the surrounding gas, fuel mole fraction 0.298100; oxygen flow 5.59 mg/s from a spherical burner (inverse flame)\". The table lists oxygen from none in the surrounding gas; 12 to 85 % oxygen supplied from the burner (inverse flames) and pressure from 7.18 to 48.01 psi. Fuel or sample, oxygen and pressure varied between tests, and airflow is not listed.",
+  "total": 7,
+  "verified": 7,
+  "dropped": 0,
+  "judge": "gemini-3.5-flash-lite",
+  "judge_removed": [],
+  "text": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 146 different fuel or sample descriptions, for example \"ethane in the surrounding gas, fuel mole fraction 0.298100; oxygen flow 5.59 mg/s from a spherical burner (inverse flame)\". The table lists oxygen from none in the surrounding gas; 12 to 85 % oxygen supplied from the burner (inverse flames) and pressure from 7.18 to 48.01 psi. Fuel or sample, oxygen and pressure varied between tests, and airflow is not listed."
+ },
+ "9c42e3de51eda1e61a68": {
+  "kind": "investigation",
+  "label": "ACME Flame Design inverse",
+  "model": "gemini-3.1-flash-lite",
+  "raw": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 120 different fuel or sample descriptions, for example \"ethylene in the surrounding gas, mole fraction 0.271563399; oxygen flow 5.116084436 mg/s from a spherical burner (inverse flame)\". The table lists oxygen from none in the surrounding gas; 21.2 to 85 % oxygen supplied from the burner (inverse flames) and pressure from 6.24 to 44.2 psi. The fuel or sample, oxygen and pressure varied between tests, and airflow and sensors are not listed.",
+  "total": 7,
+  "verified": 7,
+  "dropped": 0,
+  "judge": "gemini-3.5-flash-lite",
+  "judge_removed": [],
+  "text": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 120 different fuel or sample descriptions, for example \"ethylene in the surrounding gas, mole fraction 0.271563399; oxygen flow 5.116084436 mg/s from a spherical burner (inverse flame)\". The table lists oxygen from none in the surrounding gas; 21.2 to 85 % oxygen supplied from the burner (inverse flames) and pressure from 6.24 to 44.2 psi. The fuel or sample, oxygen and pressure varied between tests, and airflow and sensors are not listed."
+ },
+ "2c8cdbedeb20c989df11": {
+  "kind": "investigation",
+  "label": "ACME CLD Flame",
+  "model": "gemini-3.1-flash-lite",
+  "raw": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 31 different fuel or sample descriptions, for example \"40% CH4, diluted with nitrogen to 30%-40% (coflow burner)\". The fuel or sample varied between tests, and oxygen, pressure, airflow and sensors are not listed.",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "judge": "gemini-3.5-flash-lite",
+  "judge_removed": [],
+  "text": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 31 different fuel or sample descriptions, for example \"40% CH4, diluted with nitrogen to 30%-40% (coflow burner)\". The fuel or sample varied between tests, and oxygen, pressure, airflow and sensors are not listed."
+ },
+ "629c1b6458fa551b3c3e": {
+  "kind": "investigation",
+  "label": "ACME s-Flame",
+  "model": "gemini-3.1-flash-lite",
+  "raw": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 16 different fuel or sample descriptions, for example \"50% C2H4 with N2 (spherical burner)\". The table lists oxygen from 21 to 30 %. The fuel or sample and oxygen varied between tests, and pressure, airflow and sensors are not listed.",
+  "total": 4,
+  "verified": 4,
+  "dropped": 0,
+  "judge": "gemini-3.5-flash-lite",
+  "judge_removed": [],
+  "text": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 16 different fuel or sample descriptions, for example \"50% C2H4 with N2 (spherical burner)\". The table lists oxygen from 21 to 30 %. The fuel or sample and oxygen varied between tests, and pressure, airflow and sensors are not listed."
+ },
+ "c52aaf031266107eebcb": {
+  "kind": "investigation",
+  "label": "SPICE",
+  "model": "gemini-3.1-flash-lite",
+  "raw": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 336 different fuel or sample descriptions, for example \"Ethylene, 1.971 mg/s from a 1.6002 mm nozzle (coflow)\". The table lists airflow from 0.66 to 85.28 cm/s. The fuel or sample and airflow varied between tests, and oxygen, pressure and sensors are not listed.",
+  "total": 5,
+  "verified": 5,
+  "dropped": 0,
+  "judge": "gemini-3.5-flash-lite",
+  "judge_removed": [],
+  "text": "This was a flame test on gas-fuelled burner flames in microgravity, and the table gives 336 different fuel or sample descriptions, for example \"Ethylene, 1.971 mg/s from a 1.6002 mm nozzle (coflow)\". The table lists airflow from 0.66 to 85.28 cm/s. The fuel or sample and airflow varied between tests, and oxygen, pressure and sensors are not listed."
  }
 }

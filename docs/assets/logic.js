@@ -249,5 +249,12 @@
     return { n: near.length, by, nearest: best, o2_gap: best ? round(Math.abs(best.o - o2), 1) : null, solids };
   }
 
-  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P };
+  function inverse(FF) { // tests whose oxygen came from the burner, not the surrounding air
+    if (FF._inv) return FF._inv;
+    const r = FF.rows.filter((x) => / inverse$/.test(x.i)), o = r.filter((x) => x.os != null);
+    return (FF._inv = { n: r.length, top: o.length ? Math.max(...o.map((x) => x.os)) : 0, minP: r.length ? Math.min(...r.filter((x) => x.P).map((x) => x.P[0])) : 0,
+      invs: [...new Set(r.map((x) => x.i))] });
+  }
+
+  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P, inverse };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -212,8 +212,8 @@
       const topO = Math.max(...pts.map((x) => x.o));
       s += txt(X(topO) + 12, Y(56), `${pts.length} tests`, { fill: C.ink, size: narrow ? 12.5 : 14, weight: 600, extra: halo });
       s += txt(X(topO) + 12, Y(56) + 17, `all at ${g(topO)}% oxygen or less`, { fill: C.ink2, size: narrow ? 11.5 : 12.5, extra: halo });
-      if (narrow) s += txt(X(73), Y(10.5), "No test in the", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "loaded data out here", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
-      else s += txt(X(70), Y(28), "No test in the loaded data out here", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
+      if (narrow) s += txt(X(73), Y(10.5), "No test with this", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "surrounding air", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
+      else s += txt(X(70), Y(28), "No test with this surrounding air", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
       // tests
       [...bins.values()].sort((a, b) => b.n - a.n).forEach((b) => {
         const o = b.o / b.n, p = b.p / b.n, r = Math.min(8, 2.6 + Math.sqrt(b.n) * 0.9), [col, lab] = cls[b.c] || [C.ug, b.c];

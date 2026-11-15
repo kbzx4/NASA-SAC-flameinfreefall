@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115e">
+<link rel="stylesheet" href="assets/style.css?v=20261115f">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -115,7 +115,7 @@
     <div class="section-head reveal">
       <span class="eyebrow">The gap</span>
       <h2>Past that line, the data thins out. Crews have lived far beyond it.</h2>
-      <p>In the NASA tables loaded here, every microgravity fire test that records its surrounding air ran at <span data-n="topo2"></span>% oxygen or less. Crews have breathed pure oxygen from Mercury to Apollo, about three-quarters oxygen on Skylab, and pure oxygen inside every US spacesuit today; Apollo 1 burned in pure oxygen. Solid materials, the things that actually burn in a cabin, were flame-tested in orbit only up to <span data-n="solidmax"></span>%. NASA's CFI-G inverse-flame tests did flow up to 85% oxygen, but from the burner into a chamber of fuel and nitrogen, not as the surrounding air, and that table is not loaded here.</p>
+      <p>In the NASA tables loaded here, every microgravity fire test that records its surrounding air ran at <span data-n="topo2"></span>% oxygen or less. Crews have breathed pure oxygen from Mercury to Apollo, about three-quarters oxygen on Skylab, and pure oxygen inside every US spacesuit today; Apollo 1 burned in pure oxygen. Solid materials, the things that actually burn in a cabin, were flame-tested in orbit only up to <span data-n="solidmax"></span>%. NASA's <span data-n="invn"></span> inverse-flame tests (ACME CFI-G and Flame Design) did feed up to <span data-n="invtop"></span>% oxygen, but out of the burner into a chamber of fuel and nitrogen, not as the surrounding air, so they are in the catalog but not on the map.</p>
     </div>
     <div class="figure reveal">
       <h3><span data-n="open"></span> of <span data-n="atmos"></span> crew atmospheres, past and planned, have no test near them in the loaded data.</h3>
@@ -226,13 +226,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115e"></script>
-<script src="assets/data.js?v=20261115e"></script>
-<script src="assets/logic.js?v=20261115e"></script>
-<script src="assets/charts.js?v=20261115e"></script>
-<script src="assets/models.js?v=20261115e"></script>
-<script src="assets/flame.js?v=20261115e"></script>
-<script src="assets/replay.js?v=20261115e"></script>
+<script src="assets/config.js?v=20261115f"></script>
+<script src="assets/data.js?v=20261115f"></script>
+<script src="assets/logic.js?v=20261115f"></script>
+<script src="assets/charts.js?v=20261115f"></script>
+<script src="assets/models.js?v=20261115f"></script>
+<script src="assets/flame.js?v=20261115f"></script>
+<script src="assets/replay.js?v=20261115f"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -288,6 +288,7 @@
       built: FF.built,
       findings: FF.findings.length,
       topo2: Math.max(...FFLogic.placed(FF).map((x) => x.o)),
+      invn: FFLogic.inverse(FF).n, invtop: FFLogic.inverse(FF).top,
       open: FFLogic.ATMOS.filter((a) => FFLogic.coverage(FF, a.o2, a.p).n === 0).length,
       atmos: FFLogic.ATMOS.length,
     };

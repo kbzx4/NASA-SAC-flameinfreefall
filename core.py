@@ -172,7 +172,9 @@ def describe(cat, inv):
         "Fuel class": g["fuel_class"].iloc[0],
         "Fuels or samples": (f"{len(fuels)} distinct descriptions in the table, for example: {fuels[0]}"
                              if len(fuels) > 1 else str(fuels[0])),
-        "Oxygen": _rng(g["o2_min"].min(), g["o2_max"].max(), "%"),
+        "Oxygen": (f'none in the surrounding gas; {_rng(g["o2_supply_pct"].min(), g["o2_supply_pct"].max(), "%")} oxygen supplied from the burner (inverse flames)'
+                   if "o2_supply_pct" in g and g["o2_min"].isna().all() and g["o2_supply_pct"].notna().any()
+                   else _rng(g["o2_min"].min(), g["o2_max"].max(), "%")),
         "Pressure": _rng(g["pressure_min"].min(), g["pressure_max"].max(), "psi"),
         "Airflow": ("a fan setting is listed, but no air speed in cm/s"
                     if g["flow_min"].isna().all() and g["flow_raw"].notna().any()

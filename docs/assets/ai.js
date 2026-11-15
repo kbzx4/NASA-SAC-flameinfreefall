@@ -183,7 +183,7 @@ CONTEXT:
     const c = L.coverage(FF, st.o2, st.pressure), pts = L.placed(FF), r1 = (v) => Math.round(v * 10) / 10;
     return {
       tests_with_oxygen_and_pressure: pts.length,
-      not_loaded: "NASA's CFI-G inverse-flame tests flowed up to 85% oxygen from the burner into a chamber of fuel and nitrogen; that table is not loaded, and its oxygen is not the surrounding air, so those tests are not counted here",
+      not_on_map: `NASA's ${L.inverse(FF).n} inverse-flame tests (ACME CFI-G and Flame Design) fed up to ${L.inverse(FF).top}% oxygen out of the burner into a chamber of fuel and nitrogen; that oxygen is not the surrounding air, so those tests are not counted here`,
       highest_oxygen_tested_pct: Math.max(...pts.map((x) => x.o)), lowest_pressure_tested_psi: r1(Math.min(...pts.map((x) => x.p))),
       tests_near_this_habitat: c.n, near_means: `within ${FF.near} points of oxygen and 25% of the pressure`,
       nearest_test: c.nearest ? { investigation: c.nearest.i, oxygen_pct: r1(c.nearest.o), pressure_psi: r1(c.nearest.p) } : null,

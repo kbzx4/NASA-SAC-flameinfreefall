@@ -43,12 +43,12 @@ None of the scores predicts flammability.
 - In BASS-II, carbon monoxide rose in 117 of 118 burns, by up to 575 ppm.
 - Gravity changed the outcome for 4 of 9 Saffire-II samples. Thin silicone did not burn in microgravity and burned completely in normal gravity. Cotton-fiberglass fabric burned completely in both.
 - In the 16 investigations loaded, no solid-material flame test lists an oxygen level above 22.2%. Liquid-droplet tests reach 34% and gas-flame tests 40%.
-- In the tables loaded here, all 754 microgravity tests that list both the oxygen of the surrounding air and the pressure sit at 40% oxygen or less and 7.35 psi or more (CFI-G's inverse-flame tests, which flowed up to 85% oxygen from the burner, are not loaded). The atmospheres of Mercury to Apollo (100%, 5 psi), Apollo 1 (100%, 16.7 psi), Skylab (about 74%, 5 psi) and the spacesuit (100%, 4.3 psi) have no test near them; the nearest is 35 to 61 points of oxygen away.
+- In the tables loaded here, all 754 microgravity tests that list both the oxygen of the surrounding air and the pressure sit at 40% oxygen or less and 7.35 psi or more (the 274 inverse-flame tests of ACME CFI-G and Flame Design fed up to 85% oxygen, but out of the burner into fuel and nitrogen, so they are not placed by surrounding air). The atmospheres of Mercury to Apollo (100%, 5 psi), Apollo 1 (100%, 16.7 psi), Skylab (about 74%, 5 psi) and the spacesuit (100%, 4.3 psi) have no test near them; the nearest is 35 to 61 points of oxygen away.
 - No loaded investigation ran in partial gravity.
 
 ## NASA data used
 
-1,196 records from 16 PSI experiment tables: Saffire I, II and III, BASS, BASS-II, FLEX, FLEX-2, CFI, CFI-G, ACME Flame Design, ACME BRE, ACME E-FIELD Flames, SLICE, SAME, SAME-R and DAFT. The site's "Data and method" page lists each table with a link to its PSI record. The raw tables are in [data/raw](data/raw), the harmonised table in [data/catalog.csv](data/catalog.csv), and every cleaning decision in [DATA_NOTES.md](DATA_NOTES.md).
+1,989 records from 21 PSI experiment tables across 18 PSI investigations: Saffire I, II and III, BASS, BASS-II, FLEX, FLEX-2, CFI, CFI-G (normal and inverse flames), ACME Flame Design (normal and inverse flames), ACME BRE, ACME E-FIELD Flames, ACME CLD Flame, ACME s-Flame, SLICE, SPICE, SAME, SAME-R and DAFT. The site's "Data and method" page lists each table with a link to its PSI record. The raw tables are in [data/raw](data/raw), the harmonised table in [data/catalog.csv](data/catalog.csv), and every cleaning decision in [DATA_NOTES.md](DATA_NOTES.md).
 
 Source: [NASA Physical Science Informatics](https://psi.nasa.gov/physci/repo/search?q=combustion).
 

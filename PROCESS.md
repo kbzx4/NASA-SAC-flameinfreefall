@@ -109,6 +109,12 @@ Changes made:
 - Checks before publishing: every FLEX oxygen band includes tests from about 10 to 15 psi, so oxygen and pressure are not confounded; Moon-base pressure moves the model's lines by at most 1.6 points; the real nitrogen-only tests sit on or near the model lines (methanol 11 of 15 at 21% against 74% predicted for a 3 mm droplet).
 - The coverage map stays as supporting evidence, reworded: the challenge statement says CFI-G inverse flames flowed up to 85% oxygen, so claims are now limited to "the loaded data" and the 85% tests are named. Other fixes: "1,196 microgravity records" (9 are normal-gravity) is now "combustion test records"; the disclaimers no longer say the site never predicts, since the Fire model does.
 
+## Nov 15, late morning: five more NASA tables
+
+- The PSI investigation pages show each experiment table in the browser. Reading them there (a real Chrome window, driven over its DevTools connection) found five tables that had never been downloaded: CFI-G Inverse Flames (154 tests, the up-to-85%-oxygen tests the challenge statement mentions), ACME Flame Design Inverse Flame (120), ACME CLD Flame (32 test days), ACME s-Flame (18 test days) and SPICE (469 flame settings). The catalog grows from 1,196 to 1,989 records.
+- Inverse flames feed oxygen out of the burner into a chamber of fuel and nitrogen. Their surrounding gas holds no oxygen, so the burner's oxygen goes in its own column (`o2_supply_pct`) and these tests are kept off the Atmosphere map and out of the models, which describe flames burning in an oxygen atmosphere. The findings and models came out unchanged.
+- The SI wrote summaries for the five new investigations; all numbers checked, and each text was read. The lowest tested pressure is now 6.24 psi (an inverse-flame test), which changed the Spacesuit briefing's facts; the first regenerated text had its pressure-gap sentence removed by the second pass, so it was discarded and regenerated once more.
+
 ## Still open
 
 - The gravity bound assumes burning changes steadily with gravity. That is NASA's stated possibility, not a result in this data.
