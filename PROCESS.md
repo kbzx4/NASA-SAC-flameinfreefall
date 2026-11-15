@@ -150,6 +150,14 @@ The whole site was read again as a judge would, against the challenge statement,
   - Asked why a habitat runs its air past the burn line, it said the context never mentioned a burn line. The air facts now carry the burn line, where the habitat sits against it, the prebreathe from ISS air and the saving, and the suit pressure for a cabin at the line.
   - Its gap sentences said "no test in the data ran in Moon gravity" right after citing NASA's drop-tower tests at Moon gravity. The gaps it gets now name NASA's PSI tables, and a rule asks it to say when a report goes beyond a gap.
 
+## Nov 15, evening: the suit
+
+- Asked whether the project stood out yet, the honest answer was no: the trade-off was ours alone, but it read as one chart among many and its punchline was jargon.
+- Working the numbers further gave a sharper finding. The least-oxygen cabin with no prebreathe falls about 2 points of oxygen for each half psi of suit pressure. At 5.8 psi, a cabin at 21.7% oxygen and 12.2 psi needs none: inside the burn line, with droplet flames going out on their own 67% of the time against 14% at today's 4.3 psi. Each hour of prebreathe buys back about 2.4 points; 1 h 47 min reaches the burn line.
+- 5.8 psi is not a made-up number: NASA's NESC history of the prebreathe gives it as the Russian Orlan suit's operating pressure, and records that the Shuttle suit's makers proposed raising the suit to 5.8 psi with an 11.8 psi cabin (R 1.6) so crews could skip the prebreathe. NASA turned it down on cost. The model's 5.8 psi cabin lands at 12.2 psi, next to that 11.8, now a seventh check in tests/air.mjs.
+- Under the stricter planetary limit the suit helps less (26.7% at 5.8 psi; the burn line needs 6.9 psi), and the site says so.
+- The home page now opens on it: "Moon-base fire safety starts with the spacesuit."
+
 ## Still open
 
 - The prebreathe estimate is one tissue at rest. NASA's current planetary risk models are stricter; the stricter limit approximates them but does not reproduce them.
