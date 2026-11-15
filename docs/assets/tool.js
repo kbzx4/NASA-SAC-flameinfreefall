@@ -158,7 +158,8 @@
     return true;
   }
   function cites(text, r) {
-    return esc(text).replace(/\[((?:F\d+|gaps|model|map)(?:\s*,\s*(?:F\d+|gaps|model|map))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+    return esc(text).replace(/\[((?:F\d+|R\d+|gaps|model|map)(?:\s*,\s*(?:F\d+|R\d+|gaps|model|map))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+      /^R\d+$/.test(c) ? (r.rids && r.rids[c] ? `<a class="cite" href="#rep-${r.rids[c]}">${c}</a>` : "") :
       c === "model" ? `<a class="cite" href="?view=model" data-view-link="model">model</a>` : c === "map" ? `<a class="cite" href="?view=map" data-view-link="map">map</a>` : c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
   }
   function liveCheck() { return ""; }
@@ -248,10 +249,11 @@
   }
   /* one word on how much test evidence sits near this habitat, beside the briefing */
   function verdict() {
-    const c = L.coverage(FF, state.o2, state.pressure);
-    const [word, cls] = c.n >= 20 ? ["Tested", "ok"] : c.n > 0 ? ["Sparse", "thin"] : ["Untested", "none"];
+    const c = L.coverage(FF, state.o2, state.pressure), rep = L.reportCoverage(FF, state.o2, state.pressure).length, n = c.n + rep;
+    const [word, cls] = n >= 20 ? ["Tested", "ok"] : n > 0 ? ["Sparse", "thin"] : ["Untested", "none"];
     const why = c.n ? `${c.n} microgravity tests within ${FF.near} points of oxygen and 25% of this pressure.` : `No microgravity test within ${FF.near} points of oxygen and 25% of this pressure. The nearest is at ${g(Math.round(c.nearest.o * 10) / 10)}% oxygen and ${g(Math.round(c.nearest.p * 10) / 10)} psi.`;
-    return `<a class="verdict ${cls}" href="?view=map" data-view-link="map" data-tip="<b>${word}</b><span>${esc(why)} Open the Atmosphere map.</span>"><i></i>${word}</a>`;
+    const whyAll = why + (rep ? ` NASA's technical reports add ${rep} solid-material fire${rep > 1 ? "s" : ""} in orbit near it.` : "");
+    return `<a class="verdict ${cls}" href="?view=map" data-view-link="map" data-tip="<b>${word}</b><span>${esc(whyAll)} Open the Atmosphere map.</span>"><i></i>${word}</a>`;
   }
   /* the replay on the Insights view: kept across redraws (live SI redraws the view) and restarted
      only when the oxygen group nearest the habitat changes */
@@ -275,8 +277,16 @@
     const shown = rank.filter((r) => words.every((w) => insightText(byId[r.id]).includes(w)));
     const brief = isPreset() ? FF.briefings[state.scenario] : null, gaps = L.gaps(FF, state.o2, state.pressure);
     const far = all[0].m_o2 === 0;
-    const custom = (far ? `No finding has tests within ${g(FF.range.o2)} points of ${g(state.o2)}% oxygen. The nearest results are these, and they are a long way from your habitat. ` : "")
-      + all.slice(0, 3).map((r) => cap(byId[r.id].bands[r.band].line) + ".").join(" ");
+    let rev = L.reportEvidence(FF, state.o2, state.pressure);
+    if (partial()) rev = [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")];
+    const revNear = rev.filter((e) => e.o2_gap < FF.range.o2);
+    const revShown = rev.filter((e) => (!state.kind || state.kind === "solid") && words.every((w) => [e.title, e.where, e.nearest, ...e.lines].join(" ").toLowerCase().includes(w)));
+    const psiLines = all.slice(0, 3).map((r) => cap(byId[r.id].bands[r.band].line) + ".").join(" ");
+    const custom = far
+      ? `No PSI finding has tests within ${g(FF.range.o2)} points of ${g(state.o2)}% oxygen.${revNear.length ? ` NASA's technical reports come closer: ${revNear.slice(0, 2).map((e) => e.nearest).join(" ")} The nearest PSI results are a long way off: ` : " The nearest results are these, and they are a long way from your habitat. "}${psiLines}`
+      : psiLines;
+    const repSection = revShown.length ? `<div class="h-sec" id="reports"><h2>From NASA technical reports</h2><span>Beyond the PSI tables · ranked by how close their tests came to ${g(state.o2)}% oxygen</span></div>
+      ${revShown.map((e, k) => repEvidenceCard(e, k)).join("")}` : "";
     const models = [...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", ");
     el.innerHTML = `
       <span class="eyebrow">Fire safety insights</span>
@@ -285,7 +295,7 @@
       <div class="briefing">${(() => {
         const lb = live.brief && live.brief.key === habitatKey() ? live.brief : null;
         if (lb) return `${verdict()}<div class="k">Briefing · written live by SI for these values</div>${liveBody("brief")}`;
-        if (brief) return `${verdict()}<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}`;
+        if (brief) return `${verdict()}<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}${far && revNear.length ? `<div class="k" style="margin-top:14px">Beyond the PSI tables · from NASA technical reports, computed, not SI-written</div><p>${esc(revNear[0].nearest)} <a href="#reports">See the reports</a></p>` : ""}`;
         return `${verdict()}<div class="k">Closest results · computed, not SI-written</div><p>${esc(custom)}</p>
           ${AI.configured() ? `<button class="btn small" id="brief-live" style="margin-top:12px">Write an SI briefing for these values</button>` : `<span class="chk none">Turn on live SI below to get an SI-written briefing for these values.</span>`}`;
       })()}
@@ -298,16 +308,17 @@
         <div id="ins-rp"></div>
         <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. Both sides include tests with CO2 or helium added, which went out on their own more often. <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
       </div>
-      ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence.</b> No finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. The findings below are the nearest there are; treat this habitat as a research gap.</div>` : ""}
+      ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence${revNear.length ? " in the PSI tables" : ""}.</b> No PSI finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. ${far && revNear.length ? `The NASA technical reports below come closer; the PSI findings after them are the nearest PSI has.` : "The findings below are the nearest there are; treat this habitat as a research gap."}</div>` : ""}
+      ${far ? repSection : ""}
       ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No PSI test ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first. NASA drop-tower tests at Moon and Mars gravity are on the <a href="?view=gravity" data-view-link="gravity">Gravity</a> tab.</div>` : ""}
       <div class="ins-tools">
         <div class="pills" id="kinds">${KINDS.map(([k, l]) => `<button class="pill" aria-pressed="${state.kind === k}" data-k="${k}">${l}</button>`).join("")}</div>
         <input class="find" id="find" type="search" placeholder="Find: oxygen, CO2, smoke, gravity, PMMA" value="${esc(state.find)}" aria-label="Find a finding">
       </div>
       <div id="ins-list">${shown.length ? shown.map((r, i) => insightCard(byId[r.id], r, i, r === pin)).join("") : `<p class="muted">No finding matches "${esc(state.find)}".</p>`}</div>
+      ${far ? "" : repSection}
       <div class="h-sec" id="gaps"><h2>What this data cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</span></div>
       <div class="card prose"><ul>${gaps.map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul></div>
-      ${reportCard("What NASA's technical reports add, beyond the PSI tables")}
       <div class="cols-2" style="margin-top:18px">
         <div class="card"><h3>How the findings are ranked</h3>
           <div class="formula">Relevance = C<sub>oxygen</sub> × ½ (1 + C<sub>pressure</sub>) × W<sub>tests</sub></div>
@@ -405,6 +416,17 @@
       out.push(`<b>${state.gravity === 1 ? "Moon" : "Mars"} gravity, NASA drop-tower tests:</b> ${gl.map((m) => `${esc(m.material)} kept burning down to ${g(m[key].uloi)}% oxygen (Earth gravity: ${g(m.earth.uloi)}%)`).join("; ")}. <a href="?view=gravity" data-view-link="gravity">Gravity</a>`);
     }
     return out;
+  }
+  function repEvidenceCard(e, k) {
+    const near = e.o2_gap === 0 ? `Covers your ${g(state.o2)}% oxygen` : `${g(e.o2_gap)} points of oxygen from your ${g(state.o2)}%`;
+    const links = e.src.map((key) => { const s = L.source(FF, key); return s ? `<a class="tag" href="${s.url}" target="_blank" rel="noopener">NTRS ${esc(s.ntrs)} ↗</a>` : ""; }).join("");
+    return `<article class="insight rep-ins" id="rep-${e.id}">
+      <div class="ins-head"><span class="n">R${k + 1}</span><span class="tag code">NASA report</span>${partial() && e.id === "gravity" ? `<span class="tag">Pinned for ${esc(gravityLabel())}</span>` : ""}<span class="tag">${esc(e.where)}</span>${links}</div>
+      <h3>${esc(e.title)}</h3>
+      <p class="near-line"><b>${near}:</b> ${esc(e.nearest)}</p>
+      ${e.lines.length ? `<ul class="facts">${e.lines.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      <p class="note">Tested at ${rangeText(e.o2, "%")} oxygen and ${rangeText(e.p, " psi")}, ${esc(e.gravity)}. ${esc(e.caveat)} Computed from tables transcribed from the report, not SI-written.</p>
+    </article>`;
   }
   function reportCard(title) {
     const n = reportNotes();

@@ -291,6 +291,78 @@
     });
   }
 
+  /* What NASA's technical reports say for one habitat: one entry per report group, with the result nearest
+     the habitat and the patterns computed from the transcribed tables (no SI). Ranked by how far the habitat's
+     oxygen is from the oxygen the group tested, then by pressure. Limits quoted are from the Saffire VI paper
+     (p. 5): NASA's 1-hour CO2 limit of 3 mmHg and the 24-hour CO limit (SMAC) of 100 ppm. */
+  function reportEvidence(FF, o2, p) {
+    const R = REP(FF), out = [], r1 = (v) => Math.round(v * 10) / 10, lp = Math.log(NEAR_P);
+    const gapTo = (lo, hi, v) => (v < lo ? lo - v : v > hi ? v - hi : 0);
+    const dist = (o, q) => Math.hypot((o - o2) / 5, Math.log(q / p) / lp);
+    const add = (e) => { e.p = e.p.map(r1); e.o2_gap = r1(gapTo(e.o2[0], e.o2[1], o2)); e.p_gap = r1(gapTo(e.p[0], e.p[1], p)); out.push(e); };
+    const low1 = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+    const srcOf = (rows) => [...new Set(rows.flatMap((r) => r.src))];
+    if (R.ssce.length) {
+      const os = R.ssce.map((r) => r.o2), ps = R.ssce.map((r) => r.psi);
+      const near = R.ssce.slice().sort((a, b) => dist(a.o2, a.psi) - dist(b.o2, b.psi))[0];
+      const at = (o, atm) => R.ssce.find((r) => r.o2 === o && r.atm === atm && r.spread != null);
+      const lines = [], a35 = at(35, 1.5), a50 = at(50, 1.5), pr = R.ssce.filter((r) => r.o2 === 50 && r.spread != null).sort((a, b) => a.atm - b.atm);
+      if (a35 && a50) lines.push(`Flames spread over paper ${r1(a50.spread / a35.spread)} times faster at 50% oxygen than at 35%, at the same 1.5 atm (${a50.spread} against ${a35.spread} cm/s).`);
+      if (pr.length > 1) lines.push(`At 50% oxygen they spread faster as pressure rose: ${pr.map((r) => `${r.spread} cm/s at ${r.atm} atm`).join(", ")}.`);
+      const thick = R.ssce.filter((r) => /PMMA/.test(r.material));
+      if (thick.length) lines.push(`Thick PMMA kept burning on all ${thick.length} flights, at ${[...new Set(thick.map((r) => r.o2))].sort((a, b) => a - b).join(" and ")}% oxygen, until the experiment put it out or the camera film ran out.`);
+      add({ id: "ssce", title: "Solid materials burned in orbit at 35 to 70% oxygen", where: "Space Shuttle SSCE · in orbit", gravity: "microgravity",
+        o2: [Math.min(...os), Math.max(...os)], p: [Math.min(...ps), Math.max(...ps)],
+        nearest: `In orbit on the Space Shuttle (SSCE ${near.id}), ${near.material} at ${near.o2}% oxygen and ${near.atm} atm${near.spread != null ? `: the flame spread at ${near.spread} cm/s, ${low1(near.outcome).replace(/^spread /, "")}` : ` ${low1(near.outcome)}`}`,
+        lines, caveat: "Quiet air with no airflow; small samples (paper 10 cm, PMMA 2.5 cm) in a 39-litre chamber.", src: srcOf(R.ssce) });
+    }
+    if (R.saffire.length) {
+      const os = R.saffire.map((r) => r.o2), ps = R.saffire.map((r) => r.psi);
+      const near = R.saffire.slice().sort((a, b) => dist(a.o2, a.psi) - dist(b.o2, b.psi))[0];
+      const lines = [], co2 = R.saffire.filter((r) => r.co2_mmhg != null && r.co2_mmhg > 3), coR = R.saffire.filter((r) => r.co_ppm != null);
+      const keep = R.saffire.find((r) => /fan off/.test(r.outcome)), smoke = R.saffire.find((r) => /smoke-alarm/.test(r.outcome));
+      if (keep) lines.push(`Saffire ${keep.id}, ${keep.material} at ${keep.o2}% oxygen and ${r1(keep.psi)} psi: ${keep.outcome}`);
+      if (co2.length) lines.push(`${co2.map((r) => `Saffire ${r.id}`).join(" and ")} raised the spacecraft's average CO2 by ${co2.map((r) => r.co2_mmhg).join(" and ")} mmHg, past NASA's 1-hour limit of 3 mmHg.`);
+      if (coR.length) lines.push(`CO rose by up to ${Math.max(...coR.map((r) => r.co_ppm))} ppm; ${coR.filter((r) => r.co_ppm > 100).length} of the ${coR.length} burns with a CO reading went above NASA's 24-hour limit of 100 ppm.`);
+      if (smoke) lines.push(`Saffire ${smoke.id}: a tight smoke-alarm threshold (1 mg/m3) was reached only at 981 s, after much of the hazardous gas had been released.`);
+      add({ id: "saffire", title: "Large fires in a real spacecraft, up to 31% oxygen", where: "Saffire IV to VI · Cygnus, in orbit", gravity: "microgravity",
+        o2: [Math.min(...os), Math.max(...os)], p: [Math.min(...ps), Math.max(...ps)],
+        nearest: `In orbit in a Cygnus spacecraft (Saffire ${near.id}), ${near.material} at ${near.o2}% oxygen and ${r1(near.psi)} psi: ${low1(near.outcome)}`,
+        lines, caveat: "Samples 18 to 50 cm long in a flow duct at 20 cm/s; one or two tests at each condition.", src: srcOf(R.saffire) });
+    }
+    if (R.wstf10.length) {
+      const n = R.wstf10.length, at = Math.min(99.5, Math.max(30, o2));
+      const burn = R.wstf10.filter((r) => burnsAbove(r.moc, at)), unk = R.wstf10.filter((r) => r.moc.bound === "above" && r.moc.v < at);
+      const outN = n - burn.length - unk.length, top = R.wstf10.filter((r) => r.moc.bound === "above" && r.moc.v >= 99.5);
+      const names = (rows) => [...new Set(rows.map((r) => r.material.replace(/ (single|double) layer$/, "")))].join(", ");
+      const lines = [`Still burning at 30% oxygen, Moon-base air: ${names(R.wstf10.filter((r) => burnsAbove(r.moc, 30)))}.`];
+      if (top.length) lines.push(`Still going out at 99.5% oxygen: ${names(top)}.`);
+      add({ id: "wstf10", title: "NASA's standard material test at 10.2 psi", where: "NASA White Sands · Earth gravity", gravity: "Earth gravity",
+        o2: [30, 99.5], p: [10.2, 10.2],
+        nearest: `In NASA's standard material test at 10.2 psi, in Earth gravity, ${o2 < 30 ? "run from 30% oxygen up: at 30%, " : `at ${g(at)}% oxygen `}${burn.length} of ${n} material setups kept burning, ${outN} went out${unk.length ? `, and ${unk.length} were tested only up to ${Math.max(...unk.map((r) => r.moc.v))}%` : ""}.`,
+        lines, caveat: "NASA-STD-6001 Test 1: a strip burned upward in Earth gravity; it fails if it burns past 15 cm. Some materials burn at lower oxygen in low gravity.", src: srcOf(R.wstf10) });
+    }
+    if (R.wstfO2.length) {
+      const mtp = R.wstfO2.map((r) => r.mtp), lo = R.wstfO2.reduce((a, b) => (b.mtp < a.mtp ? b : a));
+      add({ id: "wstfO2", title: "In pure oxygen, materials burn at a fraction of a spacesuit's pressure", where: "NASA White Sands · Earth gravity", gravity: "Earth gravity",
+        o2: [99.8, 99.8], p: [Math.min(...mtp), Math.max(...R.wstfO2.map((r) => r.ulpi))],
+        nearest: `In 99.8% oxygen, all ${R.wstfO2.length} spacecraft materials tested became flammable above ${g(Math.min(...mtp))} to ${g(Math.max(...mtp))} psi, the highest pressure at which every sample went out. A US spacesuit runs at 4.3 psi.`,
+        lines: [`${lo.material} (${lo.form}) burned down to the lowest pressure: it went out reliably only at ${g(lo.mtp)} psi or below.`],
+        caveat: "NASA-STD-6001 Test 1 in Earth gravity, with a hot-wire igniter because the standard igniter fails below 0.7 psi.", src: srcOf(R.wstfO2) });
+    }
+    if (R.gravity.length) {
+      const gl = gravityLimits(FF), os = R.gravity.flatMap((r) => [r.moc, r.uloi]), ps = R.gravity.map((r) => r.psia);
+      const moonLow = gl.filter((m) => m.moon.mid < m.earth.mid && m.moon.mid < m.micro.mid).length;
+      const big = gl.reduce((a, b) => (b.moon.delta < a.moon.delta ? b : a));
+      add({ id: "gravity", title: "At Moon gravity, materials burned at lower oxygen than on Earth or in microgravity", where: "NASA Glenn drop tower · Moon and Mars gravity", gravity: "in Moon, Mars and microgravity in a drop tower",
+        o2: [Math.min(...os), Math.max(...os)], p: [Math.min(...ps), Math.max(...ps)],
+        nearest: `In NASA drop-tower tests, ${moonLow === gl.length ? `all ${gl.length}` : `${moonLow} of ${gl.length}`} materials kept burning at lower oxygen at Moon gravity than on Earth or in microgravity; ${big.material}'s limit fell ${g(-big.moon.delta)} points.`,
+        lines: gl.map((m) => `${m.material} (${g(m.psia)} psi): Earth ${g(m.earth.moc)} to ${g(m.earth.uloi)}%, Moon ${g(m.moon.moc)} to ${g(m.moon.uloi)}%, Mars ${g(m.mars.moc)} to ${g(m.mars.uloi)}%, microgravity ${g(m.micro.moc)} to ${g(m.micro.uloi)}%.`),
+        caveat: "Ranges run from the oxygen where the flame went out to where it kept burning. Drop tests last about 5 seconds; the microgravity tests had a 30 cm/s airflow.", src: srcOf(R.gravity) });
+    }
+    return out.sort((a, b) => a.o2_gap - b.o2_gap || a.p_gap / Math.max(p, 1) - b.p_gap / Math.max(p, 1));
+  }
+
   root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P, inverse,
-    source, reportPoints, reportCoverage, burnsAbove, wstfBurning, gravityLimits };
+    source, reportPoints, reportCoverage, burnsAbove, wstfBurning, gravityLimits, reportEvidence };
 })(typeof window !== "undefined" ? window : globalThis);

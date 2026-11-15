@@ -67,7 +67,7 @@
     let total = 0, found = 0;
     const kept = [], dropped = [];
     sentences(text).forEach((s) => {
-      const ns = numbers(s.replace(/\[F\d+\]/g, "").replace(/\b1\s?g\b/g, ""));
+      const ns = numbers(s.replace(/\[(?:F\d+|R\d+|gaps|model|map)(?:\s*,\s*(?:F\d+|R\d+|gaps|model|map))*\]/g, "").replace(/\b1\s?g\b/g, ""));
       const ok = ns.filter((n) => allowed.has(n)).length;
       total += ns.length; found += ok;
       (ok === ns.length ? kept : dropped).push(s);
@@ -130,7 +130,10 @@ findings ranked for it (each with an id such as F1, its facts, the result neares
 caveats), what the data cannot tell, the materials the user picked, and model_predictions from models
 fitted to the tests, and test_coverage: how close the tests come to this habitat and to the atmospheres crews have
 breathed. When you use a model prediction, say once that it is a model prediction, and cite it as [model]. Cite
-test_coverage as [map].
+test_coverage as [map]. nasa_reports holds results from NASA technical reports beyond the PSI tables (each with an
+id such as R1, the result nearest the habitat, its facts, where and in what gravity it was tested, and its caveat);
+cite them like [R1], and say when a result was in Earth gravity or a drop tower rather than in orbit. When no PSI
+finding is close to the habitat, use the closest nasa_reports entries.
 
 Answer QUESTION in at most 110 words.
 
@@ -143,8 +146,11 @@ CONTEXT:
 
   const BRIEF = `You are writing the opening briefing of a fire-safety evidence dashboard for one crewed
 habitat design. Code computed CONTEXT from NASA microgravity combustion test tables: the habitat, the
-findings ranked by how close their tests came to it (each with an id such as F1), the gaps, and
-test_coverage: how close the tests come to this habitat (cite it as [map]).
+findings ranked by how close their tests came to it (each with an id such as F1), the gaps,
+test_coverage: how close the tests come to this habitat (cite it as [map]), and nasa_reports: results from
+NASA technical reports beyond the PSI tables, ranked the same way (cite them like [R1]; say when a result was
+in Earth gravity or a drop tower rather than in orbit). When no PSI finding is close, lead with the closest
+nasa_reports entry.
 
 Write three or four sentences: what the closest evidence shows for this habitat, with its key numbers;
 what that suggests for a fire in this habitat; and the most important gap. If the closest tests are far
@@ -192,6 +198,13 @@ CONTEXT:
     };
   }
 
+  /* NASA technical report evidence in the order the Insights page shows it (Moon or Mars gravity pins the drop-tower group) */
+  function reportFacts(FF, L, st) {
+    if (!L.reportEvidence) return [];
+    let rev = L.reportEvidence(FF, st.o2, st.pressure);
+    if (st.gravity > 0) rev = [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")];
+    return rev;
+  }
   function context(FF, L, st) {
     const ranked = L.rankFindings(FF, st.o2, st.pressure);
     const ids = Object.fromEntries(FF.findings.map((f, i) => [f.id, "F" + (i + 1)]));
@@ -213,6 +226,11 @@ CONTEXT:
       gaps: L.gaps(FF, st.o2, st.pressure),
       model_predictions: modelFacts(FF, st),
       test_coverage: coverageFacts(FF, L, st),
+      nasa_reports: reportFacts(FF, L, st).map((e, k) => ({
+        id: "R" + (k + 1), title: e.title, source: e.where, tested_in: e.gravity, oxygen_tested_pct: e.o2, pressure_tested_psi: e.p,
+        oxygen_points_from_this_habitat: e.o2_gap, result_nearest_this_habitat: e.nearest, facts: e.lines, caveat: e.caveat,
+        note: "transcribed from a NASA technical report, not from the PSI tables",
+      })),
       materials_on_board: st.materials.map((m) => {
         const ev = L.materialEvidence(FF, m, st.o2);
         return { material: m, flame_tests_in_microgravity: ev.flame_tests, oxygen_tested_pct: ev.oxygen_tested_pct || "not listed",
@@ -233,6 +251,7 @@ CONTEXT:
     return {
       text: v.kept.filter((s) => !out.has(s)).join(" "), model: w.model, judge: j.model,
       total: v.total, found: v.found, dropped: v.dropped, judged_out: j.bad, ids: Object.fromEntries(FF.findings.map((f, i) => ["F" + (i + 1), f.id])),
+      rids: Object.fromEntries(reportFacts(FF, L, st).map((e, k) => ["R" + (k + 1), e.id])),
     };
   }
 
