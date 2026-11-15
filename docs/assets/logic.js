@@ -373,7 +373,9 @@
      atmosphere (8.2 psi, 34%) gives about 128 mmHg, like the Shuttle's staged denitrogenation (Aerospace Medicine and
      Human Performance 89(9), 2018); 127 mmHg is the floor used here. Simplified on purpose: one tissue, at rest. */
   const MMHG = 51.71493, PH2O = 47 / MMHG; // mmHg per psi; water vapour, psi
-  const AIR = { suit: 4.3, half: 360, rmax: 1.65, floor: 127, iss: { o2: 21, p: 14.7 }, nasa: { protocol_min: 240, planetary_min: 390, exp: { o2: 34, p: 8.2, pio2: 128 } } };
+  // orlan: Russia's Orlan suit runs at 5.8 psi (NASA NESC, "Solving the Pressure Problem"); the Shuttle suit's makers once proposed
+  // the same 5.8 psi so crews could skip the prebreathe, and NASA turned it down on cost
+  const AIR = { suit: 4.3, orlan: 5.8, half: 360, rmax: 1.65, floor: 127, iss: { o2: 21, p: 14.7 }, nasa: { protocol_min: 240, planetary_min: 390, exp: { o2: 34, p: 8.2, pio2: 128 } } };
   AIR.rstrict = round(((AIR.iss.p * (1 - AIR.iss.o2 / 100)) / AIR.suit) / Math.pow(2, AIR.nasa.planetary_min / AIR.half), 3);
   const airR = (o2, p, suit) => (p * (1 - o2 / 100)) / suit;
   const prebreathe = (o2, p, suit, rmax) => { const R = airR(o2, p, suit); return R <= rmax ? 0 : (AIR.half / Math.LN2) * Math.log(R / rmax); }; // minutes
@@ -397,7 +399,20 @@
     return { p: round(p, 1), suit: round((p * (1 - o2 / 100)) / rmax, 1) };
   }
 
+  /* the least-oxygen cabin when the crew accepts this many minutes of prebreathe: the limit on R relaxes by 2^(minutes / half-time) */
+  function budgetCorner(minutes, suit = AIR.suit, rmax = AIR.rmax, floor = AIR.floor) {
+    return airCorner(suit, rmax * Math.pow(2, minutes / AIR.half), floor);
+  }
+  /* whole minutes of prebreathe after which the least-oxygen cabin is at or below this oxygen % (null if never within 10 h) */
+  function minutesTo(o2, suit = AIR.suit, rmax = AIR.rmax, floor = AIR.floor) {
+    if (budgetCorner(0, suit, rmax, floor).o2 <= o2) return 0;
+    let lo = 0, hi = 600;
+    if (budgetCorner(hi, suit, rmax, floor).o2 > o2) return null;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (budgetCorner(m, suit, rmax, floor).o2 <= o2) hi = m; else lo = m; }
+    return hi;
+  }
+
   root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P, inverse,
     source, reportPoints, reportCoverage, burnsAbove, wstfBurning, gravityLimits, reportEvidence,
-    AIR, airR, prebreathe, pio2, altitudeFor, floorAt, noPrebreatheAt, airAt, airCorner, suitFor };
+    AIR, airR, prebreathe, pio2, altitudeFor, floorAt, noPrebreatheAt, airAt, airCorner, suitFor, budgetCorner, minutesTo };
 })(typeof window !== "undefined" ? window : globalThis);

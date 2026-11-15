@@ -137,8 +137,9 @@ cite them like [R1], and say when a result was in Earth gravity or a drop tower 
 finding is close to the habitat, use the closest nasa_reports entries. air holds code-computed estimates for this
 habitat's air from NASA's published limits, not test data: minutes of pure-oxygen prebreathe before a spacewalk, the
 inspired oxygen and the altitude it matches, the burn line (the oxygen band past which most droplet flames keep burning),
-the least-oxygen cabin with no prebreathe and how far past the burn line it is, and the suit pressure that would allow a
-cabin at the burn line; cite it as [air] and call it an estimate.
+the least-oxygen cabin with no prebreathe and how far past the burn line it is, the suit pressure that would allow a
+cabin at the burn line, the prebreathe that brings a cabin back to it, and what a 5.8 psi suit like Russia's Orlan would
+allow; cite it as [air] and call it an estimate.
 
 Answer QUESTION in at most 110 words.
 
@@ -229,6 +230,10 @@ CONTEXT:
       burn_line: b1 == null ? undefined : { what: "the oxygen band holding the FLEX droplet model's 50-50 points for heptane and methanol: below it most droplet flames go out on their own, past it most keep burning", oxygen_pct_from: b0, oxygen_pct_to: b1,
         this_habitat: st.o2 > b1 ? "past the burn line" : st.o2 >= b0 ? "on the burn line" : "below the burn line" },
       suit_pressure_for_a_cabin_at_the_burn_line: sf ? { suit_psi: sf.suit, cabin_oxygen_pct: b1, cabin_pressure_psi: sf.p } : undefined,
+      prebreathe_minutes_that_bring_the_least_oxygen_cabin_to_the_burn_line: b1 != null ? L.minutesTo(b1, a.suit, rmax) : undefined,
+      with_a_5_8_psi_suit_like_russias_orlan: (() => { const o = L.airCorner(A.orlan, rmax); return { least_oxygen_cabin_with_no_prebreathe: { oxygen_pct: o.o2, pressure_psi: o.p },
+        against_the_burn_line: b1 == null ? undefined : o.o2 > b1 ? "past the burn line" : o.o2 < b0 ? "below the burn line" : "inside the burn line",
+        history: "the Shuttle suit's makers proposed 5.8 psi so crews could skip the prebreathe; NASA turned it down on cost" }; })(),
     };
   }
   function context(FF, L, st) {

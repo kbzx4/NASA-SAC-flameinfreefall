@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115o">
+<link rel="stylesheet" href="assets/style.css?v=20261115p">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -35,8 +35,8 @@
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow">NASA Space Apps 2026 · Flame in Freefall</span>
-      <h1>Fire changes shape <span class="blue">when gravity does.</span></h1>
-      <p class="lede">Airburn reads <b><span data-n="records"></span> combustion test records</b> from NASA, ranks what the experiments found for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit. Then it shows the trade every Moon base faces: the air that spares astronauts hours of prebreathing before a spacewalk is air where small fires keep burning.</p>
+      <h1>Moon-base fire safety <span class="blue">starts with the spacesuit.</span></h1>
+      <p class="lede">With today's <span data-h="suit">4.3</span> psi suits, a Moon base has to run <span data-h="cor">27.6%</span> oxygen to spare crews hours of prebreathing before each spacewalk: past the burn line, where NASA's droplet tests show most small fires keep burning. At <span data-h="orlan">5.8</span> psi, the pressure of Russia's Orlan suit, it could breathe <span data-h="orl">21.7%</span>, <span data-h="orlside">inside the line</span>. Airburn ranks <b><span data-n="records"></span> NASA combustion test records</b> for your habitat and has SI explain them.</p>
       <div class="cta">
         <a class="btn primary" href="tool.html">Open the tool
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -105,20 +105,21 @@
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">The trade-off · prebreathe against fire</span>
-      <h2>To skip the prebreathe, a Moon base has to run its air past the burn line.</h2>
+      <h2>With today's suits, skipping the prebreathe puts a Moon base past the burn line. A stiffer suit brings it back.</h2>
       <p>Before every spacewalk, astronauts breathe pure oxygen to flush nitrogen out of their bodies, or they risk the bends. A cabin at lower pressure with more oxygen shortens that wait, which is why the Moon base is planned at 30% oxygen and 10.2 psi. This chart puts two of NASA's own limits on one map: the decompression limit NASA accepted its Shuttle and ISS prebreathe protocols at, and the oxygen level it accepts for crews to breathe. With today's 4.3 psi suits, no cabin air below <span data-a="corner"></span> oxygen meets both. The burn line, where NASA's droplet flames stop putting themselves out, sits at <span data-x="line"></span>.</p>
     </div>
-    <div class="tiles reveal">
+    <div class="tiles four reveal">
       <div class="tile"><div class="k">From ISS air · 21% oxygen, 14.7 psi</div><div class="v"><span data-a="iss"></span> <small>of pure oxygen before each spacewalk (NASA's protocol: 4 h). Droplet flames go out on their own <span data-a="issx"></span> of the time</small></div></div>
-      <div class="tile"><div class="k">The least oxygen that skips it</div><div class="v"><span data-a="corner"></span> <small>at <span data-a="cornerp"></span> psi, <span data-a="gap"></span> points past the burn line. Droplet flames go out on their own <span data-a="cornerx"></span> of the time</small></div></div>
-      <div class="tile"><div class="k">Or raise the suit instead</div><div class="v"><span data-a="suit"></span> psi <small>a suit at this pressure skips the prebreathe from a cabin at the burn line (<span data-a="suitcab"></span>). Today's suits run at 4.3 psi</small></div></div>
+      <div class="tile"><div class="k">The least oxygen that skips it, in today's 4.3 psi suits</div><div class="v"><span data-a="corner"></span> <small>at <span data-a="cornerp"></span> psi, <span data-a="gap"></span> points past the burn line. Droplet flames go out on their own <span data-a="cornerx"></span> of the time</small></div></div>
+      <div class="tile"><div class="k">In a <span data-a="orlan"></span> psi suit, like Russia's Orlan</div><div class="v"><span data-a="orl"></span> <small>at <span data-a="orlp"></span> psi with no prebreathe, <span data-a="orlside"></span>. Droplet flames go out on their own <span data-a="orlx"></span> of the time. The Shuttle suit's makers proposed 5.8 psi to end the prebreathe; NASA turned it down on cost</small></div></div>
+      <div class="tile"><div class="k">Or keep today's suits and prebreathe a little</div><div class="v"><span data-a="mb"></span> <small>of pure oxygen before each spacewalk brings the least-oxygen cabin back to the burn line (<span data-a="mbc"></span>)</small></div></div>
     </div>
     <div class="figure reveal" style="margin-top:18px">
       <h3>Every cabin air, by oxygen and pressure</h3>
       <p class="sub">Dashed lines: hours of pure-oxygen prebreathe before a 4.3 psi spacewalk. Green: no prebreathe, with the oxygen NASA accepts. Orange: the burn line. Hover anywhere for the numbers; click to open that air in the tool.</p>
       <div id="airchart"></div>
       <div id="air-legend"></div>
-      <p class="note">How it is worked out. Decompression uses NASA's R: the nitrogen pressure in the body's slowest tissue divided by the suit pressure. NASA accepted the Shuttle and ISS prebreathe protocols at R = 1.65, and breathing pure oxygen clears that nitrogen with a 360-minute half-time. Inspired oxygen is the oxygen fraction times the cabin pressure, less 47 mmHg of water vapour; NASA's exploration atmosphere gives 128 mmHg, and 127 mmHg is the floor used here. Checked against NASA: from ISS air the model gives <span data-a="iss"></span> of prebreathe, where NASA's resting protocol took 4 hours. With a stricter limit set only from NASA's 2024 estimate of about 6.5 hours from sea-level air, the least-oxygen cabin with no prebreathe moves to <span data-a="strict"></span> oxygen at <span data-a="strictp"></span> psi; NASA chose 34% at 8.2 psi for exploration. The fire side is the FLEX droplet model above: droplets in a test chamber, not cabin materials, and its tests ran at 10.1 psi or more. Simplified on purpose (one tissue, at rest) and not medical guidance. Skylab, Apollo and today's spacesuits used 74 to 100% oxygen, off this chart. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132.</p>
+      <p class="note">How it is worked out. Decompression uses NASA's R: the nitrogen pressure in the body's slowest tissue divided by the suit pressure. NASA accepted the Shuttle and ISS prebreathe protocols at R = 1.65, and breathing pure oxygen clears that nitrogen with a 360-minute half-time. Inspired oxygen is the oxygen fraction times the cabin pressure, less 47 mmHg of water vapour; NASA's exploration atmosphere gives 128 mmHg, and 127 mmHg is the floor used here. Checked against NASA: from ISS air the model gives <span data-a="iss"></span> of prebreathe, where NASA's resting protocol took 4 hours. With a stricter limit set only from NASA's 2024 estimate of about 6.5 hours from sea-level air, the least-oxygen cabin with no prebreathe moves to <span data-a="strict"></span> oxygen at <span data-a="strictp"></span> psi; NASA chose 34% at 8.2 psi for exploration. Under that stricter limit the suit helps less: a 5.8 psi suit's no-prebreathe cabin moves to <span data-a="orlstrict"></span> oxygen, and staying at the burn line takes a <span data-a="suitstrict"></span> psi suit. The fire side is the FLEX droplet model above: droplets in a test chamber, not cabin materials, and its tests ran at 10.1 psi or more. Simplified on purpose (one tissue, at rest) and not medical guidance. Skylab, Apollo and today's spacesuits used 74 to 100% oxygen, off this chart. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132; suit pressures, including the Orlan's 5.8 psi and the 5.8 psi Shuttle-suit proposal: NASA NESC, Solving the Pressure Problem.</p>
     </div>
     <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?view=air">Choose your habitat's air
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
@@ -277,13 +278,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115o"></script>
-<script src="assets/data.js?v=20261115o"></script>
-<script src="assets/logic.js?v=20261115o"></script>
-<script src="assets/charts.js?v=20261115o"></script>
-<script src="assets/models.js?v=20261115o"></script>
-<script src="assets/flame.js?v=20261115o"></script>
-<script src="assets/replay.js?v=20261115o"></script>
+<script src="assets/config.js?v=20261115p"></script>
+<script src="assets/data.js?v=20261115p"></script>
+<script src="assets/logic.js?v=20261115p"></script>
+<script src="assets/charts.js?v=20261115p"></script>
+<script src="assets/models.js?v=20261115p"></script>
+<script src="assets/flame.js?v=20261115p"></script>
+<script src="assets/replay.js?v=20261115p"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -415,10 +416,17 @@
   safe(() => { // the cabin-air trade-off: NASA's limits (logic.js) and the droplet model, every number computed
     const L = FFLogic, A = L.AIR, MD = window.FFModels, D = FF.models.droplets, x = FFCharts.crossoverData(FF);
     const r1 = (v) => Math.round(v * 10) / 10, b1 = r1(Math.max(...x.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null)));
-    const corner = L.airCorner(), strict = L.airCorner(A.suit, A.rstrict), sf = L.suitFor(b1);
+    const corner = L.airCorner(), strict = L.airCorner(A.suit, A.rstrict), sf = L.suitFor(b1), b0 = r1(Math.min(...x.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null)));
+    const orl = L.airCorner(A.orlan), mb = L.minutesTo(b1), mbc = mb == null ? null : L.budgetCorner(mb);
+    const hmin = (m) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}`);
+    const side = (o) => (o > b1 ? "past the burn line" : o < b0 ? "before the burn line" : "inside the burn line");
     const ext = (o, p) => Math.round(MD.classify(D.ending, MD.dropletX(o, "N2", p, 3, "Methanol")).fit[0] * 100) + "%";
     const set = { iss: r1(L.prebreathe(A.iss.o2, A.iss.p, A.suit, A.rmax) / 60) + " h", issx: ext(A.iss.o2, A.iss.p), corner: corner.o2 + "%", cornerp: corner.p,
-      cornerx: ext(corner.o2, corner.p), gap: r1(corner.o2 - b1), suit: sf.suit, suitcab: `${b1}% oxygen at ${sf.p} psi`, strict: strict.o2 + "%", strictp: strict.p };
+      cornerx: ext(corner.o2, corner.p), gap: r1(corner.o2 - b1), suit: sf.suit, suitcab: `${b1}% oxygen at ${sf.p} psi`, strict: strict.o2 + "%", strictp: strict.p,
+      orlan: A.orlan, orl: orl.o2 + "%", orlp: orl.p, orlx: ext(orl.o2, orl.p), orlside: side(orl.o2), mb: mb == null ? "–" : hmin(mb), mbc: mbc ? `${mbc.o2}% oxygen at ${mbc.p} psi` : "",
+      orlstrict: L.airCorner(A.orlan, A.rstrict).o2 + "%", suitstrict: L.suitFor(b1, A.rstrict).suit };
+    const hero = { suit: A.suit, cor: corner.o2 + "%", orlan: A.orlan, orl: orl.o2 + "%", orlside: side(orl.o2).replace("burn line", "line") };
+    document.querySelectorAll("[data-h]").forEach((el) => { if (hero[el.dataset.h] != null) el.textContent = hero[el.dataset.h]; });
     document.querySelectorAll("[data-a]").forEach((el) => { if (set[el.dataset.a] != null) el.textContent = set[el.dataset.a]; });
     document.getElementById("air-legend").innerHTML = FFCharts.airLegend(A.suit);
     const go = (o, p) => { location.href = `tool.html?view=air&o2=${o}&p=${p}`; };

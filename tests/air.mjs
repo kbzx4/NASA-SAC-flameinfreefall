@@ -22,5 +22,8 @@ check("stricter limit: lowest no-prebreathe oxygen, %", strict.o2, A.nasa.exp.o2
 check("stricter limit: its pressure, psi", strict.p, A.nasa.exp.p, 0.5);
 // 5. Sea level breathes 149 mmHg of inspired oxygen, at 0 m.
 check("inspired oxygen at 14.7 psi and 21%, mmHg", L.pio2(21, 14.7), 149.5, 1);
+// 6. NASA's suit makers proposed 5.8 psi with an 11.8 psi cabin to keep R at 1.6 and need no prebreathe (NESC, "Solving the Pressure
+//    Problem"). With a 5.8 psi suit the model's no-prebreathe cabin should sit near that pressure.
+check("5.8 psi suit: no-prebreathe cabin pressure, psi", L.airCorner(A.orlan, A.rmax, A.floor).p, 11.8, 0.6);
 console.log(`${n - bad} of ${n} air-model checks against NASA's numbers pass`);
 process.exit(bad ? 1 : 0);

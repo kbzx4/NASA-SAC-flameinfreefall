@@ -796,8 +796,10 @@
     const cov = L.coverage(FF, state.o2, state.pressure), rep = L.reportCoverage(FF, state.o2, state.pressure).length;
     const side = state.o2 > b1 ? "past the burn line" : state.o2 < b0 ? "before the burn line" : "on the burn line";
     const onChart = state.o2 >= 15 && state.o2 <= 40 && state.pressure >= 4 && state.pressure <= 16;
-    const suits = [...new Set([A.suit, L.suitFor(b1).suit, L.suitFor(b1, A.rstrict).suit, 8.2])];
-    const suitLab = (v) => (v === A.suit ? `${g(v)} psi · today's suits` : v === 8.2 ? "8.2 psi · xEMU design" : `${g(v)} psi`);
+    const suits = [...new Set([A.suit, L.suitFor(b1).suit, A.orlan, L.suitFor(b1, A.rstrict).suit, 8.2])].sort((x, y) => x - y);
+    const suitLab = (v) => (v === A.suit ? `${g(v)} psi · today's suits` : v === A.orlan ? `${g(v)} psi · Russia's Orlan` : v === 8.2 ? "8.2 psi · xEMU design" : `${g(v)} psi`);
+    const mb = L.minutesTo(b1, a.suit, rmax), bc = mb ? L.budgetCorner(mb, a.suit, rmax) : null, oc = L.airCorner(A.orlan, rmax);
+    const oside = oc.o2 > b1 ? "past the burn line" : oc.o2 < b0 ? "before the burn line" : "inside the burn line";
     el.innerHTML = `
       <span class="eyebrow">Choose the air</span>
       <h1 style="margin-top:12px">Prebreathe against fire, for ${esc(habitat)}</h1>
@@ -823,13 +825,15 @@
           <li><b>Keep this air:</b> ${now.min < 1 ? "no prebreathe" : `${hm(now.min)} of pure oxygen`} before each spacewalk in a ${g(a.suit)} psi suit${now.low ? ", and less oxygen to breathe than NASA accepts" : ""}.</li>
           <li><b>Skip the prebreathe:</b> with a ${g(a.suit)} psi suit, the least-oxygen cabin that needs none and still gives enough oxygen is ${g(corner.o2)}% at ${g(corner.p)} psi${corner.o2 > b1 ? `, ${g(r1(corner.o2 - b1))} points past the burn line` : ""}. There a burning droplet goes out on its own ${pc(dropExt(corner.o2, corner.p, "Methanol").fit[0])} of the time, against ${pc(dropExt(A.iss.o2, A.iss.p, "Methanol").fit[0])} in ISS air (methanol, model).</li>
           <li><b>Stay at the burn line:</b> a cabin at ${g(b1)}% oxygen needs ${g(sf.p)} psi to give enough oxygen, and skips the prebreathe with a suit at ${g(sf.suit)} psi${a.suit >= sf.suit ? `; this ${g(a.suit)} psi suit does` : ""}.</li>
+          <li><b>Or prebreathe a little:</b> ${mb == null ? `in a ${g(a.suit)} psi suit, even 10 hours of prebreathe does not bring the cabin to the burn line` : mb === 0 ? `a ${g(a.suit)} psi suit needs no prebreathe from a cabin at the burn line` : `${hm(mb)} of pure oxygen in a ${g(a.suit)} psi suit brings the least-oxygen cabin to the burn line (${g(bc.o2)}% at ${g(bc.p)} psi)`}.</li>
+          ${a.suit !== A.orlan ? `<li><b>Or a suit like Russia's Orlan:</b> at ${g(A.orlan)} psi, the least-oxygen cabin with no prebreathe is ${g(oc.o2)}% at ${g(oc.p)} psi, ${oside}. The Shuttle suit's makers proposed 5.8 psi to end the prebreathe; NASA turned it down on cost.</li>` : ""}
         </ul></div>
         <div class="card prose"><h3>How this is worked out</h3><ul>
           <li><b>Decompression:</b> R = the cabin's nitrogen pressure ÷ the suit pressure, NASA's index for the body's slowest (360-minute) tissue. NASA accepted the Shuttle and ISS prebreathe protocols at R ${g(A.rmax)}. Breathing pure oxygen, that nitrogen halves every 360 minutes. The stricter limit, R ${g(A.rstrict)}, is set from NASA's 2024 estimate of about 6.5 hours from sea-level air.</li>
           <li><b>Breathing:</b> inspired oxygen = oxygen fraction × (pressure − 47 mmHg of water vapour). NASA's exploration atmosphere (34%, 8.2 psi) gives 128 mmHg; 127 is the floor here.</li>
           <li><b>Fire:</b> the FLEX droplet model on the Fire model tab, nitrogen only, 3 mm droplets. Droplets in a test chamber, not cabin materials; its tests ran at ${g(r1(D.range.p[0] * 14.6959))} psi or more.</li>
           <li><b>Checked against NASA</b> (tests/air.mjs): ${g(r1(L.prebreathe(A.iss.o2, A.iss.p, A.suit, A.rmax) / 60))} h from ISS air, where NASA's resting protocol took 4 h. With the stricter limit, set only from the 6.5 h estimate, the least-oxygen no-prebreathe cabin lands at ${g(L.airCorner(A.suit, A.rstrict).o2)}% and ${g(L.airCorner(A.suit, A.rstrict).p)} psi; NASA chose 34% and 8.2 psi for exploration.</li>
-          <li>Simplified on purpose: one tissue, at rest; NASA's protocols also use exercise and staged pressures. Not medical or operational guidance. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132 (suit pressures).</li>
+          <li>Simplified on purpose: one tissue, at rest; NASA's protocols also use exercise and staged pressures. Not medical or operational guidance. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132 (suit pressures); NASA NESC, Solving the Pressure Problem (the Orlan's 5.8 psi, and the 5.8 psi Shuttle-suit proposal).</li>
         </ul></div>
       </div>`;
     CH.airChart($("airchart-tool"), FF, { suit: a.suit, rmax, you: { o2: state.o2, p: state.pressure },
