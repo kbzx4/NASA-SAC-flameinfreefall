@@ -19,7 +19,7 @@
   }, root.FF_AI || {});
   const URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent";
   const NUMBER = /(?<![A-Za-z\d.])\d+(?:\.\d+)?/g;
-  const STORE = "flamebound-gemini-key";
+  const STORE = "burnline-gemini-key";
 
   function userKey() { try { return localStorage.getItem(STORE) || ""; } catch (e) { return ""; } }
   function setUserKey(k) { try { k ? localStorage.setItem(STORE, k.trim()) : localStorage.removeItem(STORE); } catch (e) { /* storage blocked */ } }

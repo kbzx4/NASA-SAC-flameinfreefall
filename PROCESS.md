@@ -73,7 +73,7 @@ Changes made:
 ## Nov 14, night: high oxygen and live SI
 
 - At 85.5% oxygen the tool showed results from 20 to 21% oxygen and no "no close evidence" warning. No test is within 20 points of 85.5%, so oxygen closeness was 0 for every finding, a pressure match alone gave 0.5, and the tie between oxygen groups went to the first one. Each finding now uses its group of tests nearest the habitat's oxygen level, oxygen gates the score (`C_oxygen × ½ (1 + C_pressure) × W_tests`), and ties go to the nearer oxygen level. The cards say how far away the nearest tests are. A sweep of 10,860 slider settings checks that the nearest group is always the one used. The Spacesuit briefing had been written from the wrong groups and was dropped.
-- Live SI: "Ask Flamebound" answers questions, and "Write an SI briefing" covers any habitat, from the facts the page computed for it. Gemini 3.1 Flash Lite answers in 3 to 6 seconds; in tests the second pass (Gemini 3.5 Flash Lite) caught a misattributed oxygen range and a wrong "lower than". Gemma 4 26B timed out three times in a row, so it is only the last fallback.
+- Live SI: "Ask Burnline" answers questions, and "Write an SI briefing" covers any habitat, from the facts the page computed for it. Gemini 3.1 Flash Lite answers in 3 to 6 seconds; in tests the second pass (Gemini 3.5 Flash Lite) caught a misattributed oxygen range and a wrong "lower than". Gemma 4 26B timed out three times in a row, so it is only the last fallback.
 - The free tier allows 20 requests a day for the stronger models (Gemini 4 Hydrogen included), so live SI uses the Flash Lite models.
 
 ## Nov 14, late: test replay
@@ -132,6 +132,7 @@ The whole site was read again as a judge would, against the challenge statement,
 - The Insights replay counted CO2 and helium tests on the ISS side only (every test at 30 to 34% is nitrogen only). It now compares nitrogen-only tests, as the home page does, and its note says which.
 - The home page said 21 investigations; it is 21 tables from 19 investigations (the README said 18). It said solids burned in orbit only up to 22.2%, one paragraph above the reports showing 31% and 70%; that sentence is now limited to the PSI tables.
 - The headline counts (17 of 32, 2 of 23) are the tests the model was fitted to, while the findings count every test (17 of 34, 2 of 24). The home page now says so.
+- Renamed from Flamebound to Burnline, because another team's project is also called FlameBound. The new name points at the lead finding: the oxygen line past which fires stop putting themselves out.
 - Smaller: the hero says Moon and Mars have drop tests only, not "no data"; the White Sands 34% tile says it ran at 10.2 psi; Saffire-II's "037 mm" thickness is marked as NASA's own text; "at or just above today's air" became "right around" it, since the 50-50 point spans 20.4 to 23.4%.
 
 ## Still open

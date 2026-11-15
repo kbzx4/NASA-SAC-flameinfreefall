@@ -153,9 +153,9 @@
   function allowed() {
     if (AI.mode() === "your key") return true;
     let t = [];
-    try { t = JSON.parse(localStorage.getItem("flamebound-live") || "[]").filter((x) => Date.now() - x < 3600e3); } catch (e) { return true; }
+    try { t = JSON.parse(localStorage.getItem("burnline-live") || "[]").filter((x) => Date.now() - x < 3600e3); } catch (e) { return true; }
     if (t.length >= LIMIT) return false;
-    try { localStorage.setItem("flamebound-live", JSON.stringify(t.concat(Date.now()))); } catch (e) { /* storage blocked */ }
+    try { localStorage.setItem("burnline-live", JSON.stringify(t.concat(Date.now()))); } catch (e) { /* storage blocked */ }
     return true;
   }
   function cites(text, r) {
@@ -191,12 +191,12 @@
   }
   function askPanel() {
     if (!AI.configured()) {
-      return `<div class="ask"><div class="k">Ask Flamebound · live SI</div>
+      return `<div class="ask"><div class="k">Ask Burnline · live SI</div>
         <p class="hint" style="margin:8px 0 10px">Live questions need a Gemini API key. Paste one to try it here; it is kept only in this browser. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key ↗</a></p>
         <form id="key-form" class="ask-row"><input id="key-in" class="find" type="password" autocomplete="off" placeholder="Gemini API key" aria-label="Gemini API key"><button class="btn primary small">Turn on live SI</button></form></div>`;
     }
     const a = live.ask && live.ask.key === habitatKey() ? live.ask : null;
-    return `<div class="ask"><div class="k">Ask Flamebound · live SI${AI.mode() === "your key" ? ` · using your key · <button class="linkish" id="key-clear">forget it</button>` : ""}</div>
+    return `<div class="ask"><div class="k">Ask Burnline · live SI${AI.mode() === "your key" ? ` · using your key · <button class="linkish" id="key-clear">forget it</button>` : ""}</div>
       <form id="ask-form" class="ask-row"><input id="ask-q" class="find" maxlength="300" placeholder="Ask about this habitat" value="${esc(a ? a.q : "")}" aria-label="Ask a question about this habitat"><button class="btn primary small"${a && a.busy ? " disabled" : ""}>Ask</button></form>
       <div class="pills" id="ask-sugg" style="margin-top:10px">${SUGGEST.map((x) => `<button class="pill" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div>
       <div class="ask-out">${liveBody("ask")}</div>
@@ -539,7 +539,7 @@
           <li>The tables transcribed from NASA reports are shown beside the PSI results and never mixed into the catalog, the findings, the models or the SI texts.</li></ul></div>
         <div class="card prose"><h3>How SI is used</h3><ul>
           <li>Insights: code computes each finding from the NASA tables and ranks the findings for your habitat. ${esc([...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", "))} then interprets each finding (headline, what the tests found, what it suggests, its limit) and writes a briefing for each preset habitat, reading only the facts code computed.</li>
-          <li>Live: "Ask Flamebound" and "Write an SI briefing" send the facts computed for your habitat (the ranked findings, the gaps and your materials) to Gemini 3.1 Flash Lite, which answers from those facts only and cites the findings it used. The same two checks run in your browser before the answer is shown. Live answers are not read by a person first.</li>
+          <li>Live: "Ask Burnline" and "Write an SI briefing" send the facts computed for your habitat (the ranked findings, the gaps and your materials) to Gemini 3.1 Flash Lite, which answers from those facts only and cites the findings it used. The same two checks run in your browser before the answer is shown. Live answers are not read by a person first.</li>
           <li>Material cards and investigation summaries: code works out every finding and a Gemini model only puts it into sentences. It is asked to change nothing.</li>
           <li>Code then looked up every number in each text in those facts and removed any sentence containing a number that was not there. Across ${texts.length} texts, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.</li>
           <li>A second SI pass then re-read each remaining sentence against the facts and removed any it judged unsupported. ${texts.filter((t) => t.judge && t.judge !== t.model).length} of the ${texts.length} texts were re-read by a different model${(() => { const j = [...new Set(texts.filter((t) => t.judge && t.judge !== t.model).map((t) => t.judge))]; return j.length ? " (" + esc(j.join(", ")) + ")" : ""; })()}, ${texts.filter((t) => t.judge && t.judge === t.model).length} by the same model in a fresh pass, and ${texts.filter((t) => !t.judge).length} got no second pass. The removed-sentence count above includes both checks.</li>
@@ -579,7 +579,7 @@
     const css = "body{font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#1c1c1a;max-width:860px;margin:32px auto;padding:0 20px}h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}h3{font-size:15px;margin:18px 0 4px}.sub{color:#555;margin:0 0 16px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e4e4e0;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#555}.warn{background:#fff6e0;border:1px solid #e8c877;padding:10px 12px;border-radius:6px}.si{background:#f3f6fb;border-left:3px solid #3987e5;padding:8px 12px;margin:8px 0}ul{margin:4px 0 0 18px;padding:0}small{color:#666}@media print{body{margin:0}}";
     const used = new Set(["FLEX", "CFI-G", ...FF.findings.flatMap((x) => x.investigations)]);
     let h = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Fire Evidence Brief: ${esc(state.scenario)}</title><style>${css}</style></head><body>
-      <h1>Fire Evidence Brief</h1><p class="sub">${esc(state.scenario)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${g(state.flow)} cm/s airflow, ${esc(gravityLabel())}. Generated ${new Date().toISOString().slice(0, 10)} with Flamebound.</p>
+      <h1>Fire Evidence Brief</h1><p class="sub">${esc(state.scenario)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${g(state.flow)} cm/s airflow, ${esc(gravityLabel())}. Generated ${new Date().toISOString().slice(0, 10)} with Burnline.</p>
       <p class="warn"><b>This is an evidence summary, not a safety assessment.</b> It reports which NASA microgravity tests exist near these conditions. It does not predict whether a material will burn.</p>
       ${(() => {
         const b = isPreset() ? FF.briefings[state.scenario] : null;

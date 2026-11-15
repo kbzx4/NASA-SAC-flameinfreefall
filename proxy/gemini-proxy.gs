@@ -1,5 +1,5 @@
 /**
- * Flamebound live-SI proxy, as a Google Apps Script web app.
+ * Burnline live-SI proxy, as a Google Apps Script web app.
  *
  * It keeps the Gemini API key off the public site: the page sends {model, body} here, and this
  * script adds the key and forwards the request to Gemini. It only allows the models below, caps

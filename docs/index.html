@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flamebound: fire evidence for crewed habitats</title>
+<title>Burnline: fire evidence for crewed habitats</title>
 <meta name="description" content="Describe a crewed habitat and see what NASA's microgravity combustion experiments say about it, and how close those tests come to your conditions.">
-<meta property="og:title" content="Flamebound: fire evidence for crewed habitats">
+<meta property="og:title" content="Burnline: fire evidence for crewed habitats">
 <meta property="og:description" content="Check a habitat's atmosphere and materials against NASA microgravity combustion test records.">
 <meta name="theme-color" content="#04060b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%235aa8ff' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115k">
+<link rel="stylesheet" href="assets/style.css?v=20261115l">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
 
 <nav class="nav" aria-label="Main">
   <div class="wrap">
-    <a class="brand" href="./"><span class="orb"></span>Flamebound</a>
+    <a class="brand" href="./"><span class="orb"></span>Burnline</a>
     <div class="nav-links">
       <a class="hide-s" href="#finding">The finding</a>
       <a class="hide-s" href="#problem">The gap</a>
@@ -35,7 +35,7 @@
     <div>
       <span class="eyebrow">NASA Space Apps 2026 · Flame in Freefall</span>
       <h1>Fire changes shape <span class="blue">when gravity does.</span></h1>
-      <p class="lede">Flamebound reads <b><span data-n="records"></span> combustion test records</b> from NASA, works out what the experiments found, ranks those findings for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit.</p>
+      <p class="lede">Burnline reads <b><span data-n="records"></span> combustion test records</b> from NASA, works out what the experiments found, ranks those findings for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit.</p>
       <div class="cta">
         <a class="btn primary" href="tool.html">Open the tool
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -211,7 +211,7 @@
     <div class="grid-3">
       <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Numbers transcribed from NASA technical reports name the report, table and page. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
       <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding and its ranking. A Gemini model then interprets the findings, reading only the facts code computed. Code looks up every number it wrote, a second model re-reads every sentence against the facts, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
-      <div class="card reveal"><h3>Honest about limits</h3><p>Flamebound shows how much evidence exists near your conditions and what models fitted to NASA's droplet and gas-flame tests predict there. The models cover only the conditions tested and say nothing directly about cabin materials. It is not an operational safety system.</p></div>
+      <div class="card reveal"><h3>Honest about limits</h3><p>Burnline shows how much evidence exists near your conditions and what models fitted to NASA's droplet and gas-flame tests predict there. The models cover only the conditions tested and say nothing directly about cabin materials. It is not an operational safety system.</p></div>
     </div>
   </div>
 </section>
@@ -233,7 +233,7 @@
 <footer>
   <div class="wrap cols">
     <div>
-      <a class="brand" href="./" style="margin-bottom:14px"><span class="orb"></span>Flamebound</a>
+      <a class="brand" href="./" style="margin-bottom:14px"><span class="orb"></span>Burnline</a>
       <p>Built for the NASA International Space Apps Challenge 2026, challenge "Flame in Freefall".</p>
       <p>Not affiliated with or endorsed by NASA.</p>
     </div>
@@ -252,13 +252,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115k"></script>
-<script src="assets/data.js?v=20261115k"></script>
-<script src="assets/logic.js?v=20261115k"></script>
-<script src="assets/charts.js?v=20261115k"></script>
-<script src="assets/models.js?v=20261115k"></script>
-<script src="assets/flame.js?v=20261115k"></script>
-<script src="assets/replay.js?v=20261115k"></script>
+<script src="assets/config.js?v=20261115l"></script>
+<script src="assets/data.js?v=20261115l"></script>
+<script src="assets/logic.js?v=20261115l"></script>
+<script src="assets/charts.js?v=20261115l"></script>
+<script src="assets/models.js?v=20261115l"></script>
+<script src="assets/flame.js?v=20261115l"></script>
+<script src="assets/replay.js?v=20261115l"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
