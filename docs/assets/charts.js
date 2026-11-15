@@ -47,7 +47,7 @@
       });
       rows.forEach((p, i) => {
         const cy = top + i * rowH + (narrow ? 40 : rowH / 2), same = p.ug === p.g1;
-        const name = `${p.material.replace(" (SIBAL)", "")} · ${p.thickness === "See Fig. 5" ? "thickness: see source" : p.thickness}${/Opposed/.test(p.direction) ? " · opposed flow" : ""}`;
+        const name = `${p.material.replace(" (SIBAL)", "")} · ${p.thickness === "See Fig. 5" ? "thickness: see source" : /^0\d/.test(p.thickness) ? p.thickness + "*" : p.thickness}${/Opposed/.test(p.direction) ? " · opposed flow" : ""}`;
         const info = `<b>Sample ${esc(p.sample)}: ${esc(p.material)}</b><span>Microgravity burn length: ${esc(p.ug_raw)}<br>Normal gravity: ${esc(p.g1_raw)}<br>GSI ${p.gsi.toFixed(2)} · ${esc(p.o2_raw)}% O2, ${esc(p.flow_raw)}</span>`;
         s += narrow ? txt(x0, cy - 20, name, { fill: C.ink, size: 13 }) : txt(labelW, cy + 4, name, { anchor: "end", fill: C.ink, size: 13.5 });
         s += `<line x1="${X(0)}" x2="${X(29)}" y1="${cy}" y2="${cy}" stroke="${C.line}" stroke-width="1"/>`;

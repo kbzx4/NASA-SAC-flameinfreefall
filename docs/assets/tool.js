@@ -22,7 +22,8 @@
   const preset = (atQ && FF.scenarios.find((s) => s.o2 === +q.get("o2") && s.pressure === +q.get("p"))) || (atQ ? { ...FF.scenarios.find((s) => s.name === "Custom"), o2: Math.min(100, Math.max(10, +q.get("o2"))), pressure: Math.min(45, Math.max(3, +q.get("p"))) } : null) || FF.scenarios.find((s) => s.name === q.get("s")) || FF.scenarios[1];
   const state = {
     scenario: preset.name, o2: preset.o2, pressure: preset.pressure, flow: 10,
-    gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g")))) : 1,
+    gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g"))))
+      : preset.name === "ISS cabin" || (atQ && !/^Moon|^Exploration/.test(preset.name)) ? 0 : 1, // the ISS, and past crew atmospheres opened from the map, are in orbit
     materials: DEFAULT_MATERIALS.filter((m) => FF.materials.includes(m)),
     view: ["insights", "map", "model", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
     model: { fuel: "Methanol", gas: "N2", d0: 3, gfuel: "propane", flow: 1, xf: 1 },
@@ -43,7 +44,7 @@
   }
   document.querySelector(".side").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
-    if (b.dataset.s) { const s = FF.scenarios.find((x) => x.name === b.dataset.s); state.scenario = s.name; state.o2 = s.o2; state.pressure = s.pressure; }
+    if (b.dataset.s) { const s = FF.scenarios.find((x) => x.name === b.dataset.s); state.scenario = s.name; state.o2 = s.o2; state.pressure = s.pressure; if (s.name === "ISS cabin") state.gravity = 0; else if (/^Moon/.test(s.name)) state.gravity = 1; }
     else if (b.dataset.gi) state.gravity = +b.dataset.gi;
     else if (b.dataset.m) { const m = b.dataset.m; state.materials = state.materials.includes(m) ? state.materials.filter((x) => x !== m) : FF.materials.filter((x) => x === m || state.materials.includes(x)); }
     update();
@@ -257,14 +258,21 @@
   }
   /* the replay on the Insights view: kept across redraws (live SI redraws the view) and restarted
      only when the oxygen group nearest the habitat changes */
+  function insRpGas() { // nitrogen only when both sides have at least 5 such tests, so CO2 and helium do not tip the count
+    const bs = FF.findings.find((f) => f.id === "droplet-oxygen").bands, gap = (b, o) => Math.max(b.o2[0] - o, o - b.o2[1], 0);
+    const near = (o) => bs.reduce((best, b, i) => (gap(b, o) < gap(bs[best], o) ? i : best), 0);
+    const a = near(21), b = near(state.o2) !== a ? near(state.o2) : bs.length - 1;
+    const n2 = (i) => FF.replay.droplets.filter((r) => r[6] === "N2" && r[0] >= bs[i].o2[0] - 0.05 && r[0] <= bs[i].o2[1] + 0.05).length;
+    return n2(a) >= 5 && n2(b) >= 5 ? "N2" : "";
+  }
   let insRp = null, insRpHost = null, insRpKey = null;
   function insReplay(rank) {
     const slot = $("ins-rp"); if (!slot) return;
-    const key = rank ? rank.band : -1;
+    const gas = insRpGas(), key = (rank ? rank.band : -1) + gas;
     if (insRpHost && insRpKey === key) { slot.appendChild(insRpHost); return; }
     if (insRp) insRp.destroy();
     insRpHost = document.createElement("div"); insRpKey = key; slot.appendChild(insRpHost);
-    insRp = FFReplay.mount(insRpHost, FF, { kind: "droplets", compact: true, loop: true, o2: state.o2 });
+    insRp = FFReplay.mount(insRpHost, FF, { kind: "droplets", compact: true, loop: true, o2: state.o2, gas });
   }
   function drawInsights() {
     const el = $("view-insights"), habitat = state.scenario === "Custom" ? "your habitat" : state.scenario;
@@ -278,7 +286,8 @@
     const brief = isPreset() ? FF.briefings[state.scenario] : null, gaps = L.gaps(FF, state.o2, state.pressure);
     const far = all[0].m_o2 === 0;
     let rev = L.reportEvidence(FF, state.o2, state.pressure);
-    if (partial()) rev = [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")];
+    // Moon or Mars gravity pins the drop-tower group first; in orbit it goes last, after the fires burned in orbit
+    rev = partial() ? [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")] : [...rev.filter((e) => e.id !== "gravity"), ...rev.filter((e) => e.id === "gravity")];
     const revNear = rev.filter((e) => e.o2_gap < FF.range.o2);
     const revShown = rev.filter((e) => (!state.kind || state.kind === "solid") && words.every((w) => [e.title, e.where, e.nearest, ...e.lines].join(" ").toLowerCase().includes(w)));
     const psiLines = all.slice(0, 3).map((r) => cap(byId[r.id].bands[r.band].line) + ".").join(" ");
@@ -295,7 +304,7 @@
       <div class="briefing">${(() => {
         const lb = live.brief && live.brief.key === habitatKey() ? live.brief : null;
         if (lb) return `${verdict()}<div class="k">Briefing · written live by SI for these values</div>${liveBody("brief")}`;
-        if (brief) return `${verdict()}<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}${far && revNear.length ? `<div class="k" style="margin-top:14px">Beyond the PSI tables · from NASA technical reports, computed, not SI-written</div><p>${esc(revNear[0].nearest)} <a href="#reports">See the reports</a></p>` : ""}`;
+        if (brief) return `${verdict()}<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}${revNear.length ? `<div class="k" style="margin-top:14px">Beyond the PSI tables · from NASA technical reports, computed, not SI-written</div><p>The gaps this briefing names are gaps in NASA's PSI tables. NASA's technical reports go further: ${esc(revNear.slice(0, 2).map((e) => e.nearest).join(" "))}${revShown.length ? ` <a href="#reports">See the reports</a>` : ""}</p>` : ""}`;
         return `${verdict()}<div class="k">Closest results · computed, not SI-written</div><p>${esc(custom)}</p>
           ${AI.configured() ? `<button class="btn small" id="brief-live" style="margin-top:12px">Write an SI briefing for these values</button>` : `<span class="chk none">Turn on live SI below to get an SI-written briefing for these values.</span>`}`;
       })()}
@@ -306,7 +315,7 @@
         <h3 style="margin-top:10px">ISS air against the droplet tests nearest your oxygen: watch how many flames go out on their own</h3>
         <p class="sub">Each flame is one FLEX fuel-droplet test from NASA's table, starting at its recorded size and ending the way the table says it ended. Hover over one to see it.</p>
         <div id="ins-rp"></div>
-        <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. Both sides include tests with CO2 or helium added, which went out on their own more often. <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
+        <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. ${insRpGas() === "N2" ? "Only tests with nothing added to the nitrogen, so CO2 and helium do not tip the count." : "Tests with CO2 or helium added, which went out on their own more often, are included."} <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
       </div>
       ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence${revNear.length ? " in the PSI tables" : ""}.</b> No PSI finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. ${far && revNear.length ? `The NASA technical reports below come closer; the PSI findings after them are the nearest PSI has.` : "The findings below are the nearest there are; treat this habitat as a research gap."}</div>` : ""}
       ${far ? repSection : ""}
@@ -317,8 +326,8 @@
       </div>
       <div id="ins-list">${shown.length ? shown.map((r, i) => insightCard(byId[r.id], r, i, r === pin)).join("") : `<p class="muted">No finding matches "${esc(state.find)}".</p>`}</div>
       ${far ? "" : repSection}
-      <div class="h-sec" id="gaps"><h2>What this data cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</span></div>
-      <div class="card prose"><ul>${gaps.map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul></div>
+      <div class="h-sec" id="gaps"><h2>What the PSI tables cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi · under each gap, what NASA's technical reports add</span></div>
+      <div class="card prose"><ul>${gaps.map((x) => { const r = gapReport(x); return `<li>${esc(cap(x))}.${r ? `<span class="muted" style="display:block;font-size:.92em;margin-top:3px">${esc(r)}</span>` : ""}</li>`; }).join("")}</ul></div>
       <div class="cols-2" style="margin-top:18px">
         <div class="card"><h3>How the findings are ranked</h3>
           <div class="formula">Relevance = C<sub>oxygen</sub> × ½ (1 + C<sub>pressure</sub>) × W<sub>tests</sub></div>
@@ -353,7 +362,7 @@
     $("view-gravity").innerHTML = `
       <span class="eyebrow">Gravity bound</span>
       <h1 style="margin-top:12px">Gravity changed the outcome for ${flips} of ${paired.length} Saffire-II samples</h1>
-      <p class="lede">Saffire-II burned the same materials in microgravity and in normal gravity. For ${tight} samples the burn length was the same in both, so the answer for the Moon or Mars is constrained. For ${flips} it differed by half the sample or more, so the answer in partial gravity is open.</p>
+      <p class="lede">Saffire-II burned the same materials in microgravity and in normal gravity. For ${tight} samples the burn length was the same in both, so the answer for the Moon or Mars is constrained. For ${flips} it differed by half the sample or more, so the answer in partial gravity is open${paired.length - tight - flips ? `; for ${paired.length - tight - flips} it differed by less than half` : ""}.</p>
       <div class="figure"><div id="dumbbell"></div>
         <div class="legend"><span><i style="background:#3987e5"></i>Microgravity</span><span><i class="dia" style="background:#d95926"></i>Normal gravity (1g)</span><span>Bar: the range the Moon and Mars fall in, if burning changes steadily with gravity</span></div></div>
       <div class="cols-2" style="margin-top:18px">
@@ -370,7 +379,7 @@
       <div class="h-sec"><h2>Source text</h2><span><a href="${FF.investigations.find((i) => i.name === "SAFFIRE-2").link}" target="_blank" rel="noopener">PSI-99, Saffire-II</a></span></div>
       <div class="scroll"><table class="t"><tr><th>Sample</th><th>Material</th><th>Thickness</th><th>Flow</th><th>O2 %</th><th>µg burn length</th><th>µg spread</th><th>1g burn length</th><th>1g spread</th><th>GSI</th></tr>
         ${FF.pairs.map((p) => `<tr><td>${esc(p.sample)}</td><td>${esc(p.material)}</td><td>${esc(p.thickness)}</td><td>${esc(p.direction)}</td><td>${esc(p.o2_raw)}</td><td>${esc(p.ug_raw)}</td><td>${esc(p.ug_spread || "—")}</td><td>${esc(p.g1_raw || "—")}</td><td>${esc(p.g1_spread || "—")}</td><td class="mono">${p.gsi == null ? "—" : p.gsi.toFixed(2)}</td></tr>`).join("")}</table></div>
-      <p class="note">"Complete" is plotted as the full sample length. Sample 2-7 is split into its PMMA and Nomex sections; the table gives no 1g result for the PMMA section, so it has no GSI. Cells are shown as NASA wrote them.</p>`;
+      <p class="note">"Complete" is plotted as the full sample length. Sample 2-7 is split into its PMMA and Nomex sections; the table gives no 1g result for the PMMA section, so it has no GSI. Cells are shown as NASA wrote them, including the thickness "037 mm" (marked * on the chart), which may mean 0.37 mm.</p>`;
     CH.dumbbell($("dumbbell"), FF.pairs);
     const gl = L.gravityLimits(FF), src = L.source(FF, "partial-g"), src26 = L.source(FF, "partial-g-2026");
     if (!gl.length) return;
@@ -427,6 +436,24 @@
       ${e.lines.length ? `<ul class="facts">${e.lines.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       <p class="note">Tested at ${rangeText(e.o2, "%")} oxygen and ${rangeText(e.p, " psi")}, ${esc(e.gravity)}. ${esc(e.caveat)} Computed from tables transcribed from the report, not SI-written.</p>
     </article>`;
+  }
+  /* what NASA's technical reports add to one PSI gap (code-written, from the transcribed tables) */
+  function gapReport(x) {
+    const R = FF.reports, rp = L.reportPoints(FF), r1 = (v) => Math.round(v * 10) / 10;
+    if (!R || !rp.length) return "";
+    const sa = rp.filter((p) => p.set === "Saffire"), ss = rp.filter((p) => p.set === "SSCE"), hi = (a) => Math.max(...a.map((p) => p.o)), lo = (a) => Math.min(...a.map((p) => p.o));
+    if (/^no solid material/i.test(x)) return `NASA's technical reports go further: in orbit, Saffire IV to VI burned solids at up to ${g(hi(sa))}% oxygen, and the Space Shuttle's SSCE at ${g(lo(ss))} to ${g(hi(ss))}%.`;
+    if (/lists its pressure/i.test(x)) return `NASA's technical reports give the pressure for ${rp.length} solid-material fires in orbit, from ${g(r1(Math.min(...rp.map((p) => p.p))))} to ${g(r1(Math.max(...rp.map((p) => p.p))))} psi.`;
+    if (/Moon or Mars gravity/i.test(x)) {
+      const gl = L.gravityLimits(FF), low = gl.filter((m) => m.moon.mid < m.earth.mid && m.moon.mid < m.micro.mid).length;
+      return gl.length ? `NASA's technical reports add drop-tower tests lasting about 5 seconds at Moon and Mars gravity: ${low} of ${gl.length} materials kept burning at lower oxygen at Moon gravity than on Earth or in microgravity.` : "";
+    }
+    if (/ran above/i.test(x)) return `NASA's technical reports go further: in orbit, the Space Shuttle's SSCE burned solids at up to ${g(hi(ss))}% oxygen; in Earth gravity, NASA White Sands ran its standard material test in 99.8% oxygen.`;
+    if (/ran below/i.test(x) && R.wstfO2.length) {
+      const m = R.wstfO2.map((r) => r.mtp), u = R.wstfO2.map((r) => r.ulpi);
+      return `NASA's technical reports go lower, in Earth gravity: NASA White Sands tested materials in 99.8% oxygen at ${g(Math.min(...m))} to ${g(Math.max(...u))} psi, and each of the ${R.wstfO2.length} could burn above ${g(Math.min(...m))} to ${g(Math.max(...m))} psi.`;
+    }
+    return "";
   }
   function reportCard(title) {
     const n = reportNotes();
@@ -561,13 +588,13 @@
           <p><small>The ${top.length} findings whose tests came closest to these conditions. Relevance = oxygen closeness × ½ (1 + pressure closeness) × test-count weight.</small></p>
           ${top.map((r, i) => { const x = FF.findings.find((y) => y.id === r.id), t = x.si || {}; return `<h3>${i + 1}. ${esc(t.headline || x.topic)} <small>(${esc(x.investigations.join(", "))}, relevance ${r.score.toFixed(2)})</small></h3>
             <p><b>Nearest these conditions:</b> ${esc(x.bands[r.band].line)}.</p>${t.found ? `<p>${esc(t.found)}</p>` : ""}${t.means ? `<p class="si">${esc(t.means)}<br><small>SI interpretation</small></p>` : ""}${t.limit ? `<p><small>Limit: ${esc(t.limit)}</small></p>` : ""}`; }).join("")}
-          <h3>What this data cannot tell you</h3><ul>${L.gaps(FF, state.o2, state.pressure).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+          <h3>What the PSI tables cannot tell you</h3><ul>${L.gaps(FF, state.o2, state.pressure).map((x) => { const r = gapReport(x); return `<li>${esc(x)}${r ? `<br><small>${esc(r)}</small>` : ""}</li>`; }).join("")}</ul>`;
       })()}
       <h2>${f.near} of ${f.mats.length} materials were flame-tested near ${g(state.o2)}% oxygen</h2>
       <table><tr><th>Material</th><th>Evidence</th><th>Flame tests</th><th>Oxygen tested</th><th>Gap to yours</th><th>Smoke tests</th></tr>
       ${f.mats.map((m) => `<tr><td>${esc(m.material)}</td><td>${GRADE[m.grade][0]}</td><td>${m.flame_tests}</td><td>${m.oxygen_tested_pct ? m.oxygen_tested_pct + "%" : "not listed"}</td><td>${m.oxygen_gap_points == null ? "" : g(m.oxygen_gap_points) + " points"}</td><td>${m.smoke_tests}</td></tr>`).join("")}</table>
       <small>"Near" means within ${g(FF.near)} points of oxygen. Pressure is not listed in any solid-fuel table loaded, so the grade uses oxygen only.</small>
-      ${partial() ? `<p class="warn"><b>No partial-gravity tests exist in the loaded data.</b> The gravity lines below compare microgravity with normal gravity. NASA's challenge statement says the two could bound intermediate gravity; that is a hypothesis.</p>` : ""}
+      ${partial() ? `<p class="warn"><b>No partial-gravity tests exist in the loaded PSI data.</b> The gravity lines below compare microgravity with normal gravity. NASA's challenge statement says the two could bound intermediate gravity. In NASA drop-tower tests at Moon gravity (Olson and Ferkul, ICES 2012, NTRS 20130010991), three materials kept burning at lower oxygen than in either, so that bound did not hold for their oxygen limits.</p>` : ""}
       <h2>By material</h2>`;
     f.mats.forEach((m) => {
       Object.keys(m.flame_tests_by_investigation).concat(Object.keys(m.smoke_tests_by_investigation)).forEach((i) => used.add(i));

@@ -202,7 +202,7 @@ CONTEXT:
   function reportFacts(FF, L, st) {
     if (!L.reportEvidence) return [];
     let rev = L.reportEvidence(FF, st.o2, st.pressure);
-    if (st.gravity > 0) rev = [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")];
+    rev = st.gravity > 0 ? [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")] : [...rev.filter((e) => e.id !== "gravity"), ...rev.filter((e) => e.id === "gravity")];
     return rev;
   }
   function context(FF, L, st) {

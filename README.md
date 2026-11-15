@@ -36,7 +36,7 @@ None of the scores predicts flammability.
 
 ## What the data shows
 
-- **The self-extinction line.** Somewhere between ISS air and Moon-base air, flames stop putting themselves out. In FLEX tests with nothing added to the nitrogen, 17 of 32 burning droplets went out on their own at 20 to 21% oxygen, against 2 of 23 at 30 to 34%. A model fitted to 261 FLEX tests (AUC 0.88 on unseen tests) puts the 50-50 point at 20.4% oxygen for a 3 mm heptane droplet and 23.4% for methanol: at or just above the air astronauts breathe today. Pressure moves it by under 2 points. CFI-G gas flames point the same way. These are droplets and gas flames in a test chamber, not cabin materials.
+- **The self-extinction line.** Somewhere between ISS air and Moon-base air, flames stop putting themselves out. In FLEX tests with nothing added to the nitrogen, 17 of 32 burning droplets went out on their own at 20 to 21% oxygen, against 2 of 23 at 30 to 34%. A model fitted to 261 FLEX tests (AUC 0.88 on unseen tests) puts the 50-50 point at 20.4% oxygen for a 3 mm heptane droplet and 23.4% for methanol: right around the 21% oxygen astronauts breathe today. Pressure moves it by under 2 points. CFI-G gas flames point the same way. These are droplets and gas flames in a test chamber, not cabin materials.
 - In FLEX, 58 of 84 droplet flames at 20 to 21% oxygen went out on their own before the fuel was used up; at 30 to 34% oxygen, 2 of 24 did.
 - In CFI-G, every gas flame that lit at 18 to 23.4% oxygen went out on its own (median burn 8 s); at 33.2 to 40% oxygen, 30 of the 91 that lit burned until the fuel was cut off (median burn 50 s).
 - At about 21% oxygen, 13 of 14 droplet flames went out on their own with helium added and 28 of 36 with CO2 added, against 17 of 34 with nitrogen only.
@@ -48,7 +48,7 @@ None of the scores predicts flammability.
 
 ### From NASA technical reports, beyond the PSI tables
 
-Five NASA reports on the Technical Reports Server hold results the PSI tables do not. The Insights page ranks them by how close their tests came to the habitat, and leads with them when no PSI test is within 20 points of its oxygen, as for a spacesuit or Skylab-like air. Their tables were transcribed into [data/reports](data/reports) by Claude, the SI coding assistant, from the rendered report pages, each row naming its report, table and page, and are shown beside the PSI results, never mixed into the catalog, the findings, the models or the SI texts.
+Seven NASA reports on the Technical Reports Server hold results the PSI tables do not. The Insights page ranks them by how close their tests came to the habitat, and leads with them when no PSI test is within 20 points of its oxygen, as for a spacesuit or Skylab-like air. Their tables were transcribed into [data/reports](data/reports) by Claude, the SI coding assistant, from the rendered report pages, each row naming its report, table and page, and are shown beside the PSI results, never mixed into the catalog, the findings, the models or the SI texts.
 
 - **Solids in orbit above 22.2% oxygen, with pressure.** Saffire IV to VI burned fabric and PMMA in a Cygnus cargo spacecraft at up to 31% oxygen and 7.8 psi (Saffire VI, between the Moon-base plan of 30% at 10.2 psi and the exploration plan of 34% at 8.2 psi). Cotton jersey at 26.2% oxygen and 10.3 psi kept burning through 70 s with the fan off and burned until the sample was used up. The two PMMA fires on Saffire VI raised the spacecraft's CO2 past NASA's 1-hour limit, and a tight smoke-alarm threshold was reached only at 981 s, after much of the hazardous gas was out (Urban et al., ICES-2021-266 and ICES-2024-365).
 - **Solids in orbit at 35 to 70% oxygen.** The Space Shuttle's Solid Surface Combustion Experiment spread flames over paper at 0.358, 0.454 and 0.547 cm/s at 50% oxygen and 1, 1.5 and 2 atm, and 0.092 cm/s at 35% and 1.5 atm; thick PMMA kept burning at 50 and 70% (Altenkirch et al.).
@@ -57,7 +57,7 @@ Five NASA reports on the Technical Reports Server hold results the PSI tables do
 
 ## NASA data used
 
-1,989 records from 21 PSI experiment tables across 18 PSI investigations: Saffire I, II and III, BASS, BASS-II, FLEX, FLEX-2, CFI, CFI-G (normal and inverse flames), ACME Flame Design (normal and inverse flames), ACME BRE, ACME E-FIELD Flames, ACME CLD Flame, ACME s-Flame, SLICE, SPICE, SAME, SAME-R and DAFT. The site's "Data and method" page lists each table with a link to its PSI record. The raw tables are in [data/raw](data/raw), the harmonised table in [data/catalog.csv](data/catalog.csv), and every cleaning decision in [DATA_NOTES.md](DATA_NOTES.md).
+1,989 records from 21 PSI experiment tables across 19 PSI investigations: Saffire I, II and III, BASS, BASS-II, FLEX, FLEX-2, CFI, CFI-G (normal and inverse flames), ACME Flame Design (normal and inverse flames), ACME BRE, ACME E-FIELD Flames, ACME CLD Flame, ACME s-Flame, SLICE, SPICE, SAME, SAME-R and DAFT. The site's "Data and method" page lists each table with a link to its PSI record. The raw tables are in [data/raw](data/raw), the harmonised table in [data/catalog.csv](data/catalog.csv), and every cleaning decision in [DATA_NOTES.md](DATA_NOTES.md).
 
 Source: [NASA Physical Science Informatics](https://psi.nasa.gov/physci/repo/search?q=combustion).
 
