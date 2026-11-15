@@ -1,4 +1,4 @@
-/* Burnline. Blue is microgravity, orange is normal gravity, everywhere on the site. */
+/* Airburn. Blue is microgravity, orange is normal gravity, everywhere on the site. */
 :root {
   --bg: #04060b;
   --bg-2: #080c15;
@@ -436,3 +436,11 @@ table.rep-t td { font-size: 13.5px; vertical-align: top; }
 table.rep-t td:nth-child(6) { min-width: 240px; }
 table.rep-t td:nth-child(7) { white-space: nowrap; }
 .rep-details summary { font-size: 14px; }
+
+/* the cabin-air trade-off */
+.briefing p.air-line { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
+.briefing p.air-line b { color: var(--ink); font-weight: 600; }
+.briefing p.air-line .k { display: block; margin-bottom: 2px; }
+.tiles.four { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) { .tiles.four { grid-template-columns: 1fr; } }
+.air-ctl { margin: 18px 0 14px; justify-content: flex-start; }

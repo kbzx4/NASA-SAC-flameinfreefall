@@ -1,10 +1,10 @@
-# Burnline
+# Airburn
 
-**Describe a crewed habitat. See what NASA's microgravity fire experiments say about it, and how close those tests come to your conditions.**
+**Describe a crewed habitat. See what NASA's microgravity fire experiments say about it, how close those tests come to your conditions, and what its air costs: hours of prebreathe before every spacewalk, or air where small fires keep burning.**
 
 Built for the NASA International Space Apps Challenge 2026, challenge [Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data](https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/).
 
-Burnline is an evidence summary, not a safety assessment. It reports which NASA tests exist near a set of conditions, and its models predict how NASA's droplet and gas-flame tests would end there, only within the conditions tested. It does not predict whether a cabin material will burn.
+Airburn is an evidence summary, not a safety assessment. It reports which NASA tests exist near a set of conditions, and its models predict how NASA's droplet and gas-flame tests would end there, only within the conditions tested. It does not predict whether a cabin material will burn.
 
 ## The problem
 
@@ -13,18 +13,19 @@ NASA's Physical Science Informatics (PSI) archive holds decades of microgravity 
 ## What it does
 
 1. **You describe a habitat**: oxygen, pressure, airflow, gravity, and the materials on board.
-2. **Atmosphere map.** Every microgravity test that lists oxygen and pressure (754) on one oxygen-against-pressure map, with the eight atmospheres crews have breathed or are planned to: Mercury to Apollo, Apollo 1, Skylab, the Shuttle, Mir and ISS cabin, the Shuttle before a spacewalk, a Moon base, NASA's exploration atmosphere, and the spacesuit. Four of the eight have no test within 2 points of oxygen and 25% of their pressure. Click a pin or anywhere on the map to check that atmosphere; live SI gets the same numbers and cites them as [map].
-3. **It ranks what NASA's experiments found.** Code computes nine fire-safety findings from the NASA tables (how often droplet and gas flames went out on their own at each oxygen level, how long they burned at low oxygen, what CO2 and helium did, cool flames, what gravity changed, flame spread with and against the airflow, carbon monoxide from burning samples, and the smoke tests). They are ranked by how close their tests came to your habitat, with the result nearest your oxygen level picked out and charted.
-4. **Fire model.** Models fitted to every FLEX droplet test (261) and every lit CFI-G gas flame (132) predict outcomes at your exact conditions, with a 90% range from 300 bootstrap refits: the chance a droplet flame goes out on its own, burns until the fuel is used up or disrupts; its burning rate; the oxygen level where going out on its own becomes a 50-50 chance; and the chance a lit gas flame goes out on its own. Checked on tests they never saw (5-fold cross-validation): droplet AUC 0.88, gas AUC 0.84. Whether a gas flame lights could not be predicted better than guessing, so the site does not predict it. Inputs beyond the tested range are flagged. A simulation draws 60 droplets from the model and plays them next to the real tests nearest your oxygen level.
-5. **Test replay.** NASA's own FLEX droplet tests and CFI-G gas-flame tests replay side by side in time-lapse at two oxygen levels. Each droplet starts at its recorded size, shrinks by the d² law and ends at its recorded burn time the way the table says it ended (flame out with fuel left, burned to nothing, or disrupted); live counters tally the outcomes. The look of each flame is drawn, not measured.
-6. **Ask Burnline (live SI).** Ask a question about your habitat, or have SI write a briefing for any values you set. Gemini 3.1 Flash Lite answers from the facts computed for that habitat only and cites the findings it used; the number check and a second model (Gemini 3.5 Flash Lite) run in the browser before the answer is shown.
-7. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
-8. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
-9. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Burnline shows where that bound is tight and where it is wide open.
-10. **It ranks and compares investigations** by how close their test conditions come to yours.
-11. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
+2. **Choose the air.** For any cabin oxygen and pressure, and a suit pressure from today's 4.3 psi to the 8.2 psi of NASA's xEMU design, it shows how long the pure-oxygen prebreathe before a spacewalk is, how the oxygen compares with what NASA accepts, the chance a burning droplet goes out on its own, and the NASA tests nearby, on one chart with the crew atmospheres. Every Insights briefing carries the same numbers in one line.
+3. **Atmosphere map.** Every microgravity test that lists oxygen and pressure (754) on one oxygen-against-pressure map, with the eight atmospheres crews have breathed or are planned to: Mercury to Apollo, Apollo 1, Skylab, the Shuttle, Mir and ISS cabin, the Shuttle before a spacewalk, a Moon base, NASA's exploration atmosphere, and the spacesuit. Four of the eight have no test within 2 points of oxygen and 25% of their pressure. Click a pin or anywhere on the map to check that atmosphere; live SI gets the same numbers and cites them as [map].
+4. **It ranks what NASA's experiments found.** Code computes nine fire-safety findings from the NASA tables (how often droplet and gas flames went out on their own at each oxygen level, how long they burned at low oxygen, what CO2 and helium did, cool flames, what gravity changed, flame spread with and against the airflow, carbon monoxide from burning samples, and the smoke tests). They are ranked by how close their tests came to your habitat, with the result nearest your oxygen level picked out and charted.
+5. **Fire model.** Models fitted to every FLEX droplet test (261) and every lit CFI-G gas flame (132) predict outcomes at your exact conditions, with a 90% range from 300 bootstrap refits: the chance a droplet flame goes out on its own, burns until the fuel is used up or disrupts; its burning rate; the oxygen level where going out on its own becomes a 50-50 chance; and the chance a lit gas flame goes out on its own. Checked on tests they never saw (5-fold cross-validation): droplet AUC 0.88, gas AUC 0.84. Whether a gas flame lights could not be predicted better than guessing, so the site does not predict it. Inputs beyond the tested range are flagged. A simulation draws 60 droplets from the model and plays them next to the real tests nearest your oxygen level.
+6. **Test replay.** NASA's own FLEX droplet tests and CFI-G gas-flame tests replay side by side in time-lapse at two oxygen levels. Each droplet starts at its recorded size, shrinks by the d² law and ends at its recorded burn time the way the table says it ended (flame out with fuel left, burned to nothing, or disrupted); live counters tally the outcomes. The look of each flame is drawn, not measured.
+7. **Ask Airburn (live SI).** Ask a question about your habitat, or have SI write a briefing for any values you set. Gemini 3.1 Flash Lite answers from the facts computed for that habitat only and cites the findings it used; the number check and a second model (Gemini 3.5 Flash Lite) run in the browser before the answer is shown.
+8. **SI interprets each finding** for a crewed habitat: a headline, what the tests found, what it suggests, and its main limit, plus a briefing for each preset habitat and a computed list of what the data cannot tell you. You can filter the findings by fire type and search them.
+9. **It grades the evidence for each material**: flame-tested near your oxygen level, tested but not near it, smoke tests only, or not tested.
+10. **It shows the gravity bound.** NASA's Saffire-II experiment burned the same materials in orbit and on the ground. The challenge statement says those two results could bound what happens at intermediate gravity. Airburn shows where that bound is tight and where it is wide open.
+11. **It ranks and compares investigations** by how close their test conditions come to yours.
+12. **You download a brief** and the exact test records behind it, with units harmonised and NASA's original text beside every converted value.
 
-## Three scores, each shown with its formula
+## The formulas, each shown on the site
 
 | Score | Formula | What it means |
 |---|---|---|
@@ -32,11 +33,15 @@ NASA's Physical Science Informatics (PSI) archive holds decades of microgravity 
 | Habitat Fire Relevance Index | `HFRI = M_conditions × M_fuel × W_evidence` | How close an investigation's tests come to your conditions. A condition the NASA table does not list counts as 0. |
 | Finding relevance | `C_oxygen × ½ (1 + C_pressure) × W_tests` | How close the group of tests nearest your oxygen level comes to your habitat. Oxygen gates the score; an unlisted pressure halves it. W is 1 for 10 or more tests, 0.7 for fewer. |
 
+| Decompression index (NASA's R) | `R = cabin nitrogen pressure ÷ suit pressure`; prebreathe `= 360 ÷ ln 2 × ln(R ÷ R_max)` minutes | NASA accepted the Shuttle and ISS prebreathe protocols at R_max = 1.65. Body nitrogen halves every 360 minutes on pure oxygen. An estimate from NASA's published limits, not test data. |
+| Inspired oxygen | `PIO2 = oxygen fraction × (pressure − 47 mmHg)` | NASA's exploration atmosphere gives 128 mmHg; the site's floor is 127 mmHg. |
+
 None of the scores predicts flammability.
 
 ## What the data shows
 
-- **The self-extinction line.** Somewhere between ISS air and Moon-base air, flames stop putting themselves out. In FLEX tests with nothing added to the nitrogen, 17 of 32 burning droplets went out on their own at 20 to 21% oxygen, against 2 of 23 at 30 to 34%. A model fitted to 261 FLEX tests (AUC 0.88 on unseen tests) puts the 50-50 point at 20.4% oxygen for a 3 mm heptane droplet and 23.4% for methanol: right around the 21% oxygen astronauts breathe today. Pressure moves it by under 2 points. CFI-G gas flames point the same way. These are droplets and gas flames in a test chamber, not cabin materials.
+- **The trade-off: prebreathe against fire.** With today's 4.3 psi spacesuits, no cabin air below 27.6% oxygen lets a crew skip the pure-oxygen prebreathe before a spacewalk and still gives the oxygen NASA accepts for breathing. The burn line (below) is at 20.4 to 23.4%. So the air that spares the prebreathe is air where most small droplet fires keep burning. Raising the suit to 5.3 psi would let a cabin at the burn line skip the prebreathe. The prebreathe estimate gives 4.3 hours from ISS air, where NASA's resting protocol took 4 hours; with a stricter limit set only from NASA's 2024 estimate of 6.5 hours from sea-level air, the least-oxygen cabin with no prebreathe lands at 33.5% oxygen and 8.2 psi, next to the 34% and 8.2 psi NASA chose for exploration (`node tests/air.mjs`).
+- **The burn line (the self-extinction line).** Somewhere between ISS air and Moon-base air, flames stop putting themselves out. In FLEX tests with nothing added to the nitrogen, 17 of 32 burning droplets went out on their own at 20 to 21% oxygen, against 2 of 23 at 30 to 34%. A model fitted to 261 FLEX tests (AUC 0.88 on unseen tests) puts the 50-50 point at 20.4% oxygen for a 3 mm heptane droplet and 23.4% for methanol: right around the 21% oxygen astronauts breathe today. Pressure moves it by under 2 points. CFI-G gas flames point the same way. These are droplets and gas flames in a test chamber, not cabin materials.
 - In FLEX, 58 of 84 droplet flames at 20 to 21% oxygen went out on their own before the fuel was used up; at 30 to 34% oxygen, 2 of 24 did.
 - In CFI-G, every gas flame that lit at 18 to 23.4% oxygen went out on its own (median burn 8 s); at 33.2 to 40% oxygen, 30 of the 91 that lit burned until the fuel was cut off (median burn 50 s).
 - At about 21% oxygen, 13 of 14 droplet flames went out on their own with helium added and 28 of 36 with CO2 added, against 17 of 34 with nitrogen only.
@@ -60,6 +65,8 @@ Seven NASA reports on the Technical Reports Server hold results the PSI tables d
 1,989 records from 21 PSI experiment tables across 19 PSI investigations: Saffire I, II and III, BASS, BASS-II, FLEX, FLEX-2, CFI, CFI-G (normal and inverse flames), ACME Flame Design (normal and inverse flames), ACME BRE, ACME E-FIELD Flames, ACME CLD Flame, ACME s-Flame, SLICE, SPICE, SAME, SAME-R and DAFT. The site's "Data and method" page lists each table with a link to its PSI record. The raw tables are in [data/raw](data/raw), the harmonised table in [data/catalog.csv](data/catalog.csv), and every cleaning decision in [DATA_NOTES.md](DATA_NOTES.md).
 
 Source: [NASA Physical Science Informatics](https://psi.nasa.gov/physci/repo/search?q=combustion).
+
+Cabin-air limits (published numbers, used as constants): NASA accepted the Shuttle and ISS prebreathe protocols at R = 1.65 ([Gernhardt et al., NASA EVA operations, 2013](https://nasa.gov/wp-content/uploads/2023/03/gernhardt-eva-ops-chp-5.4-2013.pdf)); the 8.2 psi, 34% oxygen exploration atmosphere gives 128 mmHg of inspired oxygen ([Aerospace Medicine and Human Performance 89(9), 2018](https://asma.kglmeridian.com/downloadpdf/view/journals/amhp/89/9/article-p792.pdf)); about 6.5 hours of prebreathe from sea-level air in NASA's 2024 planetary estimate ([NTRS 20240014714](https://ntrs.nasa.gov/citations/20240014714)); suit pressures of 4.3 and 8.2 psi ([NTRS 20170010132](https://ntrs.nasa.gov/citations/20170010132)).
 
 ## How SI is used
 
@@ -99,6 +106,7 @@ python scripts/build_insights.py    # optional; SI interpretation of the finding
 python scripts/build_models.py      # fits, cross-validates and bootstraps the Fire model -> data/models.json
 python scripts/build_site.py        # catalog + SI text -> docs/assets/data.js
 node tests/parity.mjs               # checks the site's JavaScript against the Python
+node tests/air.mjs                  # checks the cabin-air model against NASA's published numbers
 ```
 
 Live SI needs a Gemini key. Either deploy [proxy/gemini-proxy.gs](proxy/gemini-proxy.gs) as a Google Apps Script web app (the key stays on Google's side; setup steps are at the top of the file) and put its URL in `docs/assets/config.js` as `FF_AI.proxy`, or let visitors paste their own key, which stays in their browser.
@@ -116,6 +124,7 @@ An earlier Streamlit version of the tool is kept in `app.py` (`streamlit run app
 | `scripts/` | `build_catalog.py`, `build_findings.py`, `build_models.py`, `build_si.py`, `build_insights.py`, `build_reports.py`, `build_site.py` |
 | `core.py`, `brief.py`, `si.py` | Scores, evidence logic, SI calls and checks |
 | `tests/parity.mjs` | Fails if the site's JavaScript and the Python disagree |
+| `tests/air.mjs` | Fails if the cabin-air model drifts from NASA's published prebreathe and oxygen numbers |
 
 ## Limits
 
@@ -125,6 +134,7 @@ An earlier Streamlit version of the tool is kept in `app.py` (`streamlit run app
 - BASS and BASS-II list a fan setting or nothing for airflow, not a speed.
 - 93 solid-fuel records name a shape but no material (for example "1/4" clear rod") and are not assigned to a material.
 - The gravity bound rests on 9 samples at one oxygen level and one airflow, and the PSI table does not state the conditions of the normal-gravity tests.
+- The cabin-air numbers are estimates from NASA's published limits, not test data: one body tissue, at rest, with the cabin's nitrogen in equilibrium. NASA's protocols also use exercise and staged pressures, and its current risk models are stricter (the stricter limit approximates them). Not medical or operational guidance.
 - The hero flame on the home page is an illustration, not a simulation.
 
 ## Licence and credits

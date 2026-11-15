@@ -25,9 +25,9 @@
     gravity: q.has("g") && !isNaN(+q.get("g")) ? Math.min(2, Math.max(0, Math.round(+q.get("g"))))
       : preset.name === "ISS cabin" || (atQ && !/^Moon|^Exploration/.test(preset.name)) ? 0 : 1, // the ISS, and past crew atmospheres opened from the map, are in orbit
     materials: DEFAULT_MATERIALS.filter((m) => FF.materials.includes(m)),
-    view: ["insights", "map", "model", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
+    view: ["insights", "air", "map", "model", "replay", "brief", "gravity", "investigations", "compare", "data"].includes(q.get("view")) ? q.get("view") : "insights",
     model: { fuel: "Methanol", gas: "N2", d0: 3, gfuel: "propane", flow: 1, xf: 1 },
-    replay: { kind: "droplets" },
+    replay: { kind: "droplets" }, air: { suit: 4.3, strict: false },
     concern: "solid", compare: ["SAFFIRE-2", "BASS-II", "FLEX"], open: null, kind: "", find: "",
   };
   const partial = () => state.gravity > 0;
@@ -153,13 +153,14 @@
   function allowed() {
     if (AI.mode() === "your key") return true;
     let t = [];
-    try { t = JSON.parse(localStorage.getItem("burnline-live") || "[]").filter((x) => Date.now() - x < 3600e3); } catch (e) { return true; }
+    try { t = JSON.parse(localStorage.getItem("airburn-live") || "[]").filter((x) => Date.now() - x < 3600e3); } catch (e) { return true; }
     if (t.length >= LIMIT) return false;
-    try { localStorage.setItem("burnline-live", JSON.stringify(t.concat(Date.now()))); } catch (e) { /* storage blocked */ }
+    try { localStorage.setItem("airburn-live", JSON.stringify(t.concat(Date.now()))); } catch (e) { /* storage blocked */ }
     return true;
   }
   function cites(text, r) {
-    return esc(text).replace(/\[((?:F\d+|R\d+|gaps|model|map)(?:\s*,\s*(?:F\d+|R\d+|gaps|model|map))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+    return esc(text).replace(/\[((?:F\d+|R\d+|gaps|model|map|air)(?:\s*,\s*(?:F\d+|R\d+|gaps|model|map|air))*)\]/g, (m, list) => list.split(/\s*,\s*/).map((c) =>
+      c === "air" ? `<a class="cite" href="?view=air" data-view-link="air">air</a>` :
       /^R\d+$/.test(c) ? (r.rids && r.rids[c] ? `<a class="cite" href="#rep-${r.rids[c]}">${c}</a>` : "") :
       c === "model" ? `<a class="cite" href="?view=model" data-view-link="model">model</a>` : c === "map" ? `<a class="cite" href="?view=map" data-view-link="map">map</a>` : c === "gaps" ? `<a class="cite" href="#gaps">gaps</a>` : r.ids[c] ? `<a class="cite" href="#ins-${r.ids[c]}">${c}</a>` : "").join(""));
   }
@@ -191,12 +192,12 @@
   }
   function askPanel() {
     if (!AI.configured()) {
-      return `<div class="ask"><div class="k">Ask Burnline · live SI</div>
+      return `<div class="ask"><div class="k">Ask Airburn · live SI</div>
         <p class="hint" style="margin:8px 0 10px">Live questions need a Gemini API key. Paste one to try it here; it is kept only in this browser. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key ↗</a></p>
         <form id="key-form" class="ask-row"><input id="key-in" class="find" type="password" autocomplete="off" placeholder="Gemini API key" aria-label="Gemini API key"><button class="btn primary small">Turn on live SI</button></form></div>`;
     }
     const a = live.ask && live.ask.key === habitatKey() ? live.ask : null;
-    return `<div class="ask"><div class="k">Ask Burnline · live SI${AI.mode() === "your key" ? ` · using your key · <button class="linkish" id="key-clear">forget it</button>` : ""}</div>
+    return `<div class="ask"><div class="k">Ask Airburn · live SI${AI.mode() === "your key" ? ` · using your key · <button class="linkish" id="key-clear">forget it</button>` : ""}</div>
       <form id="ask-form" class="ask-row"><input id="ask-q" class="find" maxlength="300" placeholder="Ask about this habitat" value="${esc(a ? a.q : "")}" aria-label="Ask a question about this habitat"><button class="btn primary small"${a && a.busy ? " disabled" : ""}>Ask</button></form>
       <div class="pills" id="ask-sugg" style="margin-top:10px">${SUGGEST.map((x) => `<button class="pill" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div>
       <div class="ask-out">${liveBody("ask")}</div>
@@ -307,7 +308,7 @@
         if (brief) return `${verdict()}<div class="k">Briefing · SI-written from the ranked findings and the gaps</div><p>${esc(brief.text)}</p>${checkLine(brief)}${revNear.length ? `<div class="k" style="margin-top:14px">Beyond the PSI tables · from NASA technical reports, computed, not SI-written</div><p>The gaps this briefing names are gaps in NASA's PSI tables. NASA's technical reports go further: ${esc(revNear.slice(0, 2).map((e) => e.nearest).join(" "))}${revShown.length ? ` <a href="#reports">See the reports</a>` : ""}</p>` : ""}`;
         return `${verdict()}<div class="k">Closest results · computed, not SI-written</div><p>${esc(custom)}</p>
           ${AI.configured() ? `<button class="btn small" id="brief-live" style="margin-top:12px">Write an SI briefing for these values</button>` : `<span class="chk none">Turn on live SI below to get an SI-written briefing for these values.</span>`}`;
-      })()}
+      })()}${airLine()}
       </div>
       ${askPanel()}
       <div class="figure ins-replay">
@@ -532,6 +533,7 @@
       <div class="cols-2">
         <div class="card prose"><h3>Limits</h3><ul>
           <li>${FF.investigations.length} NASA experiment tables are loaded. NASA's archive holds more.</li>
+          <li>The cabin-air numbers on "Choose the air" (prebreathe, inspired oxygen) are estimates from NASA's published limits, not test data: one body tissue, at rest. tests/air.mjs checks them against NASA's 4-hour ISS prebreathe protocol and its 8.2 psi, 34% exploration atmosphere.</li>
           <li>${unnamed} solid-fuel records name a shape but no material, such as "1/4" clear rod". They are not assigned to any material.</li>
           <li>BASS and BASS-II list a fan setting or nothing for airflow, and no pressure.</li>
           <li>FLEX-2, SLICE, ACME BRE, ACME E-FIELD Flames and DAFT tables are summaries, not one row per test.</li>
@@ -539,7 +541,7 @@
           <li>The tables transcribed from NASA reports are shown beside the PSI results and never mixed into the catalog, the findings, the models or the SI texts.</li></ul></div>
         <div class="card prose"><h3>How SI is used</h3><ul>
           <li>Insights: code computes each finding from the NASA tables and ranks the findings for your habitat. ${esc([...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", "))} then interprets each finding (headline, what the tests found, what it suggests, its limit) and writes a briefing for each preset habitat, reading only the facts code computed.</li>
-          <li>Live: "Ask Burnline" and "Write an SI briefing" send the facts computed for your habitat (the ranked findings, the gaps and your materials) to Gemini 3.1 Flash Lite, which answers from those facts only and cites the findings it used. The same two checks run in your browser before the answer is shown. Live answers are not read by a person first.</li>
+          <li>Live: "Ask Airburn" and "Write an SI briefing" send the facts computed for your habitat (the ranked findings, the gaps and your materials) to Gemini 3.1 Flash Lite, which answers from those facts only and cites the findings it used. The same two checks run in your browser before the answer is shown. Live answers are not read by a person first.</li>
           <li>Material cards and investigation summaries: code works out every finding and a Gemini model only puts it into sentences. It is asked to change nothing.</li>
           <li>Code then looked up every number in each text in those facts and removed any sentence containing a number that was not there. Across ${texts.length} texts, ${total.toLocaleString("en-US")} numbers were checked and ${dropped} sentence${dropped === 1 ? " was" : "s were"} removed.</li>
           <li>A second SI pass then re-read each remaining sentence against the facts and removed any it judged unsupported. ${texts.filter((t) => t.judge && t.judge !== t.model).length} of the ${texts.length} texts were re-read by a different model${(() => { const j = [...new Set(texts.filter((t) => t.judge && t.judge !== t.model).map((t) => t.judge))]; return j.length ? " (" + esc(j.join(", ")) + ")" : ""; })()}, ${texts.filter((t) => t.judge && t.judge === t.model).length} by the same model in a fresh pass, and ${texts.filter((t) => !t.judge).length} got no second pass. The removed-sentence count above includes both checks.</li>
@@ -579,7 +581,7 @@
     const css = "body{font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#1c1c1a;max-width:860px;margin:32px auto;padding:0 20px}h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}h3{font-size:15px;margin:18px 0 4px}.sub{color:#555;margin:0 0 16px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e4e4e0;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#555}.warn{background:#fff6e0;border:1px solid #e8c877;padding:10px 12px;border-radius:6px}.si{background:#f3f6fb;border-left:3px solid #3987e5;padding:8px 12px;margin:8px 0}ul{margin:4px 0 0 18px;padding:0}small{color:#666}@media print{body{margin:0}}";
     const used = new Set(["FLEX", "CFI-G", ...FF.findings.flatMap((x) => x.investigations)]);
     let h = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Fire Evidence Brief: ${esc(state.scenario)}</title><style>${css}</style></head><body>
-      <h1>Fire Evidence Brief</h1><p class="sub">${esc(state.scenario)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${g(state.flow)} cm/s airflow, ${esc(gravityLabel())}. Generated ${new Date().toISOString().slice(0, 10)} with Burnline.</p>
+      <h1>Fire Evidence Brief</h1><p class="sub">${esc(state.scenario)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi, ${g(state.flow)} cm/s airflow, ${esc(gravityLabel())}. Generated ${new Date().toISOString().slice(0, 10)} with Airburn.</p>
       <p class="warn"><b>This is an evidence summary, not a safety assessment.</b> It reports which NASA microgravity tests exist near these conditions. It does not predict whether a material will burn.</p>
       ${(() => {
         const b = isPreset() ? FF.briefings[state.scenario] : null;
@@ -589,6 +591,10 @@
           ${top.map((r, i) => { const x = FF.findings.find((y) => y.id === r.id), t = x.si || {}; return `<h3>${i + 1}. ${esc(t.headline || x.topic)} <small>(${esc(x.investigations.join(", "))}, relevance ${r.score.toFixed(2)})</small></h3>
             <p><b>Nearest these conditions:</b> ${esc(x.bands[r.band].line)}.</p>${t.found ? `<p>${esc(t.found)}</p>` : ""}${t.means ? `<p class="si">${esc(t.means)}<br><small>SI interpretation</small></p>` : ""}${t.limit ? `<p><small>Limit: ${esc(t.limit)}</small></p>` : ""}`; }).join("")}
           <h3>What the PSI tables cannot tell you</h3><ul>${L.gaps(FF, state.o2, state.pressure).map((x) => { const r = gapReport(x); return `<li>${esc(x)}${r ? `<br><small>${esc(r)}</small>` : ""}</li>`; }).join("")}</ul>`;
+      })()}
+      ${(() => { // the air: prebreathe against fire, as on the "Choose the air" view
+        const A = L.AIR, rmax = airLimit(), x = L.airAt(state.o2, state.pressure, state.air.suit, rmax), c = L.airCorner(state.air.suit, rmax), m = dropExt(state.o2, state.pressure, "Methanol"), h = dropExt(state.o2, state.pressure, "Heptane");
+        return `<h2>The air: prebreathe against fire</h2><p>Prebreathe before a ${g(state.air.suit)} psi spacewalk: ${hm(x.min)} of pure oxygen (R ${x.R}; limit ${g(rmax)}). Breathing: ${Math.round(x.pio2)} mmHg of inspired oxygen${x.low ? ", less than NASA accepts (127 mmHg)" : `, like ${x.alt < 50 ? "sea level" : `${Math.round(x.alt / 10) * 10} m above sea level`}`}.${m ? ` A burning 3 mm droplet goes out on its own: methanol ${Math.round(m.fit[0] * 100)}%, heptane ${Math.round(h.fit[0] * 100)}% (FLEX model).` : ""} With this suit, the least-oxygen cabin that needs no prebreathe and gives enough oxygen is ${g(c.o2)}% at ${g(c.p)} psi.</p><p><small>Estimates from NASA's published limits, not test data: NASA accepted its Shuttle and ISS prebreathe protocols at R ${g(A.rmax)} (R = cabin nitrogen pressure ÷ suit pressure; body nitrogen halves every 360 minutes on pure oxygen); inspired oxygen = oxygen fraction × (pressure − 47 mmHg). Simplified: one tissue, at rest. Not medical guidance.</small></p>`;
       })()}
       <h2>${f.near} of ${f.mats.length} materials were flame-tested near ${g(state.o2)}% oxygen</h2>
       <table><tr><th>Material</th><th>Evidence</th><th>Flame tests</th><th>Oxygen tested</th><th>Gap to yours</th><th>Smoke tests</th></tr>
@@ -771,6 +777,67 @@
     el.querySelectorAll("tr[data-pin]").forEach((tr) => { tr.onclick = () => pin(tr.dataset.pin); tr.onkeydown = (e) => { if (e.key === "Enter") pin(tr.dataset.pin); }; });
   }
 
+  /* ------------------------------------------------------------------ air */
+  const hm = (m) => (m < 1 ? "none" : m < 60 ? `${Math.round(m)} min` : `${Math.round(m / 6) / 10} h`);
+  const airLimit = () => (state.air.strict ? L.AIR.rstrict : L.AIR.rmax);
+  const dropExt = (o, p, fuel) => MODELS && window.FFModels ? window.FFModels.classify(MODELS.droplets.ending, window.FFModels.dropletX(o, "N2", p, 3, fuel)) : null;
+  const burnBand = () => { const x = CH.crossoverData(FF), f = x.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null), r1 = (v) => Math.round(v * 10) / 10; return [r1(Math.min(...f)), r1(Math.max(...f))]; };
+  /* one computed line under every briefing: the air at a glance */
+  function airLine() {
+    const a = L.airAt(state.o2, state.pressure, state.air.suit, airLimit()), e = dropExt(state.o2, state.pressure, "Methanol");
+    return `<p class="air-line"><span class="k">Air check · computed, not SI-written</span>Prebreathe before a ${g(state.air.suit)} psi spacewalk: <b>${hm(a.min)}</b> · breathing: <b>${a.low ? "less oxygen than NASA accepts" : a.alt < 50 ? "like sea level" : `like ${Math.round(a.alt / 10) * 10} m above sea level`}</b>${e ? ` · a burning droplet goes out on its own: <b>${Math.round(e.fit[0] * 100)}%</b>` : ""} · <a href="?view=air" data-view-link="air">Choose the air</a></p>`;
+  }
+  function drawAir() {
+    const el = $("view-air"), A = L.AIR, a = state.air, rmax = airLimit(), r1 = (v) => Math.round(v * 10) / 10, pc = (v) => Math.round(v * 100) + "%";
+    const habitat = state.scenario === "Custom" ? "your habitat" : state.scenario, D = MODELS.droplets;
+    const now = L.airAt(state.o2, state.pressure, a.suit, rmax), corner = L.airCorner(a.suit, rmax), [b0, b1] = burnBand(), sf = L.suitFor(b1, rmax);
+    const fm = dropExt(state.o2, state.pressure, "Methanol"), fh = dropExt(state.o2, state.pressure, "Heptane");
+    const beyond = state.o2 < D.range.o2[0] || state.o2 > D.range.o2[1] || state.pressure < D.range.p[0] * 14.6959 - 1e-9;
+    const cov = L.coverage(FF, state.o2, state.pressure), rep = L.reportCoverage(FF, state.o2, state.pressure).length;
+    const side = state.o2 > b1 ? "past the burn line" : state.o2 < b0 ? "before the burn line" : "on the burn line";
+    const onChart = state.o2 >= 15 && state.o2 <= 40 && state.pressure >= 4 && state.pressure <= 16;
+    const suits = [...new Set([A.suit, L.suitFor(b1).suit, L.suitFor(b1, A.rstrict).suit, 8.2])];
+    const suitLab = (v) => (v === A.suit ? `${g(v)} psi · today's suits` : v === 8.2 ? "8.2 psi · xEMU design" : `${g(v)} psi`);
+    el.innerHTML = `
+      <span class="eyebrow">Choose the air</span>
+      <h1 style="margin-top:12px">Prebreathe against fire, for ${esc(habitat)}</h1>
+      <p class="lede">Before a spacewalk, astronauts breathe pure oxygen to flush nitrogen from their bodies, or risk the bends. A cabin at lower pressure with more oxygen shortens that wait, and moves the air past the line where small fires stop putting themselves out. ${g(state.o2)}% oxygen at ${g(state.pressure)} psi, with a ${g(a.suit)} psi suit:</p>
+      <div class="tiles four">
+        <div class="tile"><div class="k">Prebreathe before a spacewalk</div><div class="v">${hm(now.min)} <small>of pure oxygen · R ${now.R}, limit ${g(rmax)}</small></div></div>
+        <div class="tile"><div class="k">Breathing</div><div class="v">${Math.round(now.pio2)} mmHg <small>${now.low ? "of oxygen: less than NASA accepts (127)" : `of oxygen, like ${now.alt < 50 ? "sea level" : `${Math.round(now.alt / 10) * 10} m above sea level`}`}</small></div></div>
+        <div class="tile"><div class="k">A burning droplet goes out on its own</div><div class="v">${fm ? pc(fm.fit[0]) : "–"} <small>methanol, ${fh ? pc(fh.fit[0]) : "–"} heptane (3 mm, model${beyond ? ", beyond the tested range" : ""}): ${side}</small></div></div>
+        <div class="tile"><div class="k">NASA tests near this air</div><div class="v">${cov.n} <small>PSI tests${rep ? `, plus ${rep} solid-material fire${rep > 1 ? "s" : ""} in orbit from NASA reports` : ""}</small></div></div>
+      </div>
+      <div class="ins-tools air-ctl">
+        <div class="pills" id="air-suit" aria-label="Suit pressure">${suits.map((v) => `<button class="pill" aria-pressed="${a.suit === v}" data-suit="${v}">${suitLab(v)}</button>`).join("")}</div>
+        <div class="pills" id="air-lim" aria-label="Decompression limit"><button class="pill" aria-pressed="${!a.strict}" data-strict="0">Shuttle and ISS limit · R ${g(A.rmax)}</button><button class="pill" aria-pressed="${a.strict}" data-strict="1">Stricter planetary limit · R ${g(A.rstrict)}</button></div>
+      </div>
+      <div class="figure">
+        <h3>Every cabin air, by oxygen and pressure</h3>
+        <p class="sub">Dashed lines: hours of pure-oxygen prebreathe before a ${g(a.suit)} psi spacewalk. Green: no prebreathe, with the oxygen NASA accepts. Orange: the burn line. Hover anywhere for the numbers; click to choose that air.${onChart ? "" : ` Your habitat (${g(state.o2)}%, ${g(state.pressure)} psi) is off this chart.`}</p>
+        <div id="airchart-tool"></div>
+        ${CH.airLegend(a.suit)}
+      </div>
+      <div class="cols-2" style="margin-top:18px">
+        <div class="card prose"><h3>What it would take</h3><ul>
+          <li><b>Keep this air:</b> ${now.min < 1 ? "no prebreathe" : `${hm(now.min)} of pure oxygen`} before each spacewalk in a ${g(a.suit)} psi suit${now.low ? ", and less oxygen to breathe than NASA accepts" : ""}.</li>
+          <li><b>Skip the prebreathe:</b> with a ${g(a.suit)} psi suit, the least-oxygen cabin that needs none and still gives enough oxygen is ${g(corner.o2)}% at ${g(corner.p)} psi${corner.o2 > b1 ? `, ${g(r1(corner.o2 - b1))} points past the burn line` : ""}. There a burning droplet goes out on its own ${pc(dropExt(corner.o2, corner.p, "Methanol").fit[0])} of the time, against ${pc(dropExt(A.iss.o2, A.iss.p, "Methanol").fit[0])} in ISS air (methanol, model).</li>
+          <li><b>Stay at the burn line:</b> a cabin at ${g(b1)}% oxygen needs ${g(sf.p)} psi to give enough oxygen, and skips the prebreathe with a suit at ${g(sf.suit)} psi${a.suit >= sf.suit ? `; this ${g(a.suit)} psi suit does` : ""}.</li>
+        </ul></div>
+        <div class="card prose"><h3>How this is worked out</h3><ul>
+          <li><b>Decompression:</b> R = the cabin's nitrogen pressure ÷ the suit pressure, NASA's index for the body's slowest (360-minute) tissue. NASA accepted the Shuttle and ISS prebreathe protocols at R ${g(A.rmax)}. Breathing pure oxygen, that nitrogen halves every 360 minutes. The stricter limit, R ${g(A.rstrict)}, is set from NASA's 2024 estimate of about 6.5 hours from sea-level air.</li>
+          <li><b>Breathing:</b> inspired oxygen = oxygen fraction × (pressure − 47 mmHg of water vapour). NASA's exploration atmosphere (34%, 8.2 psi) gives 128 mmHg; 127 is the floor here.</li>
+          <li><b>Fire:</b> the FLEX droplet model on the Fire model tab, nitrogen only, 3 mm droplets. Droplets in a test chamber, not cabin materials; its tests ran at ${g(r1(D.range.p[0] * 14.6959))} psi or more.</li>
+          <li><b>Checked against NASA</b> (tests/air.mjs): ${g(r1(L.prebreathe(A.iss.o2, A.iss.p, A.suit, A.rmax) / 60))} h from ISS air, where NASA's resting protocol took 4 h. With the stricter limit, set only from the 6.5 h estimate, the least-oxygen no-prebreathe cabin lands at ${g(L.airCorner(A.suit, A.rstrict).o2)}% and ${g(L.airCorner(A.suit, A.rstrict).p)} psi; NASA chose 34% and 8.2 psi for exploration.</li>
+          <li>Simplified on purpose: one tissue, at rest; NASA's protocols also use exercise and staged pressures. Not medical or operational guidance. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132 (suit pressures).</li>
+        </ul></div>
+      </div>`;
+    CH.airChart($("airchart-tool"), FF, { suit: a.suit, rmax, you: { o2: state.o2, p: state.pressure },
+      onPick: (o, p) => { setAt(o, p); update(); }, onPin: (id) => { const x = L.ATMOS.find((y) => y.id === id); setAt(x.o2, x.p); update(); } });
+    $("air-suit").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; a.suit = +b.dataset.suit; drawAir(); };
+    $("air-lim").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; a.strict = b.dataset.strict === "1"; drawAir(); };
+  }
+
   /* --------------------------------------------------------------- replay */
   const REPLAYABLE = { "droplet-oxygen": ["droplets", ""], "droplet-low-oxygen": ["droplets", ""], "droplet-diluent": ["droplets", "He"],
     "gas-oxygen": ["gas", ""], "cool-flames": ["gas", ""] };
@@ -796,7 +863,7 @@
     replayCtl = FFReplay.mount($("rp"), FF, { kind: rp.kind, right: rp.right, gas: rp.gas || "", o2: state.o2 });
   }
 
-  const DRAW = { insights: drawInsights, map: drawMap, model: drawModel, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
+  const DRAW = { insights: drawInsights, air: drawAir, map: drawMap, model: drawModel, replay: drawReplay, brief: drawBrief, gravity: drawGravity, investigations: drawInvestigations, compare: drawCompare, data: drawData };
   function update() {
     drawControls();
     document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === state.view));

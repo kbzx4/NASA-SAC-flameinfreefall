@@ -19,7 +19,7 @@
   }, root.FF_AI || {});
   const URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent";
   const NUMBER = /(?<![A-Za-z\d.])\d+(?:\.\d+)?/g;
-  const STORE = "burnline-gemini-key";
+  const STORE = "airburn-gemini-key";
 
   function userKey() { try { return localStorage.getItem(STORE) || ""; } catch (e) { return ""; } }
   function setUserKey(k) { try { k ? localStorage.setItem(STORE, k.trim()) : localStorage.removeItem(STORE); } catch (e) { /* storage blocked */ } }
@@ -67,7 +67,7 @@
     let total = 0, found = 0;
     const kept = [], dropped = [];
     sentences(text).forEach((s) => {
-      const ns = numbers(s.replace(/\[(?:F\d+|R\d+|gaps|model|map)(?:\s*,\s*(?:F\d+|R\d+|gaps|model|map))*\]/g, "").replace(/\b1\s?g\b/g, ""));
+      const ns = numbers(s.replace(/\[(?:F\d+|R\d+|gaps|model|map|air)(?:\s*,\s*(?:F\d+|R\d+|gaps|model|map|air))*\]/g, "").replace(/\b1\s?g\b/g, ""));
       const ok = ns.filter((n) => allowed.has(n)).length;
       total += ns.length; found += ok;
       (ok === ns.length ? kept : dropped).push(s);
@@ -133,7 +133,9 @@ breathed. When you use a model prediction, say once that it is a model predictio
 test_coverage as [map]. nasa_reports holds results from NASA technical reports beyond the PSI tables (each with an
 id such as R1, the result nearest the habitat, its facts, where and in what gravity it was tested, and its caveat);
 cite them like [R1], and say when a result was in Earth gravity or a drop tower rather than in orbit. When no PSI
-finding is close to the habitat, use the closest nasa_reports entries.
+finding is close to the habitat, use the closest nasa_reports entries. air holds code-computed estimates for this
+habitat's air from NASA's published limits, not test data: minutes of pure-oxygen prebreathe before a spacewalk, the
+inspired oxygen and the altitude it matches; cite it as [air] and call it an estimate.
 
 Answer QUESTION in at most 110 words.
 
@@ -150,7 +152,8 @@ findings ranked by how close their tests came to it (each with an id such as F1)
 test_coverage: how close the tests come to this habitat (cite it as [map]), and nasa_reports: results from
 NASA technical reports beyond the PSI tables, ranked the same way (cite them like [R1]; say when a result was
 in Earth gravity or a drop tower rather than in orbit). When no PSI finding is close, lead with the closest
-nasa_reports entry.
+nasa_reports entry. air holds code-computed estimates of this habitat's spacewalk prebreathe and breathing from
+NASA's published limits, not test data (cite it as [air]).
 
 Write three or four sentences: what the closest evidence shows for this habitat, with its key numbers;
 what that suggests for a fire in this habitat; and the most important gap. If the closest tests are far
@@ -205,6 +208,17 @@ CONTEXT:
     rev = st.gravity > 0 ? [...rev.filter((e) => e.id === "gravity"), ...rev.filter((e) => e.id !== "gravity")] : [...rev.filter((e) => e.id !== "gravity"), ...rev.filter((e) => e.id === "gravity")];
     return rev;
   }
+  /* the cabin-air estimates the "Choose the air" view shows (logic.js), for this habitat */
+  function airFacts(L, st) {
+    if (!L.airAt) return undefined;
+    const A = L.AIR, a = st.air || { suit: A.suit, strict: false }, rmax = a.strict ? A.rstrict : A.rmax, x = L.airAt(st.o2, st.pressure, a.suit, rmax), c = L.airCorner(a.suit, rmax);
+    return {
+      what_this_is: "estimates from NASA's published limits, not test data: R is the cabin's nitrogen pressure over the suit pressure; NASA accepted its Shuttle and ISS prebreathe protocols at R 1.65; inspired oxygen is the oxygen fraction times (pressure minus 47 mmHg); simplified, one tissue, at rest",
+      suit_pressure_psi: a.suit, decompression_limit_R: rmax, R_value: x.R, prebreathe_minutes_of_pure_oxygen: Math.round(x.min),
+      inspired_oxygen_mmHg: Math.round(x.pio2), less_oxygen_than_nasa_accepts: x.low, altitude_with_the_same_oxygen_m: Math.round(x.alt / 10) * 10,
+      least_oxygen_cabin_with_no_prebreathe: { oxygen_pct: c.o2, pressure_psi: c.p },
+    };
+  }
   function context(FF, L, st) {
     const ranked = L.rankFindings(FF, st.o2, st.pressure);
     const ids = Object.fromEntries(FF.findings.map((f, i) => [f.id, "F" + (i + 1)]));
@@ -226,6 +240,7 @@ CONTEXT:
       gaps: L.gaps(FF, st.o2, st.pressure),
       model_predictions: modelFacts(FF, st),
       test_coverage: coverageFacts(FF, L, st),
+      air: airFacts(L, st),
       nasa_reports: reportFacts(FF, L, st).map((e, k) => ({
         id: "R" + (k + 1), title: e.title, source: e.where, tested_in: e.gravity, oxygen_tested_pct: e.o2, pressure_tested_psi: e.p,
         oxygen_points_from_this_habitat: e.o2_gap, result_nearest_this_habitat: e.nearest, facts: e.lines, caveat: e.caveat,

@@ -3,23 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Burnline: fire safety insights</title>
+<title>Airburn: fire safety insights</title>
 <meta name="description" content="Set a habitat's atmosphere, gravity and materials, and get the NASA microgravity fire findings ranked and interpreted for it.">
 <meta name="theme-color" content="#04060b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%235aa8ff' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115l">
+<link rel="stylesheet" href="assets/style.css?v=20261115m">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
 
 <nav class="nav" aria-label="Main">
   <div class="wrap">
-    <a class="brand" href="./"><span class="orb"></span>Burnline</a>
+    <a class="brand" href="./"><span class="orb"></span>Airburn</a>
     <div class="nav-links" role="tablist" aria-label="Views">
       <button class="tab" role="tab" data-view="insights">Insights</button>
+      <button class="tab" role="tab" data-view="air">Choose the air</button>
       <button class="tab" role="tab" data-view="map">Atmosphere map</button>
       <button class="tab" role="tab" data-view="model">Fire model</button>
       <button class="tab" role="tab" data-view="replay">Test replay</button>
@@ -50,6 +51,7 @@
 
   <div>
     <section class="view" id="view-insights" style="padding:0"></section>
+    <section class="view" id="view-air" style="padding:0"></section>
     <section class="view" id="view-map" style="padding:0"></section>
     <section class="view" id="view-model" style="padding:0"></section>
     <section class="view" id="view-replay" style="padding:0"></section>
@@ -58,18 +60,18 @@
     <section class="view" id="view-investigations" style="padding:0"></section>
     <section class="view" id="view-compare" style="padding:0"></section>
     <section class="view" id="view-data" style="padding:0"></section>
-    <p class="disclaimer">Burnline is an evidence summary, not a safety assessment. It reports which NASA microgravity tests exist near your conditions, and its fire models predict how NASA's droplet and gas-flame tests would end there, only within the conditions tested. It does not predict whether a cabin material will burn. Data: NASA Physical Science Informatics. Not affiliated with or endorsed by NASA.</p>
+    <p class="disclaimer">Airburn is an evidence summary, not a safety assessment. It reports which NASA microgravity tests exist near your conditions, and its fire models predict how NASA's droplet and gas-flame tests would end there, only within the conditions tested. It does not predict whether a cabin material will burn. Data: NASA Physical Science Informatics. Not affiliated with or endorsed by NASA.</p>
   </div>
 </main>
 
-<script src="assets/config.js?v=20261115l"></script>
-<script src="assets/data.js?v=20261115l"></script>
-<script src="assets/logic.js?v=20261115l"></script>
-<script src="assets/charts.js?v=20261115l"></script>
-<script src="assets/flame.js?v=20261115l"></script>
-<script src="assets/ai.js?v=20261115l"></script>
-<script src="assets/models.js?v=20261115l"></script>
-<script src="assets/replay.js?v=20261115l"></script>
-<script src="assets/tool.js?v=20261115l"></script>
+<script src="assets/config.js?v=20261115m"></script>
+<script src="assets/data.js?v=20261115m"></script>
+<script src="assets/logic.js?v=20261115m"></script>
+<script src="assets/charts.js?v=20261115m"></script>
+<script src="assets/flame.js?v=20261115m"></script>
+<script src="assets/ai.js?v=20261115m"></script>
+<script src="assets/models.js?v=20261115m"></script>
+<script src="assets/replay.js?v=20261115m"></script>
+<script src="assets/tool.js?v=20261115m"></script>
 </body>
 </html>

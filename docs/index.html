@@ -3,25 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Burnline: fire evidence for crewed habitats</title>
+<title>Airburn: fire evidence for crewed habitats</title>
 <meta name="description" content="Describe a crewed habitat and see what NASA's microgravity combustion experiments say about it, and how close those tests come to your conditions.">
-<meta property="og:title" content="Burnline: fire evidence for crewed habitats">
+<meta property="og:title" content="Airburn: fire evidence for crewed habitats">
 <meta property="og:description" content="Check a habitat's atmosphere and materials against NASA microgravity combustion test records.">
 <meta name="theme-color" content="#04060b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%235aa8ff' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115l">
+<link rel="stylesheet" href="assets/style.css?v=20261115m">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
 
 <nav class="nav" aria-label="Main">
   <div class="wrap">
-    <a class="brand" href="./"><span class="orb"></span>Burnline</a>
+    <a class="brand" href="./"><span class="orb"></span>Airburn</a>
     <div class="nav-links">
       <a class="hide-s" href="#finding">The finding</a>
+      <a class="hide-s" href="#tradeoff">The trade-off</a>
       <a class="hide-s" href="#problem">The gap</a>
       <a class="hide-s" href="#findings">Gravity</a>
       <a class="hide-s" href="#method">Method</a>
@@ -35,7 +36,7 @@
     <div>
       <span class="eyebrow">NASA Space Apps 2026 · Flame in Freefall</span>
       <h1>Fire changes shape <span class="blue">when gravity does.</span></h1>
-      <p class="lede">Burnline reads <b><span data-n="records"></span> combustion test records</b> from NASA, works out what the experiments found, ranks those findings for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit.</p>
+      <p class="lede">Airburn reads <b><span data-n="records"></span> combustion test records</b> from NASA, ranks what the experiments found for your habitat, and has SI explain what they suggest for fire safety on the Moon, on Mars and in orbit. Then it shows the trade every Moon base faces: the air that spares astronauts hours of prebreathing before a spacewalk is air where small fires keep burning.</p>
       <div class="cta">
         <a class="btn primary" href="tool.html">Open the tool
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -78,9 +79,9 @@
 <section id="finding">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">The finding · the self-extinction line</span>
+      <span class="eyebrow">The finding · the burn line</span>
       <h2>Somewhere between ISS air and Moon-base air, flames stop putting themselves out.</h2>
-      <p>In NASA's FLEX tests with nothing added to the nitrogen, about half the burning fuel droplets in ISS air went out on their own before the fuel was used up. At the 30% oxygen planned for Moon bases, almost none did. A model fitted to <span data-x="tests"></span> FLEX tests puts the 50-50 point at <span data-x="line"></span> oxygen, depending on the fuel: right around the 21% oxygen astronauts breathe today.</p>
+      <p>In NASA's FLEX tests with nothing added to the nitrogen, about half the burning fuel droplets in ISS air went out on their own before the fuel was used up. At the 30% oxygen planned for Moon bases, almost none did. A model fitted to <span data-x="tests"></span> FLEX tests puts the 50-50 point at <span data-x="line"></span> oxygen, depending on the fuel: right around the 21% oxygen astronauts breathe today. We call that band the burn line.</p>
     </div>
     <div class="tiles reveal xo-tiles">
       <div class="tile"><div class="k">ISS air · <span data-x="issband"></span> oxygen</div><div class="v"><span data-x="iss"></span> <small>droplet flames went out on their own</small></div></div>
@@ -96,6 +97,30 @@
       <p class="note">Checked on tests it never saw, the model ranks flames that went out above those that did not with AUC <span data-x="auc"></span> (0.5 is guessing, 1 is perfect). It also learned that bigger droplets go out more often, consistent with large droplet flames losing more heat by radiation. Pressure barely matters here: at Moon-base pressure the lines move by under 2 points. Gas flames point the same way: at <span data-x="gaslowband"></span> oxygen all <span data-x="gaslow"></span> lit gas flames went out on their own; at <span data-x="gashighband"></span>, <span data-x="gashigh"></span> of the <span data-x="gashighlit"></span> that lit burned until the fuel was cut off. These are droplets and gas flames in a test chamber, not cabin materials, and the tests changed several things at once: the line is a pattern to design around, not a proven cause. Sources: FLEX (PSI-69), CFI-G (PSI-159).</p>
     </div>
     <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?view=model">Run the fire model for your habitat
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </div>
+</section>
+
+<section id="tradeoff">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The trade-off · prebreathe against fire</span>
+      <h2>To skip the prebreathe, a Moon base has to run its air past the burn line.</h2>
+      <p>Before every spacewalk, astronauts breathe pure oxygen to flush nitrogen out of their bodies, or they risk the bends. A cabin at lower pressure with more oxygen shortens that wait, which is why the Moon base is planned at 30% oxygen and 10.2 psi. This chart puts two of NASA's own limits on one map: the decompression limit NASA accepted its Shuttle and ISS prebreathe protocols at, and the oxygen level it accepts for crews to breathe. With today's 4.3 psi suits, no cabin air below <span data-a="corner"></span> oxygen meets both. The burn line, where NASA's droplet flames stop putting themselves out, sits at <span data-x="line"></span>.</p>
+    </div>
+    <div class="tiles reveal">
+      <div class="tile"><div class="k">From ISS air · 21% oxygen, 14.7 psi</div><div class="v"><span data-a="iss"></span> <small>of pure oxygen before each spacewalk (NASA's protocol: 4 h). Droplet flames go out on their own <span data-a="issx"></span> of the time</small></div></div>
+      <div class="tile"><div class="k">The least oxygen that skips it</div><div class="v"><span data-a="corner"></span> <small>at <span data-a="cornerp"></span> psi, <span data-a="gap"></span> points past the burn line. Droplet flames go out on their own <span data-a="cornerx"></span> of the time</small></div></div>
+      <div class="tile"><div class="k">Or raise the suit instead</div><div class="v"><span data-a="suit"></span> psi <small>a suit at this pressure skips the prebreathe from a cabin at the burn line (<span data-a="suitcab"></span>). Today's suits run at 4.3 psi</small></div></div>
+    </div>
+    <div class="figure reveal" style="margin-top:18px">
+      <h3>Every cabin air, by oxygen and pressure</h3>
+      <p class="sub">Dashed lines: hours of pure-oxygen prebreathe before a 4.3 psi spacewalk. Green: no prebreathe, with the oxygen NASA accepts. Orange: the burn line. Hover anywhere for the numbers; click to open that air in the tool.</p>
+      <div id="airchart"></div>
+      <div id="air-legend"></div>
+      <p class="note">How it is worked out. Decompression uses NASA's R: the nitrogen pressure in the body's slowest tissue divided by the suit pressure. NASA accepted the Shuttle and ISS prebreathe protocols at R = 1.65, and breathing pure oxygen clears that nitrogen with a 360-minute half-time. Inspired oxygen is the oxygen fraction times the cabin pressure, less 47 mmHg of water vapour; NASA's exploration atmosphere gives 128 mmHg, and 127 mmHg is the floor used here. Checked against NASA: from ISS air the model gives <span data-a="iss"></span> of prebreathe, where NASA's resting protocol took 4 hours. With a stricter limit set only from NASA's 2024 estimate of about 6.5 hours from sea-level air, the least-oxygen cabin with no prebreathe moves to <span data-a="strict"></span> oxygen at <span data-a="strictp"></span> psi; NASA chose 34% at 8.2 psi for exploration. The fire side is the FLEX droplet model above: droplets in a test chamber, not cabin materials, and its tests ran at 10.1 psi or more. Simplified on purpose (one tissue, at rest) and not medical guidance. Skylab, Apollo and today's spacesuits used 74 to 100% oxygen, off this chart. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132.</p>
+    </div>
+    <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?view=air">Choose your habitat's air
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
   </div>
 </section>
@@ -211,7 +236,7 @@
     <div class="grid-3">
       <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Numbers transcribed from NASA technical reports name the report, table and page. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
       <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding and its ranking. A Gemini model then interprets the findings, reading only the facts code computed. Code looks up every number it wrote, a second model re-reads every sentence against the facts, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
-      <div class="card reveal"><h3>Honest about limits</h3><p>Burnline shows how much evidence exists near your conditions and what models fitted to NASA's droplet and gas-flame tests predict there. The models cover only the conditions tested and say nothing directly about cabin materials. It is not an operational safety system.</p></div>
+      <div class="card reveal"><h3>Honest about limits</h3><p>Airburn shows how much evidence exists near your conditions and what models fitted to NASA's droplet and gas-flame tests predict there. The models cover only the conditions tested and say nothing directly about cabin materials. It is not an operational safety system.</p></div>
     </div>
   </div>
 </section>
@@ -233,7 +258,7 @@
 <footer>
   <div class="wrap cols">
     <div>
-      <a class="brand" href="./" style="margin-bottom:14px"><span class="orb"></span>Burnline</a>
+      <a class="brand" href="./" style="margin-bottom:14px"><span class="orb"></span>Airburn</a>
       <p>Built for the NASA International Space Apps Challenge 2026, challenge "Flame in Freefall".</p>
       <p>Not affiliated with or endorsed by NASA.</p>
     </div>
@@ -252,13 +277,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115l"></script>
-<script src="assets/data.js?v=20261115l"></script>
-<script src="assets/logic.js?v=20261115l"></script>
-<script src="assets/charts.js?v=20261115l"></script>
-<script src="assets/models.js?v=20261115l"></script>
-<script src="assets/flame.js?v=20261115l"></script>
-<script src="assets/replay.js?v=20261115l"></script>
+<script src="assets/config.js?v=20261115m"></script>
+<script src="assets/data.js?v=20261115m"></script>
+<script src="assets/logic.js?v=20261115m"></script>
+<script src="assets/charts.js?v=20261115m"></script>
+<script src="assets/models.js?v=20261115m"></script>
+<script src="assets/flame.js?v=20261115m"></script>
+<script src="assets/replay.js?v=20261115m"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -386,6 +411,18 @@
     set.allnote = ia.n === x.iss.n && ma.n === x.moon.n ? "" : `These counts are the ${x.score.tests} tests the model was fitted to, which list pressure, droplet size and how each test ended. Counting every nitrogen-only test in NASA's table, as the tool's findings do, it is ${ia.e} of ${ia.n} and ${ma.e} of ${ma.n}${ia.e === x.iss.e && ma.e === x.moon.e ? "; none of the extra tests went out on its own" : ""}.`;
     document.querySelectorAll("[data-x]").forEach((el) => { if (set[el.dataset.x] != null) el.textContent = set[el.dataset.x]; });
     FFCharts.crossover(document.getElementById("crossover"), FF);
+  });
+  safe(() => { // the cabin-air trade-off: NASA's limits (logic.js) and the droplet model, every number computed
+    const L = FFLogic, A = L.AIR, MD = window.FFModels, D = FF.models.droplets, x = FFCharts.crossoverData(FF);
+    const r1 = (v) => Math.round(v * 10) / 10, b1 = r1(Math.max(...x.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null)));
+    const corner = L.airCorner(), strict = L.airCorner(A.suit, A.rstrict), sf = L.suitFor(b1);
+    const ext = (o, p) => Math.round(MD.classify(D.ending, MD.dropletX(o, "N2", p, 3, "Methanol")).fit[0] * 100) + "%";
+    const set = { iss: r1(L.prebreathe(A.iss.o2, A.iss.p, A.suit, A.rmax) / 60) + " h", issx: ext(A.iss.o2, A.iss.p), corner: corner.o2 + "%", cornerp: corner.p,
+      cornerx: ext(corner.o2, corner.p), gap: r1(corner.o2 - b1), suit: sf.suit, suitcab: `${b1}% oxygen at ${sf.p} psi`, strict: strict.o2 + "%", strictp: strict.p };
+    document.querySelectorAll("[data-a]").forEach((el) => { if (set[el.dataset.a] != null) el.textContent = set[el.dataset.a]; });
+    document.getElementById("air-legend").innerHTML = FFCharts.airLegend(A.suit);
+    const go = (o, p) => { location.href = `tool.html?view=air&o2=${o}&p=${p}`; };
+    FFCharts.airChart(document.getElementById("airchart"), FF, { onPin: (id) => { const a = L.ATMOS.find((y) => y.id === id); go(a.o2, a.p); }, onPick: go });
   });
   reveal(); // the cards drawn above
 })();

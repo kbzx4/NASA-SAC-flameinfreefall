@@ -371,6 +371,124 @@
     });
   }
 
+  /* The cabin-air trade-off: every cabin air by oxygen and pressure. Dashed contours: hours of pure-oxygen prebreathe
+     before a spacewalk at NASA's decompression limit (logic.js). Green: no prebreathe, with the oxygen NASA accepts.
+     Hatched: less oxygen than NASA accepts. Orange band: the burn line, where the droplet model's chance of a flame
+     going out on its own crosses 50% for methanol and heptane. Hover anywhere for the numbers at that point. */
+  function airChart(el, FF, opts = {}) {
+    const L = window.FFLogic, A = L.AIR, MD = window.FFModels, D = FF.models.droplets;
+    const suit = opts.suit || A.suit, rmax = opts.rmax || A.rmax, floor = A.floor;
+    const X0 = 15, X1 = 40, P0 = 4, P1 = 16, PH2O = 47 / 51.71493, r1 = (v) => Math.round(v * 10) / 10;
+    const xo = crossoverData(FF), fits = xo.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null);
+    const b0 = Math.min(...fits), b1 = Math.max(...fits), corner = L.airCorner(suit, rmax, floor);
+    const pins = L.ATMOS.filter((a) => a.o2 >= X0 && a.o2 <= X1 && a.p >= P0 && a.p <= P1);
+    const floorP = (o) => PH2O + floor / 51.71493 / (o / 100); // pressure that gives the oxygen floor at o %
+    const preP = (o, t) => (rmax * suit * Math.pow(2, t / A.half)) / (1 - o / 100); // pressure where the prebreathe is t minutes
+    const pc = (v) => Math.round(v * 100) + "%", hm = (m) => (m < 1 ? "none" : m < 60 ? `${Math.round(m)} min` : `${r1(m / 60)} h`);
+    const pr = D.range.p.map((v) => v * 14.6959);
+    const info = (o, p, head) => {
+      const a = L.airAt(o, p, suit, rmax, floor), f = ["Methanol", "Heptane"].map((fu) => MD.classify(D.ending, MD.dropletX(o, "N2", p, 3, fu)).fit[0]);
+      const beyond = o < D.range.o2[0] || o > D.range.o2[1] || p < pr[0] - 1e-9 || p > pr[1];
+      return `<b>${head || `${g(r1(o))}% oxygen · ${g(r1(p))} psi`}</b><span>Prebreathe before a ${g(suit)} psi spacewalk: ${hm(a.min)} (R ${a.R}; limit ${g(rmax)})<br>Breathing: ${Math.round(a.pio2)} mmHg of oxygen, ${a.low ? "less than NASA accepts" : a.alt < 50 ? "as at sea level" : `as ${Math.round(a.alt / 10) * 10} m above sea level`}<br>A burning 3 mm droplet goes out on its own: methanol ${pc(f[0])}, heptane ${pc(f[1])} (model${beyond ? ", beyond the tested range" : ""})</span>`;
+    };
+    mount(el, (W) => {
+      const narrow = W < 620, left = narrow ? 40 : 56, right = narrow ? 12 : 22, top = 34;
+      const plotW = W - left - right, plotH = Math.round(Math.max(320, Math.min(470, W * 0.48))), H = top + plotH + 50;
+      const X = (o) => left + ((o - X0) / (X1 - X0)) * plotW, Y = (p) => top + plotH - ((p - P0) / (P1 - P0)) * plotH;
+      const cy = (p) => Math.max(top - 60, Math.min(top + plotH + 60, Y(p)));
+      const path = (pts) => "M" + pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join("L");
+      const halo = ` paint-order="stroke" stroke="${C.bg}" stroke-width="4" stroke-linejoin="round"`;
+      const id = "air" + Math.random().toString(36).slice(2, 7), os = [];
+      for (let o = X0; o <= X1 + 1e-9; o += 0.25) os.push(o);
+      el._inv = { left, top, plotW, plotH, W };
+      let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Cabin oxygen against cabin pressure: hours of prebreathe before a spacewalk, the oxygen NASA accepts, and the burn line from NASA's droplet tests"><defs><clipPath id="${id}c"><rect x="${left}" y="${top}" width="${plotW}" height="${plotH}"/></clipPath><pattern id="${id}h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(255,255,255,0.02)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,255,255,0.1)" stroke-width="2.5"/></pattern></defs>`;
+      [15, 20, 25, 30, 35, 40].forEach((t) => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${top}" y2="${top + plotH}" stroke="${C.line}"/>` + txt(X(t), top + plotH + 20, t + "%", { anchor: "middle", fill: C.ink3, size: 12, mono: true }); });
+      [4, 6, 8, 10, 12, 14, 16].forEach((t) => { s += `<line x1="${left}" x2="${left + plotW}" y1="${Y(t)}" y2="${Y(t)}" stroke="${C.line}"/>` + txt(left - 8, Y(t) + 4, String(t), { anchor: "end", fill: C.ink3, size: 12, mono: true }); });
+      s += txt(left - 8, top - 14, "psi", { anchor: "end", fill: C.ink3, size: 12 });
+      s += txt(left + plotW, top + plotH + 40, "Cabin oxygen, % by volume", { anchor: "end", fill: C.ink3, size: 12 });
+      s += `<g clip-path="url(#${id}c)">`;
+      const fl = os.map((o) => [X(o), cy(floorP(o))]);
+      s += `<path d="${path([[X(X0), top + plotH + 60], ...fl, [X(X1), top + plotH + 60]])}Z" fill="url(#${id}h)"/>`;
+      const ok = os.filter((o) => o >= corner.o2);
+      if (ok.length) s += `<path d="${path([[X(corner.o2), Y(corner.p)], ...ok.map((o) => [X(o), cy(preP(o, 0))]), ...ok.slice().reverse().map((o) => [X(o), cy(floorP(o))])])}Z" fill="${C.third}" fill-opacity="0.22"/>`;
+      s += `<rect x="${X(b0)}" y="${top}" width="${Math.max(3, X(b1) - X(b0))}" height="${plotH}" fill="${C.g1}" fill-opacity="0.2"/>`;
+      s += `<path d="${path(fl)}" fill="none" stroke="${C.ink3}" stroke-width="1.4"/>`;
+      [240, 120, 60].forEach((t) => { s += `<path d="${path(os.map((o) => [X(o), cy(preP(o, t))]))}" fill="none" stroke="${C.ink2}" stroke-width="1.2" stroke-dasharray="5 4" opacity="0.8"/>`; });
+      s += `<path d="${path(os.map((o) => [X(o), cy(preP(o, 0))]))}" fill="none" stroke="${C.third}" stroke-width="2.4"/>`;
+      s += `</g>`;
+      // contour labels, where each contour leaves the plot
+      const lab = (t, text, strong) => {
+        const k = rmax * suit * Math.pow(2, t / A.half), oTop = 100 * (1 - k / P1), o = { fill: strong ? C.ink : C.ink2, size: 11.5, weight: strong ? 600 : 400, extra: halo };
+        if (oTop >= X0 && oTop <= X1 - 3) return txt(X(oTop) + 5, top + 14, text, o);
+        const p = k / (1 - X1 / 100);
+        return p >= P0 + 0.3 && p <= P1 - 0.3 ? txt(left + plotW - 6, Y(p) - 7, text, { ...o, anchor: "end" }) : "";
+      };
+      s += lab(240, narrow ? "4 h" : "4 h of prebreathe") + lab(120, "2 h") + lab(60, "1 h") + lab(0, narrow ? "none" : "no prebreathe below this line", true);
+      // the burn line, and which side is which
+      const bm = X((b0 + b1) / 2);
+      s += txt(bm, top + plotH - 26, "Burn line", { anchor: "middle", fill: C.ink, size: 12.5, weight: 600, extra: halo }) + txt(bm, top + plotH - 10, `${g(r1(b0))} to ${g(r1(b1))}%`, { anchor: "middle", fill: C.ink2, size: 11.5, mono: true, extra: halo });
+      const room = X(b0) - 8 - left, lt = narrow ? "← go out" : room > 175 ? "← most go out on their own" : room > 135 ? "← go out on their own" : "← go out";
+      s += txt(X(b0) - 8, top - 12, lt, { anchor: "end", fill: C.ink2, size: 12 }) + txt(X(b1) + 8, top - 12, narrow ? "keep burning →" : "most keep burning →", { fill: C.ink2, size: 12 });
+      // the regions
+      s += txt(left + 8, Y(7.2), narrow ? "Too little" : "Less oxygen than", { fill: C.ink2, size: 12, weight: 500, extra: halo }) + txt(left + 8, Y(7.2) + 15, narrow ? "oxygen" : "NASA accepts", { fill: C.ink2, size: 12, weight: 500, extra: halo });
+      if (!narrow && corner.o2 < 36) { const go = 37.5, gp = (preP(go, 0) + floorP(go)) / 2; if (gp > P0 && gp < P1) s += txt(X(go), Y(gp) - 2, "No prebreathe,", { anchor: "middle", fill: C.ink, size: 12, weight: 600, extra: halo }) + txt(X(go), Y(gp) + 13, "enough oxygen", { anchor: "middle", fill: C.ink, size: 12, weight: 600, extra: halo }); }
+      // the cheapest no-prebreathe air, and its distance from the burn line
+      if (corner.o2 >= X0 && corner.o2 <= X1 && corner.p >= P0 && corner.p <= P1) {
+        const cx = X(corner.o2), cyy = Y(corner.p);
+        const gapTxt = corner.o2 > b1 ? `${g(r1(corner.o2 - b1))} points past the burn line` : corner.o2 >= b0 ? "on the burn line" : "before the burn line";
+        if (corner.o2 > b1) s += `<line x1="${X(b1)}" x2="${cx}" y1="${cyy}" y2="${cyy}" stroke="${C.ink}" stroke-width="1.3" stroke-dasharray="2 3" opacity="0.85"/>`;
+        s += `<circle cx="${cx}" cy="${cyy}" r="6" fill="${C.ink}" stroke="${C.bg}" stroke-width="2"/>`;
+        if (narrow) s += txt(cx + 9, cyy + 17, `${g(corner.o2)}%`, { fill: C.ink, size: 12, weight: 600, extra: halo });
+        else { // a callout below the point, in the empty low-oxygen area
+          const ty = Math.min(top + plotH - 44, cyy + 64);
+          s += `<line x1="${cx}" x2="${cx}" y1="${cyy + 8}" y2="${ty - 16}" stroke="${C.ink}" stroke-width="1" opacity="0.6"/>`;
+          s += txt(cx, ty, `${g(corner.o2)}% at ${g(corner.p)} psi`, { anchor: "middle", fill: C.ink, size: 12.5, weight: 600, extra: halo })
+            + txt(cx, ty + 15, "least oxygen with no prebreathe,", { anchor: "middle", fill: C.ink2, size: 11.5, extra: halo })
+            + txt(cx, ty + 30, gapTxt, { anchor: "middle", fill: C.ink2, size: 11.5, extra: halo });
+        }
+      }
+      // crew atmospheres
+      const PL = { iss: ["start", 11, 4, "ISS"], eva: ["middle", 0, -13, narrow ? "Shuttle" : "Shuttle, before spacewalks"], moon: ["start", 11, 4, "Moon base"], exp: ["start", 11, 4, narrow ? "Explor." : "Exploration"] };
+      pins.forEach((a) => {
+        const x = X(a.o2), y = Y(a.p), [anc, dx, dy, name] = PL[a.id] || ["start", 11, 4, a.short];
+        const t = info(a.o2, a.p, `${a.name} · ${a.when}`).replace(/<\/span>$/, opts.onPin ? "<br><i>Click to open this air</i></span>" : "</span>");
+        s += `<g data-pin="${a.id}" tabindex="0" role="button" aria-label="${esc(a.name)}" style="cursor:${opts.onPin ? "pointer" : "default"}" data-tip="${esc(t)}"><circle cx="${x}" cy="${y}" r="15" fill="transparent"/><circle cx="${x}" cy="${y}" r="7.5" fill="${C.you}" stroke="${C.bg}" stroke-width="2"/>`;
+        s += `<text x="${x + dx}" y="${y + dy}" fill="${C.ink}" font-size="12.5" font-weight="600" text-anchor="${anc}" font-family="Inter, system-ui, sans-serif"${halo}>${esc(name)}</text></g>`;
+      });
+      // your habitat
+      const u = opts.you;
+      if (u && u.o2 >= X0 && u.o2 <= X1 && u.p >= P0 && u.p <= P1) {
+        const ux = X(u.o2), uy = Y(u.p);
+        s += `<line x1="${ux}" x2="${ux}" y1="${top}" y2="${top + plotH}" stroke="${C.you}" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.55" pointer-events="none"/><line x1="${left}" x2="${left + plotW}" y1="${uy}" y2="${uy}" stroke="${C.you}" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.55" pointer-events="none"/>`;
+        s += `<rect x="${ux - 7}" y="${uy - 7}" width="14" height="14" transform="rotate(45 ${ux} ${uy})" fill="${C.you}" stroke="${C.bg}" stroke-width="2" pointer-events="none"/>`;
+      }
+      return s + "</svg>";
+    });
+    // hover anywhere for the numbers there; click to choose that air
+    const at = (e) => {
+      const svg = el.querySelector("svg"), I = el._inv; if (!svg || !I) return null;
+      const r = svg.getBoundingClientRect(), k = I.W / r.width, x = (e.clientX - r.left) * k, y = (e.clientY - r.top) * k;
+      if (x < I.left || x > I.left + I.plotW || y < I.top || y > I.top + I.plotH) return null;
+      return { o: X0 + ((x - I.left) / I.plotW) * (X1 - X0), p: P0 + ((I.top + I.plotH - y) / I.plotH) * (P1 - P0) };
+    };
+    el.onmousemove = (e) => {
+      if (e.target.closest && e.target.closest("[data-tip]")) return;
+      const q = at(e), t = tip();
+      if (!q) { t.classList.remove("on"); return; }
+      t.innerHTML = info(q.o, q.p).replace(/<\/span>$/, opts.onPick ? "<br><i>Click to choose this air</i></span>" : "</span>"); t.classList.add("on");
+      const w = t.offsetWidth, h = t.offsetHeight;
+      t.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, e.clientX + 14)) + "px";
+      t.style.top = (e.clientY + h + 24 > window.innerHeight ? e.clientY - h - 12 : e.clientY + 16) + "px";
+    };
+    el.onmouseleave = () => tip().classList.remove("on");
+    el.classList.toggle("pick", !!(opts.onPick || opts.onPin));
+    el.onclick = (e) => { const pin = e.target.closest && e.target.closest("[data-pin]"); if (pin && opts.onPin) return opts.onPin(pin.dataset.pin); const q = at(e); if (q && opts.onPick) opts.onPick(Math.round(q.o * 2) / 2, Math.round(q.p * 10) / 10); };
+    el.onkeydown = (e) => { const pin = e.target.closest && e.target.closest("[data-pin]"); if (pin && opts.onPin && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); opts.onPin(pin.dataset.pin); } };
+  }
+  function airLegend(suit) {
+    return `<div class="legend"><span><i style="background:${C.third};border-radius:2px;opacity:.8"></i>No prebreathe, with the oxygen NASA accepts</span><span><i style="border-radius:2px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 2px,transparent 2px 5px)"></i>Less oxygen than NASA accepts</span><span><i style="background:${C.g1};border-radius:2px;opacity:.8"></i>Burn line: where most droplet flames stop going out on their own</span><span><i class="tick" style="background:transparent;border-left:2px dashed ${C.ink2}"></i>Hours of prebreathe before a ${g(suit)} psi spacewalk</span><span><i style="background:#fff"></i>Crew atmospheres</span></div>`;
+  }
+
   /* Limiting oxygen by gravity level for three materials (Olson and Ferkul 2012, Table I, transcribed).
      Bar: from the highest oxygen at which the flame went out (MOC) to the lowest at which it kept burning (ULOI). */
   const MAT_COL = ["#a274e6", "#bf8420", "#2aa7ae"]; // validated for this dark surface (dataviz validator)
@@ -429,5 +547,5 @@
       `<tr><td><b>${esc(x.id)}</b></td><td>${esc(x.when)}</td><td>${esc(x.material)}</td><td class="mono">${g(x.o)}%</td><td class="mono">${g(Math.round(x.p * 10) / 10)} psi</td><td>${esc(x.out)}</td><td>${cite(x)}<br><span class="muted">${esc(x.where)}</span></td></tr>`).join("")}</tbody></table></div>`;
   }
 
-  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, gravityLimitsChart, reportTable, MAT_COL, bindTips, esc, C };
+  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, airChart, airLegend, gravityLimitsChart, reportTable, MAT_COL, bindTips, esc, C };
 })();

@@ -363,6 +363,41 @@
     return out.sort((a, b) => a.o2_gap - b.o2_gap || a.p_gap / Math.max(p, 1) - b.p_gap / Math.max(p, 1));
   }
 
+  /* ---- the cabin-air trade-off: spacewalk prebreathe, oxygen to breathe, and fire ----
+     Decompression: NASA's R is the nitrogen tension in the 360-minute half-time tissue divided by the suit pressure.
+     After days in a cabin that tension equals the cabin's nitrogen partial pressure. Breathing pure oxygen it falls
+     with a 360-minute half-time, so reaching a limit Rmax takes 360 / ln 2 × ln(R / Rmax) minutes. NASA accepted the
+     Shuttle and ISS prebreathe protocols at R = 1.65 (NASA EVA operations, Gernhardt 2013). The stricter limit is
+     matched to NASA's 2024 planetary estimate of about 6.5 hours of prebreathe from sea-level air (NTRS 20240014714).
+     Breathing: inspired oxygen PIO2 = oxygen fraction × (pressure − 47 mmHg of water vapour). NASA's exploration
+     atmosphere (8.2 psi, 34%) gives about 128 mmHg, like the Shuttle's staged denitrogenation (Aerospace Medicine and
+     Human Performance 89(9), 2018); 127 mmHg is the floor used here. Simplified on purpose: one tissue, at rest. */
+  const MMHG = 51.71493, PH2O = 47 / MMHG; // mmHg per psi; water vapour, psi
+  const AIR = { suit: 4.3, half: 360, rmax: 1.65, floor: 127, iss: { o2: 21, p: 14.7 }, nasa: { protocol_min: 240, planetary_min: 390, exp: { o2: 34, p: 8.2, pio2: 128 } } };
+  AIR.rstrict = round(((AIR.iss.p * (1 - AIR.iss.o2 / 100)) / AIR.suit) / Math.pow(2, AIR.nasa.planetary_min / AIR.half), 3);
+  const airR = (o2, p, suit) => (p * (1 - o2 / 100)) / suit;
+  const prebreathe = (o2, p, suit, rmax) => { const R = airR(o2, p, suit); return R <= rmax ? 0 : (AIR.half / Math.LN2) * Math.log(R / rmax); }; // minutes
+  const pio2 = (o2, p) => (o2 / 100) * (p - PH2O) * MMHG; // mmHg
+  const altitudeFor = (v) => { const pb = v / 0.2095 + 47; return pb >= 760 ? 0 : 44330.8 * (1 - Math.pow(pb / 760, 1 / 5.25588)); }; // metres on Earth with the same inspired oxygen
+  const floorAt = (p, floor) => (floor / MMHG / (p - PH2O)) * 100; // the least oxygen % that gives the floor at pressure p
+  const noPrebreatheAt = (o2, suit, rmax) => (rmax * suit) / (1 - o2 / 100); // the highest pressure that needs no prebreathe at this oxygen %
+  function airAt(o2, p, suit = AIR.suit, rmax = AIR.rmax, floor = AIR.floor) {
+    const v = pio2(o2, p);
+    return { R: round(airR(o2, p, suit), 2), min: prebreathe(o2, p, suit, rmax), pio2: v, low: v < floor - 0.05, alt: altitudeFor(v) };
+  }
+  /* the lowest-oxygen cabin that needs no prebreathe and still gives the oxygen floor (where the two limits cross) */
+  function airCorner(suit = AIR.suit, rmax = AIR.rmax, floor = AIR.floor) {
+    let best = { o2: 100, p: 0 };
+    for (let p = 2; p <= 30; p += 0.002) { const o = Math.max(100 * (1 - (rmax * suit) / p), floorAt(p, floor)); if (o < best.o2) best = { o2: o, p }; }
+    return { o2: round(best.o2, 1), p: round(best.p, 1) };
+  }
+  /* the suit pressure that needs no prebreathe from the lowest-pressure cabin giving the oxygen floor at this oxygen % */
+  function suitFor(o2, rmax = AIR.rmax, floor = AIR.floor) {
+    const p = PH2O + floor / MMHG / (o2 / 100);
+    return { p: round(p, 1), suit: round((p * (1 - o2 / 100)) / rmax, 1) };
+  }
+
   root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P, inverse,
-    source, reportPoints, reportCoverage, burnsAbove, wstfBurning, gravityLimits, reportEvidence };
+    source, reportPoints, reportCoverage, burnsAbove, wstfBurning, gravityLimits, reportEvidence,
+    AIR, airR, prebreathe, pio2, altitudeFor, floorAt, noPrebreatheAt, airAt, airCorner, suitFor };
 })(typeof window !== "undefined" ? window : globalThis);
