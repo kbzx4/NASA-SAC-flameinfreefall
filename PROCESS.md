@@ -144,7 +144,7 @@ The whole site was read again as a judge would, against the challenge statement,
 
 ## Nov 15, evening: the demo video
 
-- The 30-second demo is a screen recording of the site's own pages. Claude Code scripted it: headless Chrome recorded each scene, with the cursor moves and clicks written as code, and FFmpeg cut the scenes to the narration, burned in the captions and put "edited with SI" in every frame. A team member reads the captions as the voice-over.
+- The 30-second demo is a screen recording of the site's own pages. Claude Code scripted it: headless Chrome recorded each scene, with the cursor moves and clicks written as code, and FFmpeg cut the scenes to the narration and burned in the captions. A team member reads the captions as the voice-over.
 - For the recording only, the home-page replay ran faster (its own label says so) and held its last frame, and the hero carried a title card.
 - Recording the live SI turned up two weaknesses, both fixed on the site:
   - Asked why a habitat runs its air past the burn line, it said the context never mentioned a burn line. The air facts now carry the burn line, where the habitat sits against it, the prebreathe from ISS air and the saving, and the suit pressure for a cabin at the line.
