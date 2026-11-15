@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115f">
+<link rel="stylesheet" href="assets/style.css?v=20261115h">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -104,8 +104,8 @@
     <div class="stats reveal">
       <div class="stat"><div class="num" data-n="records"></div><div class="lbl">records from NASA experiment tables, in one harmonised table</div></div>
       <div class="stat"><div class="num" data-n="investigations"></div><div class="lbl">NASA microgravity combustion investigations, from candle flames to cargo-ship fires</div></div>
-      <div class="stat"><div class="num"><span data-n="solidmax"></span>%</div><div class="lbl">the highest oxygen level in any solid-material flame test loaded</div></div>
-      <div class="stat"><div class="num zero">0</div><div class="lbl">tests in Moon or Mars gravity. NASA's archive has none yet</div></div>
+      <div class="stat"><div class="num"><span data-n="solidmax"></span>%</div><div class="lbl">the highest oxygen level in any solid-material flame test in NASA's PSI tables</div></div>
+      <div class="stat"><div class="num zero">0</div><div class="lbl">tests in Moon or Mars gravity in NASA's PSI tables. NASA reports hold only 5-second drop-tower tests</div></div>
     </div>
   </div>
 </section>
@@ -116,13 +116,25 @@
       <span class="eyebrow">The gap</span>
       <h2>Past that line, the data thins out. Crews have lived far beyond it.</h2>
       <p>In the NASA tables loaded here, every microgravity fire test that records its surrounding air ran at <span data-n="topo2"></span>% oxygen or less. Crews have breathed pure oxygen from Mercury to Apollo, about three-quarters oxygen on Skylab, and pure oxygen inside every US spacesuit today; Apollo 1 burned in pure oxygen. Solid materials, the things that actually burn in a cabin, were flame-tested in orbit only up to <span data-n="solidmax"></span>%. NASA's <span data-n="invn"></span> inverse-flame tests (ACME CFI-G and Flame Design) did feed up to <span data-n="invtop"></span>% oxygen, but out of the burner into a chamber of fuel and nitrogen, not as the surrounding air, so they are in the catalog but not on the map.</p>
+      <p style="margin-top:14px">NASA's technical reports go further than its PSI tables. They add <span data-r="nrep"></span> solid-material fires in orbit with the pressure recorded (the squares on the map): Saffire IV to VI burned fabric and plastic in a cargo spacecraft at up to <span data-r="safo2"></span>% oxygen and <span data-r="safp"></span> psi, and the Space Shuttle's SSCE burned paper and plastic at <span data-r="ssceo2"></span>% oxygen.</p>
     </div>
     <div class="figure reveal">
       <h3><span data-n="open"></span> of <span data-n="atmos"></span> crew atmospheres, past and planned, have no test near them in the loaded data.</h3>
       <p class="sub">Every dot is a NASA microgravity fire test at its oxygen level and pressure. Every numbered pin is an atmosphere crews have breathed, or will. Hover over a pin for its story; click it to check it in the tool.</p>
       <div id="atlas"></div>
-      <div class="legend"><span><i style="background:#d95926"></i>Liquid droplets</span><span><i style="background:#199e70"></i>Gas flames</span><span><i class="tick" style="background:#3987e5"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span></div>
+      <div class="legend"><span><i style="background:#d95926"></i>Liquid droplets</span><span><i style="background:#199e70"></i>Gas flames</span><span><i class="tick" style="background:#3987e5"></i>Solid materials, oxygen only</span><span><i style="background:#3987e5;border-radius:2px"></i>Solid materials burned in orbit, from NASA reports</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span></div>
       <p class="note">"Near" means within 2 points of oxygen and 25% of the pressure. Covers the <span data-n="investigations"></span> investigations loaded here, not all of NASA's archive. Sources: NASA PSI experiment tables; crew atmospheres from NASA history and NASA's Exploration Atmospheres Working Group.</p>
+      <details class="rep-details" style="margin-top:14px"><summary>All <span data-r="nrep"></span> in-orbit solid-material tests from NASA reports, with sources</summary><div id="rep-table" style="margin-top:12px"></div></details>
+    </div>
+    <div class="figure reveal" style="margin-top:18px">
+      <h3>NASA's standard material test, run at these atmospheres in Earth gravity</h3>
+      <p class="sub">Before a material flies, NASA burns a strip of it upward in the cabin atmosphere (NASA-STD-6001, Test 1). Its White Sands Test Facility ran that test at Moon-base pressure and in pure oxygen.</p>
+      <div class="tiles">
+        <div class="tile"><div class="k">At Moon-base air · 30% oxygen, 10.2 psi</div><div class="v"><span data-r="w30"></span> <small>of <span data-r="wn"></span> material setups kept burning</small></div></div>
+        <div class="tile"><div class="k">At 34% oxygen, the exploration plan</div><div class="v"><span data-r="w34"></span> <small>of <span data-r="wn"></span> kept burning</small></div></div>
+        <div class="tile"><div class="k">In 99.8% oxygen, as in a spacesuit</div><div class="v"><span data-r="mtpmin"></span> to <span data-r="mtpmax"></span> psi <small>where all <span data-r="o2n"></span> materials became flammable. A suit runs at 4.3 psi</small></div></div>
+      </div>
+      <p class="note">"Kept burning" means at least one sample burned past the test's limit at that oxygen level. Among those at 30%: <span data-r="w30list"></span>. In pure oxygen, the figure is each material's highest pressure at which every sample (at least five) went out; above it, it can burn. These tests ran in Earth gravity; the drop-tower tests further down suggest some materials burn at lower oxygen in Moon gravity. Sources: Hirsch et al., NASA White Sands (NTRS 20070018178, Table 2; NTRS 20100015582, Table 2), transcribed by our SI coding assistant and checked.</p>
     </div>
   </div>
 </section>
@@ -159,14 +171,27 @@
     <div class="section-head reveal">
       <span class="eyebrow">What the data shows</span>
       <h2>Gravity decided whether silicone burned.</h2>
-      <p>NASA's Saffire-II experiment burned the same materials in orbit and on the ground. NASA's challenge statement says the two results could bound what happens in between. This is where that bound is tight, and where it is wide open.</p>
+      <p>NASA's Saffire-II experiment burned the same materials in orbit and on the ground. NASA's challenge statement says the two results could bound what happens in between. This is where that bound is tight, and where it is wide open. Then a NASA drop-tower experiment tested the idea directly.</p>
     </div>
     <div class="figure reveal">
       <h3>Gravity changed the outcome for <span data-n="flips"></span> of <span data-n="pairs"></span> samples.</h3>
-      <p class="sub">Thin silicone did not burn in microgravity and burned completely in normal gravity. Cotton-fiberglass fabric burned completely in both. The Moon and Mars lie somewhere along each bar, and no test says where.</p>
+      <p class="sub">Thin silicone did not burn in microgravity and burned completely in normal gravity. Cotton-fiberglass fabric burned completely in both. The Moon and Mars lie somewhere along each bar, and no PSI test says where.</p>
       <div id="dumbbell"></div>
       <div class="legend"><span><i style="background:#3987e5"></i>Microgravity</span><span><i class="dia" style="background:#d95926"></i>Normal gravity (1g)</span></div>
       <p class="note">GSI, the Gravity Sensitivity Index, is the difference between the two burn lengths divided by the sample length. 0 means they agree; 1 means the sample burned fully in one and not at all in the other. The bound is a hypothesis: it assumes burning changes steadily with gravity. Source: PSI-99, Saffire-II.</p>
+    </div>
+    <div class="figure reveal" style="margin-top:18px">
+      <span class="eyebrow">From a NASA report · Moon and Mars gravity</span>
+      <h3 style="margin-top:10px" id="grav-h">At Moon gravity, materials kept burning at lower oxygen than on Earth or in microgravity.</h3>
+      <p class="sub">NASA Glenn spun samples in a centrifuge inside a 5-second drop tower to make Moon and Mars gravity, and lowered the oxygen until the flame went out. Each bar runs from the oxygen level where the flame went out to the level where it kept burning; the dot is the middle. Lower means the material is harder to keep from burning.</p>
+      <div id="gravlim"></div>
+      <div class="legend" id="gravlim-legend"></div>
+      <div class="tiles">
+        <div class="tile"><div class="k">Mylar film, Moon gravity against Earth</div><div class="v"><span data-r="mylar"></span> <small>points of oxygen</small></div></div>
+        <div class="tile"><div class="k">Went out at 21% oxygen on Earth, kept burning at 21% at Moon gravity</div><div class="v"><span data-r="flipn"></span> <small><span data-r="fliplist"></span></small></div></div>
+        <div class="tile"><div class="k">Lowest of the four gravity levels</div><div class="v"><span data-r="lowmoon"></span> <small>at the Moon · <span data-r="lowmars"></span> at Mars</small></div></div>
+      </div>
+      <p class="note">The microgravity tests had a 30 cm/s airflow. Drop tests last about 5 seconds, so a flame that seemed steady might have gone out given more time. Mylar and Ultem ran at 10.2 psi, Nomex at 14.7 psi. A 2026 NASA abstract (Ferkul, Kralik and Liao) says the oxygen needed to burn reaches a minimum near Moon gravity, and NASA's FM2 experiment is to burn samples on the Moon itself. So for these materials' oxygen limits, the microgravity and Earth results did not bound Moon gravity. Source: Olson and Ferkul, ICES 2012, NTRS 20130010991, Table I (Moon values from Ferkul and Olson, 2011), transcribed by our SI coding assistant and checked against the report's printed margins.</p>
     </div>
     <div class="grid-3" style="margin-top:18px">
       <div class="card reveal"><span class="step-n">FOR ENGINEERS</span><h3>Check a design</h3><p>See which of your materials have flame tests near your atmosphere, and how many points of oxygen separate you from the nearest one.</p></div>
@@ -183,7 +208,7 @@
       <h2>Built so you can check it.</h2>
     </div>
     <div class="grid-3">
-      <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
+      <div class="card reveal"><h3>Every number traces to NASA</h3><p>Each record links to its page in NASA's Physical Science Informatics archive. Numbers transcribed from NASA technical reports name the report, table and page. Where we converted a unit, the original text sits beside the result. Where a NASA table is silent, the cell stays empty.</p></div>
       <div class="card reveal"><h3>SI, checked by code</h3><p>Code works out every finding and its ranking. A Gemini model then interprets the findings, reading only the facts code computed. Code looks up every number it wrote, a second model re-reads every sentence against the facts, and any sentence that fails either check is removed. <span id="sistat"></span></p></div>
       <div class="card reveal"><h3>Honest about limits</h3><p>Flamebound shows how much evidence exists near your conditions and what models fitted to NASA's droplet and gas-flame tests predict there. The models cover only the conditions tested and say nothing directly about cabin materials. It is not an operational safety system.</p></div>
     </div>
@@ -226,13 +251,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115f"></script>
-<script src="assets/data.js?v=20261115f"></script>
-<script src="assets/logic.js?v=20261115f"></script>
-<script src="assets/charts.js?v=20261115f"></script>
-<script src="assets/models.js?v=20261115f"></script>
-<script src="assets/flame.js?v=20261115f"></script>
-<script src="assets/replay.js?v=20261115f"></script>
+<script src="assets/config.js?v=20261115h"></script>
+<script src="assets/data.js?v=20261115h"></script>
+<script src="assets/logic.js?v=20261115h"></script>
+<script src="assets/charts.js?v=20261115h"></script>
+<script src="assets/models.js?v=20261115h"></script>
+<script src="assets/flame.js?v=20261115h"></script>
+<script src="assets/replay.js?v=20261115h"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -319,6 +344,30 @@
   });
   safe(() => FFCharts.atlas(document.getElementById("atlas"), FF, { onPin: (id) => { const a = FFLogic.ATMOS.find((x) => x.id === id); location.href = `tool.html?view=map&o2=${a.o2}&p=${a.p}`; } }));
   safe(() => FFCharts.dumbbell(document.getElementById("dumbbell"), FF.pairs));
+  safe(() => { // NASA technical reports, transcribed (data/reports): every number from the data bundle
+    const L = FFLogic, R = FF.reports, rp = L.reportPoints(FF), r1 = (v) => String(Math.round(v * 10) / 10);
+    const top = R.saffire.reduce((a, b) => (b.o2 > a.o2 ? b : a)), ss = R.ssce.map((r) => r.o2);
+    const w30 = L.wstfBurning(FF, 30), w34 = L.wstfBurning(FF, 34), mtp = R.wstfO2.map((r) => r.mtp);
+    const gl = L.gravityLimits(FF), my = gl.find((m) => /Mylar/.test(m.material));
+    const flip = gl.filter((m) => m.earth.moc >= 21 && m.moon.uloi <= 21);
+    const set = {
+      nrep: rp.length, safo2: r1(top.o2), safp: r1(top.psi), ssceo2: `${Math.min(...ss)} to ${Math.max(...ss)}`,
+      wn: w30.n, w30: w30.burning.length, w34: w34.burning.length,
+      w30list: [...new Set(w30.burning.map((r) => r.material.replace(/ (single|double) layer$/, "")))].join(", "),
+      o2n: R.wstfO2.length, mtpmin: Math.min(...mtp), mtpmax: Math.max(...mtp),
+      mylar: my && my.moon.delta != null ? String(my.moon.delta) : "",
+      flipn: `${flip.length} of ${gl.length}`, fliplist: flip.map((m) => m.material.split(" ")[0]).join(" and "),
+      lowmoon: gl.filter((m) => m.lowest.gravity === "Moon").length, lowmars: gl.filter((m) => m.lowest.gravity === "Mars").length,
+    };
+    document.querySelectorAll("[data-r]").forEach((el) => { if (set[el.dataset.r] != null) el.textContent = set[el.dataset.r]; });
+    const moonLow = gl.filter((m) => m.moon.mid < m.earth.mid && m.moon.mid < m.micro.mid).length;
+    document.getElementById("grav-h").textContent = moonLow === gl.length
+      ? `At Moon gravity, all ${gl.length} materials kept burning at lower oxygen than on Earth or in microgravity.`
+      : `At Moon gravity, ${moonLow} of ${gl.length} materials kept burning at lower oxygen than on Earth or in microgravity.`;
+    document.getElementById("gravlim-legend").innerHTML = gl.map((m, i) => `<span><i style="background:${FFCharts.MAT_COL[i]}"></i>${FFCharts.esc(m.material)} · ${m.psia} psi</span>`).join("");
+    document.getElementById("rep-table").innerHTML = FFCharts.reportTable(FF);
+    FFCharts.gravityLimitsChart(document.getElementById("gravlim"), FF);
+  });
   safe(() => FFReplay.mount(document.getElementById("replay"), FF, { kind: "droplets", left: 2, right: 4, gas: "N2", compact: true, loop: true }));
   safe(() => { // the self-extinction line, every number from the data bundle
     const x = FFCharts.crossoverData(FF), r1 = (v) => String(Math.round(v * 10) / 10);

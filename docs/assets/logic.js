@@ -256,5 +256,41 @@
       invs: [...new Set(r.map((x) => x.i))] });
   }
 
-  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P, inverse };
+  /* ---- tests from NASA technical reports (data/reports): hand-copied, kept apart from the PSI tables ---- */
+  const REP = (FF) => FF.reports || { sources: [], saffire: [], ssce: [], gravity: [], wstf10: [], wstfO2: [] };
+  function source(FF, key) { return REP(FF).sources.find((s) => s.key === key); }
+  /* solid materials burned in orbit with their oxygen and pressure recorded: Saffire IV-VI and SSCE */
+  function reportPoints(FF) {
+    if (FF._rp) return FF._rp;
+    const R = REP(FF);
+    const sa = R.saffire.map((r) => ({ o: r.o2, p: r.psi, id: `Saffire ${r.id}`, set: "Saffire", when: r.flight, material: r.material, out: r.outcome, src: r.src, where: r.where }));
+    const ss = R.ssce.map((r) => ({ o: r.o2, p: r.psi, id: `SSCE ${r.id}`, set: "SSCE", when: `Space Shuttle ${r.id}${r.when ? `, ${r.when}` : ""}`, material: r.material,
+      out: r.spread != null ? `Flame spread ${r.spread} cm/s. ${r.outcome}` : r.outcome, src: r.src, where: r.where }));
+    return (FF._rp = [...sa, ...ss]);
+  }
+  function reportCoverage(FF, o2, p) { // the same "near" as coverage(): FF.near points of oxygen, 25% of pressure
+    const lp = Math.log(NEAR_P);
+    return reportPoints(FF).filter((x) => Math.abs(x.o - o2) <= FF.near && Math.abs(Math.log(x.p / p)) <= lp);
+  }
+  /* NASA's standard upward flame test (NASA-STD-6001 Test 1), normal gravity, 10.2 psi: a material can keep burning
+     at an oxygen level above its MOC, the highest oxygen at which it reliably went out ("<30": burned even at 30%) */
+  function burnsAbove(moc, o2) { return moc.bound === "below" ? o2 >= moc.v : moc.bound === "above" ? false : o2 > moc.v; }
+  function wstfBurning(FF, o2) {
+    const rows = REP(FF).wstf10;
+    return { n: rows.length, burning: rows.filter((r) => burnsAbove(r.moc, o2)) };
+  }
+  /* limiting oxygen by gravity level (Olson and Ferkul 2012, Table I): the middle of the band between the lowest
+     oxygen that kept burning (ULOI) and the highest at which the flame went out (MOC) */
+  function gravityLimits(FF) {
+    const rows = REP(FF).gravity, mats = [...new Set(rows.map((r) => r.material))];
+    return mats.map((m) => {
+      const r = rows.filter((x) => x.material === m).map((x) => ({ ...x, mid: (x.uloi + x.moc) / 2 })).sort((a, b) => a.g - b.g);
+      const at = (name) => r.find((x) => x.gravity === name || x.gravity.startsWith(name));
+      return { material: m, psia: r[0].psia, rows: r, earth: at("Earth"), moon: at("Moon"), mars: at("Mars"), micro: at("Microgravity"),
+        lowest: r.reduce((a, b) => (b.mid < a.mid ? b : a)) };
+    });
+  }
+
+  root.FFLogic = { g, span, materialEvidence, atmosphereEvidence, scoreTests, rankInvestigations, materialSentences, atmosphereSentences, rankFindings, gaps, ATMOS, placed, coverage, NEAR_P, inverse,
+    source, reportPoints, reportCoverage, burnsAbove, wstfBurning, gravityLimits };
 })(typeof window !== "undefined" ? window : globalThis);

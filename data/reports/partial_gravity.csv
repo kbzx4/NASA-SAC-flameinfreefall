@@ -1,0 +1,13 @@
+material,pressure_psia,gravity,g,uloi_pct,moc_pct,delta_o2_printed,source,where
+Mylar G,10.2,Earth,1,21.2,20.0,,partial-g,Table I (p. 6)
+Mylar G,10.2,Mars,0.38,18.0,17.0,-3.1,partial-g,Table I (p. 6)
+Mylar G,10.2,Moon,0.165,15.6,14.1,-5.75,partial-g,Table I (p. 6)
+Mylar G,10.2,Microgravity (30 cm/s airflow),0,17.0,16.0,-4.1,partial-g,Table I (p. 6)
+Ultem 1000,10.2,Earth,1,23.5,23.0,,partial-g,Table I (p. 6)
+Ultem 1000,10.2,Mars,0.38,22.0,21.1,-1.7,partial-g,Table I (p. 6)
+Ultem 1000,10.2,Moon,0.165,21.0,19.9,-2.8,partial-g,Table I (p. 6)
+Ultem 1000,10.2,Microgravity (30 cm/s airflow),0,24.0,23.0,0.25,partial-g,Table I (p. 6)
+Nomex HT90-40,14.7,Earth,1,23.5,22.1,,partial-g,Table I (p. 6)
+Nomex HT90-40,14.7,Mars,0.38,19.9,19.0,-3.35,partial-g,Table I (p. 6)
+Nomex HT90-40,14.7,Moon,0.165,21.0,19.9,-2.35,partial-g,Table I (p. 6)
+Nomex HT90-40,14.7,Microgravity (30 cm/s airflow),0,23.0,22.0,-0.3,partial-g,Table I (p. 6)

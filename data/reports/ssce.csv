@@ -1,0 +1,8 @@
+mission,when,fuel,thickness_mm,o2_pct,pressure_atm,spread_cm_s,outcome,source,where
+STS-40/SLS-1,June 1991,ashless filter paper,0.165,50,1.0,0.358,"Spread at an almost fixed rate once the flame left the igniter.",ssce-thin,p. 2
+STS-41,October 1990,ashless filter paper,0.165,50,1.5,0.454,"Spread at an almost fixed rate once the flame left the igniter.",ssce-thin,p. 2
+STS-43,August 1991,ashless filter paper,0.165,50,2.0,0.547,"Spread at an almost fixed rate once the flame left the igniter.",ssce-thin,p. 2
+STS-50/USML-1,July 1992,ashless filter paper,0.165,35,1.5,0.092,"Spread at an almost fixed rate once the flame left the igniter.",ssce-thin,p. 2
+STS-54,,PMMA,3.18,70,1.0,,"Kept spreading, at a slowly falling rate, until the experiment put it out.",ssce-thick,pp. 381-382
+STS-63,,PMMA,3.18,50,1.0,,"Both samples kept spreading, at a slowly falling rate, until the camera film ran out.",ssce-thick,pp. 381-382
+STS-64,,PMMA,3.18,50,2.0,,"Kept spreading at a slowly falling rate; one sample was put out by the experiment, the other burned until the camera film ran out.",ssce-thick,pp. 381-382

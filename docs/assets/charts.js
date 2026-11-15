@@ -210,16 +210,25 @@
       const hp = hull([...bins.values()].map((b) => [X(b.o / b.n), Y(b.p / b.n)]));
       s += `<path d="M${hp.map((q) => q.map((v) => v.toFixed(1)).join(",")).join("L")}Z" fill="rgba(255,255,255,0.05)" stroke="${C.line2}" stroke-dasharray="4 4" stroke-linejoin="round" transform="translate(0,0)"/>`;
       const topO = Math.max(...pts.map((x) => x.o));
-      s += txt(X(topO) + 12, Y(56), `${pts.length} tests`, { fill: C.ink, size: narrow ? 12.5 : 14, weight: 600, extra: halo });
+      s += txt(X(topO) + 12, Y(56), `${pts.length} PSI tests`, { fill: C.ink, size: narrow ? 12.5 : 14, weight: 600, extra: halo });
       s += txt(X(topO) + 12, Y(56) + 17, `all at ${g(topO)}% oxygen or less`, { fill: C.ink2, size: narrow ? 11.5 : 12.5, extra: halo });
-      if (narrow) s += txt(X(73), Y(10.5), "No test with this", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "surrounding air", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
-      else s += txt(X(70), Y(28), "No test with this surrounding air", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
+      if (narrow) s += txt(X(73), Y(10.5), "No PSI test with", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 }) + txt(X(73), Y(10.5) + 15, "this surrounding air", { anchor: "middle", fill: C.ink3, size: 12, weight: 500 });
+      else s += txt(X(72), Y(9), "No PSI test with this surrounding air", { anchor: "middle", fill: C.ink3, size: 16, weight: 500 });
       // tests
       [...bins.values()].sort((a, b) => b.n - a.n).forEach((b) => {
         const o = b.o / b.n, p = b.p / b.n, r = Math.min(8, 2.6 + Math.sqrt(b.n) * 0.9), [col, lab] = cls[b.c] || [C.ug, b.c];
         const who = Object.entries(b.by).map(([i, n]) => `${esc(i)}: ${n}`).join("<br>");
         s += `<circle cx="${X(o).toFixed(1)}" cy="${Y(p).toFixed(1)}" r="${r.toFixed(1)}" fill="${col}" fill-opacity="0.72" stroke="${C.bg}" stroke-width="1" tabindex="0" data-tip="<b>${b.n} ${esc(lab.toLowerCase())} test${b.n > 1 ? "s" : ""}</b><span>${g(Math.round(o * 10) / 10)}% oxygen, ${g(Math.round(p * 10) / 10)} psi<br>${who}</span>"/>`;
       });
+      // solid materials burned in orbit, from NASA technical reports (transcribed; not in the PSI tables)
+      (L.reportPoints ? L.reportPoints(FF) : []).forEach((x) => {
+        const cx = X(x.o), cy = Y(x.p), z = 5.5;
+        const ntrs = (x.src || []).map((k) => (L.source(FF, k) || {}).ntrs).filter(Boolean).join(", ");
+        const tipHtml = `<b>${esc(x.id)} · NASA report</b><span>${esc(x.material)}, ${g(x.o)}% oxygen, ${g(Math.round(x.p * 10) / 10)} psi<br>${esc(x.when)}<br>${esc(x.out)}<br>Source: NASA NTRS ${esc(ntrs)}, ${esc(x.where)}</span>`;
+        s += `<rect x="${(cx - z).toFixed(1)}" y="${(cy - z).toFixed(1)}" width="${2 * z}" height="${2 * z}" rx="1.5" fill="${C.ug}" stroke="${C.bg}" stroke-width="1.5" tabindex="0" data-tip="${esc(tipHtml)}"/>`;
+      });
+      if (!narrow && L.reportPoints && L.reportPoints(FF).some((x) => x.set === "SSCE"))
+        s += txt(X(52), Y(40), "Space Shuttle SSCE, 1990s", { anchor: "middle", fill: C.ink2, size: 12, extra: halo }) + txt(X(52), Y(40) + 15, "(from NASA reports)", { anchor: "middle", fill: C.ink3, size: 11.5, extra: halo });
       // solid materials: oxygen only, on a rail under the axis
       const ry = top + plotH + 78;
       s += txt(left, ry - 12, narrow ? "Solid materials · pressure not listed" : "Solid materials (fabric, plastic) · their tables list oxygen but not pressure", { fill: C.ink2, size: 12 });
@@ -237,8 +246,8 @@
       // pins
       const LAB = { mga: ["end", -14, 5], suit: ["end", -14, 18], a1: ["end", -14, 5], sky: ["middle", 0, -15], iss: ["end", -13, -11], eva: ["end", -8, 22], moon: ["start", 12, -10], exp: ["start", 12, 16] };
       atm.forEach((a, k) => {
-        const x = X(a.o2), y = Y(a.p), c = cov[a.id], none = c.n === 0;
-        const tipHtml = `<b>${esc(a.name)} · ${esc(a.when)}</b><span>${g(a.o2)}% oxygen, ${g(a.p)} psi<br>${esc(a.note)}<br><br>${none ? `No microgravity test within ${FF.near} points of oxygen and 25% of this pressure. Nearest: ${g(Math.round(c.nearest.o * 10) / 10)}% at ${g(Math.round(c.nearest.p * 10) / 10)} psi (${esc(c.nearest.i)}).` : `${c.n} microgravity tests within ${FF.near} points of oxygen and 25% of this pressure.`}${opts.onPin ? "<br><i>Click to check this atmosphere</i>" : ""}</span>`;
+        const x = X(a.o2), y = Y(a.p), c = cov[a.id], none = c.n === 0, rep = L.reportCoverage ? L.reportCoverage(FF, a.o2, a.p) : [];
+        const tipHtml = `<b>${esc(a.name)} · ${esc(a.when)}</b><span>${g(a.o2)}% oxygen, ${g(a.p)} psi<br>${esc(a.note)}<br><br>${none ? `No microgravity test within ${FF.near} points of oxygen and 25% of this pressure. Nearest: ${g(Math.round(c.nearest.o * 10) / 10)}% at ${g(Math.round(c.nearest.p * 10) / 10)} psi (${esc(c.nearest.i)}).` : `${c.n} microgravity tests within ${FF.near} points of oxygen and 25% of this pressure.`}${opts.onPin ? "<br><i>Click to check this atmosphere</i>" : ""}${rep.length ? `<br><br>NASA reports add ${rep.length} solid-material fire${rep.length > 1 ? "s" : ""} in orbit near it: ${rep.map((x) => esc(x.id)).join(", ")}.` : ""}</span>`;
         s += `<g data-pin="${a.id}" tabindex="0" role="button" aria-label="${esc(a.name)}" style="cursor:${opts.onPin ? "pointer" : "default"}" data-tip="${esc(tipHtml)}">`;
         s += `<circle cx="${x}" cy="${y}" r="16" fill="transparent"/>`;
         s += `<circle cx="${x}" cy="${y}" r="8.5" fill="${none ? C.bg : C.you}" stroke="${C.you}" stroke-width="2"${none ? ` stroke-dasharray="3 2.4"` : ""}/>`;
@@ -268,9 +277,9 @@
   /* the same atmospheres as a table: the map's text view */
   function atlasTable(FF, link) {
     const L = window.FFLogic;
-    return `<div class="table-wrap"><table class="t atlas-t"><thead><tr><th>#</th><th>Atmosphere</th><th>Oxygen</th><th>Pressure</th><th>When</th><th>Tests near it</th><th>Nearest test</th></tr></thead><tbody>${L.ATMOS.map((a, k) => {
-      const c = L.coverage(FF, a.o2, a.p), nr = c.nearest;
-      return `<tr${link ? ` data-pin="${a.id}" tabindex="0"` : ""}><td class="mono">${k + 1}</td><td><b>${esc(a.name)}</b>${a.fire ? ` <span class="tag fire">fire</span>` : ""}</td><td class="mono">${g(a.o2)}%</td><td class="mono">${g(a.p)} psi</td><td>${esc(a.when)}</td><td class="mono ${c.n ? "" : "zero"}">${c.n}</td><td>${c.n ? `${g(Math.round(nr.o * 10) / 10)}% at ${g(Math.round(nr.p * 10) / 10)} psi` : `${g(Math.round(nr.o * 10) / 10)}% at ${g(Math.round(nr.p * 10) / 10)} psi, <b>${g(c.o2_gap)} points</b> of oxygen away`}</td></tr>`;
+    return `<div class="table-wrap"><table class="t atlas-t"><thead><tr><th>#</th><th>Atmosphere</th><th>Oxygen</th><th>Pressure</th><th>When</th><th>Tests near it</th><th>Nearest test</th><th>NASA reports near it</th></tr></thead><tbody>${L.ATMOS.map((a, k) => {
+      const c = L.coverage(FF, a.o2, a.p), nr = c.nearest, rep = L.reportCoverage ? L.reportCoverage(FF, a.o2, a.p) : [];
+      return `<tr${link ? ` data-pin="${a.id}" tabindex="0"` : ""}><td class="mono">${k + 1}</td><td><b>${esc(a.name)}</b>${a.fire ? ` <span class="tag fire">fire</span>` : ""}</td><td class="mono">${g(a.o2)}%</td><td class="mono">${g(a.p)} psi</td><td>${esc(a.when)}</td><td class="mono ${c.n ? "" : "zero"}">${c.n}</td><td>${c.n ? `${g(Math.round(nr.o * 10) / 10)}% at ${g(Math.round(nr.p * 10) / 10)} psi` : `${g(Math.round(nr.o * 10) / 10)}% at ${g(Math.round(nr.p * 10) / 10)} psi, <b>${g(c.o2_gap)} points</b> of oxygen away`}</td><td>${rep.length ? rep.map((x) => esc(x.id)).join(", ") : "none"}</td></tr>`;
     }).join("")}</tbody></table></div>`;
   }
   function hull(P) { // monotone chain
@@ -362,5 +371,63 @@
     });
   }
 
-  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, bindTips, esc, C };
+  /* Limiting oxygen by gravity level for three materials (Olson and Ferkul 2012, Table I, transcribed).
+     Bar: from the highest oxygen at which the flame went out (MOC) to the lowest at which it kept burning (ULOI). */
+  const MAT_COL = ["#a274e6", "#bf8420", "#2aa7ae"]; // validated for this dark surface (dataviz validator)
+  function gravityLimitsChart(el, FF) {
+    const L = window.FFLogic, mats = L.gravityLimits(FF);
+    if (!mats.length) { el.innerHTML = ""; return; }
+    const order = [["Microgravity", "Microgravity", "0 g, with airflow"], ["Moon", "Moon", "1/6 g"], ["Mars", "Mars", "0.38 g"], ["Earth", "Earth", "1 g"]];
+    const all = mats.flatMap((m) => m.rows), lo = Math.floor(Math.min(...all.map((r) => r.moc)) - 1), hi = Math.ceil(Math.max(...all.map((r) => r.uloi)) + 1);
+    const moonLow = mats.every((m) => m.moon.mid < m.earth.mid && m.moon.mid < m.micro.mid);
+    mount(el, (W) => {
+      const narrow = W < 620, left = narrow ? 42 : 56, right = narrow ? 12 : 132, top = 30, plotH = narrow ? 270 : 320, H = top + plotH + 62;
+      const colW = (W - left - right) / order.length, X = (k) => left + (k + 0.5) * colW;
+      const Y = (v) => top + plotH - ((v - lo) / (hi - lo)) * plotH;
+      const halo = ` paint-order="stroke" stroke="${C.bg}" stroke-width="4" stroke-linejoin="round"`;
+      let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Lowest oxygen at which three materials kept burning, in microgravity, Moon, Mars and Earth gravity">`;
+      s += `<rect x="${X(1) - colW / 2}" y="${top}" width="${colW}" height="${plotH}" fill="rgba(255,255,255,0.045)"/>`;
+      for (let v = Math.ceil(lo / 2) * 2; v <= hi; v += 2) s += `<line x1="${left}" x2="${W - right}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.line}"/>` + txt(left - 8, Y(v) + 4, v + "%", { anchor: "end", fill: C.ink3, size: 12, mono: true });
+      if (21 > lo && 21 < hi) {
+        s += `<line x1="${left}" x2="${W - right}" y1="${Y(21)}" y2="${Y(21)}" stroke="${C.line2}" stroke-dasharray="4 4"/>`;
+        s += txt(left + 6, Y(21) + (narrow ? 15 : -6), narrow ? "air · 21%" : "21% · Earth's air", { fill: C.ink2, size: 11.5, extra: halo });
+      }
+      order.forEach(([, name0, sub0], k) => {
+        const name = narrow && k === 0 ? "0 g" : name0, sub = narrow && k === 0 ? "airflow" : sub0;
+        s += txt(X(k), top + plotH + 22, name, { anchor: "middle", fill: C.ink, size: narrow ? 12.5 : 13.5, weight: 600 });
+        s += txt(X(k), top + plotH + 39, sub, { anchor: "middle", fill: C.ink3, size: narrow ? 11 : 12 });
+      });
+      s += txt(left - 8, top - 12, "Oxygen", { anchor: "end", fill: C.ink3, size: 12 });
+      if (moonLow) s += txt(X(1), top - 10, narrow ? "Moon: all 3 below Earth and 0 g" : "Below Earth and microgravity for all three", { anchor: "middle", fill: C.ink, size: narrow ? 11.5 : 12.5, weight: 600, extra: halo });
+      const ends = [];
+      mats.forEach((m, i) => {
+        const col = MAT_COL[i % MAT_COL.length], dx = (i - (mats.length - 1) / 2) * (narrow ? 9 : 13);
+        const pts = order.map(([key], k) => [X(k) + dx, m.rows.find((r) => r.gravity.startsWith(key))]);
+        s += `<path d="M${pts.map(([x, r]) => `${x.toFixed(1)},${Y(r.mid).toFixed(1)}`).join("L")}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;
+        pts.forEach(([x, r], k) => {
+          const d = r.delta != null ? `<br>${r.delta > 0 ? "+" : ""}${g(r.delta)} points against Earth gravity` : "";
+          const tipHtml = `<b>${esc(m.material)} · ${esc(order[k][1])}${k === 0 ? " (30 cm/s airflow)" : " gravity"}</b><span>Kept burning at ${g(r.uloi)}% oxygen (ULOI)<br>Went out at ${g(r.moc)}% (MOC)<br>${g(m.psia)} psi${d}</span>`;
+          s += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${Y(r.uloi).toFixed(1)}" y2="${Y(r.moc).toFixed(1)}" stroke="${col}" stroke-width="6" stroke-linecap="round" opacity="0.4"/>`;
+          s += `<circle cx="${x.toFixed(1)}" cy="${Y(r.mid).toFixed(1)}" r="5.5" fill="${col}" stroke="${C.bg}" stroke-width="2"/>`;
+          s += `<rect x="${(x - colW / 6).toFixed(1)}" y="${(Y(r.uloi) - 8).toFixed(1)}" width="${(colW / 3).toFixed(1)}" height="${(Y(r.moc) - Y(r.uloi) + 16).toFixed(1)}" fill="transparent" tabindex="0" data-tip="${esc(tipHtml)}"/>`;
+        });
+        ends.push({ y: Y(pts[pts.length - 1][1].mid), label: `${m.material} · ${g(m.psia)} psi`, col });
+      });
+      if (!narrow) { // direct labels at the Earth end, pushed apart so they never overlap
+        ends.sort((a, b) => a.y - b.y);
+        for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 17);
+        ends.forEach((e) => { s += txt(W - right + 12, e.y + 4, e.label, { fill: C.ink, size: 12.5, weight: 600, extra: halo }); s += `<circle cx="${W - right + 4}" cy="${e.y}" r="3.5" fill="${e.col}"/>`; });
+      }
+      return s + "</svg>";
+    });
+  }
+  /* the in-orbit report tests as a table, highest oxygen first */
+  function reportTable(FF) {
+    const L = window.FFLogic, rows = L.reportPoints(FF).slice().sort((a, b) => b.o - a.o || a.p - b.p);
+    const cite = (x) => (x.src || []).map((k) => { const s = L.source(FF, k); return s ? `<a href="${s.url}" target="_blank" rel="noopener">NTRS ${esc(s.ntrs)} ↗</a>` : ""; }).join(" ");
+    return `<div class="table-wrap"><table class="t rep-t"><thead><tr><th>Test</th><th>Flight</th><th>Material</th><th>Oxygen</th><th>Pressure</th><th>What happened</th><th>Source</th></tr></thead><tbody>${rows.map((x) =>
+      `<tr><td><b>${esc(x.id)}</b></td><td>${esc(x.when)}</td><td>${esc(x.material)}</td><td class="mono">${g(x.o)}%</td><td class="mono">${g(Math.round(x.p * 10) / 10)} psi</td><td>${esc(x.out)}</td><td>${cite(x)}<br><span class="muted">${esc(x.where)}</span></td></tr>`).join("")}</tbody></table></div>`;
+  }
+
+  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, gravityLimitsChart, reportTable, MAT_COL, bindTips, esc, C };
 })();

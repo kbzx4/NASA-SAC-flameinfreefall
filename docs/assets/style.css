@@ -430,3 +430,9 @@ table.atlas-t tr[data-pin]:hover td, table.atlas-t tr[data-pin]:focus-visible td
 .verdict.none { color: #ff8a5c; border-color: rgba(255, 138, 92, 0.5); background: rgba(255, 138, 92, 0.1); }
 .verdict:hover { filter: brightness(1.15); }
 .ins-replay { margin: 18px 0; }
+
+/* NASA report tables (hand-copied; data/reports) */
+table.rep-t td { font-size: 13.5px; vertical-align: top; }
+table.rep-t td:nth-child(6) { min-width: 240px; }
+table.rep-t td:nth-child(7) { white-space: nowrap; }
+.rep-details summary { font-size: 14px; }

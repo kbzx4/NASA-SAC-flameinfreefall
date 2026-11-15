@@ -8,7 +8,7 @@ Flamebound is an evidence summary, not a safety assessment. It reports which NAS
 
 ## The problem
 
-NASA's Physical Science Informatics (PSI) archive holds decades of microgravity combustion results. They sit in separate tables with different units and free-text cells, so it is hard to tell how close any of them comes to a new habitat design. Moon bases and pressurized rovers are expected to run at 30% oxygen or more, and the archive has no combustion data in Moon or Mars gravity.
+NASA's Physical Science Informatics (PSI) archive holds decades of microgravity combustion results. They sit in separate tables with different units and free-text cells, so it is hard to tell how close any of them comes to a new habitat design. Moon bases and pressurized rovers are expected to run at 30% oxygen or more, and the PSI archive has no combustion data in Moon or Mars gravity.
 
 ## What it does
 
@@ -42,9 +42,18 @@ None of the scores predicts flammability.
 - At about 21% oxygen, 13 of 14 droplet flames went out on their own with helium added and 28 of 36 with CO2 added, against 17 of 34 with nitrogen only.
 - In BASS-II, carbon monoxide rose in 117 of 118 burns, by up to 575 ppm.
 - Gravity changed the outcome for 4 of 9 Saffire-II samples. Thin silicone did not burn in microgravity and burned completely in normal gravity. Cotton-fiberglass fabric burned completely in both.
-- In the 16 investigations loaded, no solid-material flame test lists an oxygen level above 22.2%. Liquid-droplet tests reach 34% and gas-flame tests 40%.
+- In the PSI tables loaded, no solid-material flame test lists an oxygen level above 22.2%. Liquid-droplet tests reach 34% and gas-flame tests 40%.
 - In the tables loaded here, all 754 microgravity tests that list both the oxygen of the surrounding air and the pressure sit at 40% oxygen or less and 7.35 psi or more (the 274 inverse-flame tests of ACME CFI-G and Flame Design fed up to 85% oxygen, but out of the burner into fuel and nitrogen, so they are not placed by surrounding air). The atmospheres of Mercury to Apollo (100%, 5 psi), Apollo 1 (100%, 16.7 psi), Skylab (about 74%, 5 psi) and the spacesuit (100%, 4.3 psi) have no test near them; the nearest is 35 to 61 points of oxygen away.
-- No loaded investigation ran in partial gravity.
+- No PSI investigation ran in partial gravity.
+
+### From NASA technical reports, beyond the PSI tables
+
+Five NASA reports on the Technical Reports Server hold results the PSI tables do not. Their tables were transcribed into [data/reports](data/reports) by Claude, the SI coding assistant, from the rendered report pages, each row naming its report, table and page, and are shown beside the PSI results, never mixed into the catalog, the findings, the models or the SI texts.
+
+- **Solids in orbit above 22.2% oxygen, with pressure.** Saffire IV to VI burned fabric and PMMA in a Cygnus cargo spacecraft at up to 31% oxygen and 7.8 psi (Saffire VI, between the Moon-base plan of 30% at 10.2 psi and the exploration plan of 34% at 8.2 psi). Cotton jersey at 26.2% oxygen and 10.3 psi kept burning through 70 s with the fan off and burned until the sample was used up. The two PMMA fires on Saffire VI raised the spacecraft's CO2 past NASA's 1-hour limit, and a tight smoke-alarm threshold was reached only at 981 s, after much of the hazardous gas was out (Urban et al., ICES-2021-266 and ICES-2024-365).
+- **Solids in orbit at 35 to 70% oxygen.** The Space Shuttle's Solid Surface Combustion Experiment spread flames over paper at 0.358, 0.454 and 0.547 cm/s at 50% oxygen and 1, 1.5 and 2 atm, and 0.092 cm/s at 35% and 1.5 atm; thick PMMA kept burning at 50 and 70% (Altenkirch et al.).
+- **Moon and Mars gravity.** In NASA Glenn drop-tower tests with a centrifuge, Mylar, Ultem 1000 and Nomex HT90-40 all kept burning at lower oxygen at Moon gravity than on Earth or in microgravity; Mylar's limit fell 5.75 points. Nomex and Ultem went out at 21% oxygen in Earth gravity but kept burning at 21% at Moon gravity. So for these materials' oxygen limits, microgravity and Earth results did not bound Moon gravity (Olson and Ferkul, ICES 2012, Table I). Drop tests last about 5 seconds.
+- **NASA's standard material test at these atmospheres, Earth gravity.** At 10.2 psi, 7 of 26 material setups kept burning at 30% oxygen (Moon-base air) and 9 at 34%. In 99.8% oxygen, all 7 materials tested became flammable above 0.4 to 0.9 psi; a US spacesuit runs at 4.3 psi (Hirsch et al., NASA White Sands, 2007 and 2010).
 
 ## NASA data used
 
@@ -103,13 +112,15 @@ An earlier Streamlit version of the tool is kept in `app.py` (`streamlit run app
 | `docs/` | The site: `index.html` (home), `tool.html` (the tool), `assets/` |
 | `data/raw/` | NASA PSI experiment tables, as downloaded |
 | `data/catalog.csv` | One row per test, harmonised units, source text kept |
-| `scripts/` | `build_catalog.py`, `build_findings.py`, `build_si.py`, `build_insights.py`, `build_site.py` |
+| `data/reports/` | Result tables transcribed from NASA technical reports, with sources |
+| `scripts/` | `build_catalog.py`, `build_findings.py`, `build_models.py`, `build_si.py`, `build_insights.py`, `build_reports.py`, `build_site.py` |
 | `core.py`, `brief.py`, `si.py` | Scores, evidence logic, SI calls and checks |
 | `tests/parity.mjs` | Fails if the site's JavaScript and the Python disagree |
 
 ## Limits
 
-- 16 PSI tables are loaded. PSI holds more.
+- 21 PSI experiment tables are loaded: every experiment table PSI offers for its flight combustion investigations, as of Nov 15, 2026. A ground-based cool-flame study (PSI-142) has a summary table that is not loaded.
+- The NASA report tables were typed in from the reports' pages by an SI assistant (Claude). Each row names its table and page, and the build recomputes the oxygen margins printed in the partial-gravity report, but other cells could still hold a copying error.
 - No solid-fuel table lists pressure, so the material grade uses oxygen only.
 - BASS and BASS-II list a fan setting or nothing for airflow, not a speed.
 - 93 solid-fuel records name a shape but no material (for example "1/4" clear rod") and are not assigned to a material.

@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 import brief  # noqa: E402
 import core  # noqa: E402
-from scripts import build_findings, build_insights, build_si  # noqa: E402
+from scripts import build_findings, build_insights, build_reports, build_si  # noqa: E402
 
 OUT = ROOT / "docs" / "assets"
 
@@ -114,6 +114,7 @@ def main():
         "briefings": {k: shown(v, ("text",)) for k, v in briefs.items()},
         "replay": build_findings.replay(),
         "models": json.loads((ROOT / "data" / "models.json").read_text(encoding="utf-8")),
+        "reports": build_reports.reports(),
         "expected": expected,
     }
     OUT.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,8 @@
+material,acronym,composition,form,thickness_in,ulpi_psia,mtp_psia,uloi_pct,moc_pct,source,where
+Epoxy/glass,,epoxy/fiberglass,laminate,0.06,0.9,0.8,28.6,24,wstf-2010,Tables 1 and 2 (p. 5)
+Udel P1700,PSU,polysulfone,plastic,0.06,1.0,0.9,31.7,29,wstf-2010,Tables 1 and 2 (p. 5)
+Kydex 100,PVC + PMMA,polyvinylchloride and polymethylmethacrylate alloy,plastic,0.05,1.8,0.6,33.5,32,wstf-2010,Tables 1 and 2 (p. 5)
+Solimide TA-301,PI,polyimide,foam,0.12,0.7,0.5,29.3,28,wstf-2010,Tables 1 and 2 (p. 5)
+Melinex 515,PET,polyethylene terephthalate,film,0.005,0.9,0.4,21.2,20,wstf-2010,Tables 1 and 2 (p. 5)
+Nomex HT90-40,PPTA,aramid,fabric,0.013,0.6,0.5,28.5,25,wstf-2010,Tables 1 and 2 (p. 5)
+Ultem 1000,PEI,polyetherimide,film,0.01,1.5,0.9,26.5,24,wstf-2010,Tables 1 and 2 (p. 5)

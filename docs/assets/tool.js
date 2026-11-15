@@ -112,10 +112,10 @@
       </div>
       <div class="tiles">
         <div class="tile"><div class="k">Nearest solid flame test</div><div class="v">${best ? (best.oxygen_gap_points === 0 ? "at your level" : `${g(best.oxygen_gap_points)} <small>points of oxygen ${best.nearest_test.side.replace(" yours", "")}</small>`) : "none"}</div></div>
-        <div class="tile"><div class="k">${partial() ? `Tests in ${state.gravity === 1 ? "Moon" : "Mars"} gravity` : "Microgravity flame tests"}</div><div class="v">${partial() ? `0 <small>none exist in the loaded data</small>` : `${flameUg} <small>for these materials</small>`}</div></div>
+        <div class="tile"><div class="k">${partial() ? `Tests in ${state.gravity === 1 ? "Moon" : "Mars"} gravity` : "Microgravity flame tests"}</div><div class="v">${partial() ? `0 <small>in the PSI tables; drop-tower tests on the Gravity tab</small>` : `${flameUg} <small>for these materials</small>`}</div></div>
         <div class="tile"><div class="k">Records behind this brief</div><div class="v">${records.length} <small>NASA test records</small></div></div>
       </div>
-      ${partial() ? `<div class="callout"><b>${esc(gravityLabel())}: no test data.</b> No loaded investigation ran in partial gravity. The GSI on each card compares microgravity with normal gravity for the same material. NASA's challenge statement says the two could bound what happens in between; that is a hypothesis.</div>` : ""}
+      ${partial() ? `<div class="callout"><b>${esc(gravityLabel())}: no PSI test data.</b> No PSI investigation ran in partial gravity. The GSI on each card compares microgravity with normal gravity for the same material. NASA's challenge statement says the two could bound what happens in between; in NASA drop-tower tests at Moon gravity, three materials kept burning at lower oxygen than in either, so that bound did not hold for their oxygen limits. <a href="?view=gravity" data-view-link="gravity">See the Gravity tab</a>.</div>${reportCard("What NASA's reports add")}` : ""}
 
       <div class="h-sec"><h2>Materials</h2><span>"Near" means within ${g(FF.near)} points of oxygen. No solid-fuel table lists pressure, so the grade uses oxygen only.</span></div>
       <div class="mats">${f.mats.map(materialCard).join("")}</div>
@@ -299,7 +299,7 @@
         <p class="note">Droplets shrink following the d² law; the look of each flame is drawn, not measured. Time-lapse. Both sides include tests with CO2 or helium added, which went out on their own more often. <a href="?view=replay" data-view-link="replay">Open the full replay</a> to pick oxygen levels, gases and gas flames.</p>
       </div>
       ${all[0].score < 0.4 ? `<div class="callout"><b>No close evidence.</b> No finding comes from tests near ${g(state.o2)}% oxygen and ${g(state.pressure)} psi. The findings below are the nearest there are; treat this habitat as a research gap.</div>` : ""}
-      ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No test in the data ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first.</div>` : ""}
+      ${pin ? `<div class="callout info"><b>${esc(gravityLabel())}.</b> No PSI test ran in partial gravity, so the one microgravity versus normal-gravity comparison is pinned first. NASA drop-tower tests at Moon and Mars gravity are on the <a href="?view=gravity" data-view-link="gravity">Gravity</a> tab.</div>` : ""}
       <div class="ins-tools">
         <div class="pills" id="kinds">${KINDS.map(([k, l]) => `<button class="pill" aria-pressed="${state.kind === k}" data-k="${k}">${l}</button>`).join("")}</div>
         <input class="find" id="find" type="search" placeholder="Find: oxygen, CO2, smoke, gravity, PMMA" value="${esc(state.find)}" aria-label="Find a finding">
@@ -307,6 +307,7 @@
       <div id="ins-list">${shown.length ? shown.map((r, i) => insightCard(byId[r.id], r, i, r === pin)).join("") : `<p class="muted">No finding matches "${esc(state.find)}".</p>`}</div>
       <div class="h-sec" id="gaps"><h2>What this data cannot tell you</h2><span>Computed for ${g(state.o2)}% oxygen and ${g(state.pressure)} psi</span></div>
       <div class="card prose"><ul>${gaps.map((x) => `<li>${esc(cap(x))}.</li>`).join("")}</ul></div>
+      ${reportCard("What NASA's technical reports add, beyond the PSI tables")}
       <div class="cols-2" style="margin-top:18px">
         <div class="card"><h3>How the findings are ranked</h3>
           <div class="formula">Relevance = C<sub>oxygen</sub> × ½ (1 + C<sub>pressure</sub>) × W<sub>tests</sub></div>
@@ -349,7 +350,7 @@
           <div class="formula">GSI = | L<sub class="e">1g</sub> − L<sub class="u">µg</sub> | ÷ L<sub>sample</sub></div>
           <p style="margin-top:14px">L is burn length. <b style="color:var(--ink)">0</b> means microgravity and 1g agree, so the bound is tight. <b style="color:var(--ink)">1</b> means the sample burned fully in one and not at all in the other, so the bound says nothing about partial gravity.</p></div>
         <div class="card prose"><h3>Read this before you use it</h3><ul>
-          <li>NASA's challenge statement says microgravity and normal-gravity results <i>could</i> bound intermediate gravity. That is a hypothesis.</li>
+          <li>NASA's challenge statement says microgravity and normal-gravity results <i>could</i> bound intermediate gravity. That is a hypothesis, and NASA's drop-tower tests below found Moon-gravity oxygen limits outside it for all three materials tested.</li>
           <li>${paired.length} samples, one oxygen level (about 22%), one airflow (20 cm/s).</li>
           <li>The PSI table does not state the oxygen, pressure or airflow of the 1g tests.</li>
           <li>GSI uses burn length only. The fabric samples have GSI 0 but spread at a steady 2.1 to 2.6 mm/s in microgravity and accelerated in 1g.</li>
@@ -360,6 +361,55 @@
         ${FF.pairs.map((p) => `<tr><td>${esc(p.sample)}</td><td>${esc(p.material)}</td><td>${esc(p.thickness)}</td><td>${esc(p.direction)}</td><td>${esc(p.o2_raw)}</td><td>${esc(p.ug_raw)}</td><td>${esc(p.ug_spread || "—")}</td><td>${esc(p.g1_raw || "—")}</td><td>${esc(p.g1_spread || "—")}</td><td class="mono">${p.gsi == null ? "—" : p.gsi.toFixed(2)}</td></tr>`).join("")}</table></div>
       <p class="note">"Complete" is plotted as the full sample length. Sample 2-7 is split into its PMMA and Nomex sections; the table gives no 1g result for the PMMA section, so it has no GSI. Cells are shown as NASA wrote them.</p>`;
     CH.dumbbell($("dumbbell"), FF.pairs);
+    const gl = L.gravityLimits(FF), src = L.source(FF, "partial-g"), src26 = L.source(FF, "partial-g-2026");
+    if (!gl.length) return;
+    const moonLow = gl.filter((m) => m.moon.mid < m.earth.mid && m.moon.mid < m.micro.mid).length;
+    $("view-gravity").insertAdjacentHTML("beforeend", `
+      <div class="h-sec" style="margin-top:34px"><h2>Tested at Moon and Mars gravity</h2><span>From a NASA report</span></div>
+      <div class="figure"><h3>At Moon gravity, ${moonLow === gl.length ? `all ${gl.length}` : `${moonLow} of ${gl.length}`} materials kept burning at lower oxygen than on Earth or in microgravity</h3>
+        <p class="sub">NASA Glenn spun samples in a centrifuge inside a 5-second drop tower to make Moon and Mars gravity, and lowered the oxygen until the flame went out. Each bar runs from the oxygen level where the flame went out (MOC) to the level where it kept burning (ULOI); the dot is the middle.</p>
+        <div id="gravlim"></div>
+        <div class="legend">${gl.map((m, i) => `<span><i style="background:${CH.MAT_COL[i]}"></i>${esc(m.material)} · ${g(m.psia)} psi</span>`).join("")}</div></div>
+      <div class="scroll" style="margin-top:14px"><table class="t"><tr><th>Material</th><th>Pressure</th>${gl[0].rows.map((r) => `<th>${esc(r.gravity)}</th>`).join("")}</tr>
+        ${gl.map((m) => `<tr><td>${esc(m.material)}</td><td class="mono">${g(m.psia)} psi</td>${m.rows.map((r) => `<td class="mono">${g(r.moc)}–${g(r.uloi)}%${r.delta != null ? `<br><span class="muted">${r.delta > 0 ? "+" : ""}${g(r.delta)} vs Earth</span>` : ""}</td>`).join("")}</tr>`).join("")}</table></div>
+      <div class="card prose" style="margin-top:14px"><h3>Read this before you use it</h3><ul>
+        <li>Each cell runs from the highest oxygen at which the flame went out to the lowest at which it kept burning. "vs Earth" is the report's oxygen margin: the middle of that range minus the middle of the Earth-gravity range.</li>
+        <li>Drop tests last about 5 seconds, so a flame that seemed steady might have gone out given more time. The microgravity tests had a 30 cm/s airflow.</li>
+        <li>Three materials, two pressures. NASA's standard material test (NASA-STD-6001, Test 1) runs in Earth gravity.</li>
+        <li>${src26 ? `A 2026 NASA abstract (<a href="${src26.url}" target="_blank" rel="noopener">NTRS ${esc(src26.ntrs)} ↗</a>) says the oxygen needed to burn reaches a minimum near Moon gravity; NASA's FM2 experiment is to burn samples on the Moon itself.` : ""}</li></ul>
+        <p class="note">Source: ${src ? `${esc(src.citation)} <a href="${src.url}" target="_blank" rel="noopener">NTRS ${esc(src.ntrs)} ↗</a>, ${esc(src.used)}.` : ""}</p></div>`);
+    CH.gravityLimitsChart($("gravlim"), FF);
+  }
+
+  /* ------------------------------------------- NASA technical reports */
+  // Hand-copied report tables (data/reports): shown beside the PSI results, never mixed into them.
+  function reportNotes() {
+    const out = [], o2 = state.o2, p = state.pressure, r1 = (v) => g(Math.round(v * 10) / 10);
+    const near = L.reportCoverage(FF, o2, p);
+    if (near.length) out.push(`<b>${near.length} solid-material fire${near.length > 1 ? "s" : ""} in orbit near this atmosphere</b>: ${near.map((x) => `${esc(x.id)} (${esc(x.material)}, ${g(x.o)}% oxygen, ${r1(x.p)} psi)`).join("; ")}. <a href="?view=map" data-view-link="map">Atmosphere map</a>`);
+    else {
+      const pts = L.reportPoints(FF), lp = Math.log(L.NEAR_P);
+      const best = pts.reduce((a, x) => { const d = Math.hypot((x.o - o2) / 5, Math.log(x.p / p) / lp); return !a || d < a.d ? { x, d } : a; }, null);
+      if (best) out.push(`No solid-material fire in orbit from NASA's reports is near this atmosphere. The closest is ${esc(best.x.id)}: ${esc(best.x.material)} at ${g(best.x.o)}% oxygen and ${r1(best.x.p)} psi. <a href="?view=map" data-view-link="map">Atmosphere map</a>`);
+    }
+    if (Math.abs(Math.log(p / 10.2)) <= Math.log(L.NEAR_P) && o2 >= 30 && o2 < 99.5) {
+      const w = L.wstfBurning(FF, o2);
+      out.push(`<b>NASA's standard material test at 10.2 psi, in Earth gravity:</b> ${w.burning.length} of ${w.n} material setups kept burning at ${g(o2)}% oxygen (${esc([...new Set(w.burning.map((r) => r.material.replace(/ (single|double) layer$/, "")))].join(", ") || "none")}).`);
+    }
+    if (o2 >= 99) {
+      const mtp = FF.reports.wstfO2.map((r) => r.mtp);
+      out.push(`<b>In 99.8% oxygen, in Earth gravity:</b> all ${mtp.length} spacecraft materials NASA tested became flammable above ${g(Math.min(...mtp))} to ${g(Math.max(...mtp))} psi. This atmosphere is at ${g(p)} psi.`);
+    }
+    if (partial()) {
+      const gl = L.gravityLimits(FF), key = state.gravity === 1 ? "moon" : "mars";
+      out.push(`<b>${state.gravity === 1 ? "Moon" : "Mars"} gravity, NASA drop-tower tests:</b> ${gl.map((m) => `${esc(m.material)} kept burning down to ${g(m[key].uloi)}% oxygen (Earth gravity: ${g(m.earth.uloi)}%)`).join("; ")}. <a href="?view=gravity" data-view-link="gravity">Gravity</a>`);
+    }
+    return out;
+  }
+  function reportCard(title) {
+    const n = reportNotes();
+    return n.length ? `<div class="card prose rep-card" style="margin-top:14px"><h3>${title}</h3><ul>${n.map((x) => `<li>${x}</li>`).join("")}</ul>
+      <p class="note" style="margin-top:8px">Transcribed from NASA technical reports, not from the PSI tables; each row names its report, table and page on the <a href="?view=data" data-view-link="data">Data</a> tab.</p></div>` : "";
   }
 
   /* ------------------------------------------------------ investigations */
@@ -436,7 +486,8 @@
           <li>${unnamed} solid-fuel records name a shape but no material, such as "1/4" clear rod". They are not assigned to any material.</li>
           <li>BASS and BASS-II list a fan setting or nothing for airflow, and no pressure.</li>
           <li>FLEX-2, SLICE, ACME BRE, ACME E-FIELD Flames and DAFT tables are summaries, not one row per test.</li>
-          <li>No investigation here ran in partial gravity.</li></ul></div>
+          <li>No PSI investigation here ran in partial gravity. NASA reports add short drop-tower tests at Moon and Mars gravity.</li>
+          <li>The tables transcribed from NASA reports are shown beside the PSI results and never mixed into the catalog, the findings, the models or the SI texts.</li></ul></div>
         <div class="card prose"><h3>How SI is used</h3><ul>
           <li>Insights: code computes each finding from the NASA tables and ranks the findings for your habitat. ${esc([...new Set(FF.findings.filter((f) => f.si).map((f) => f.si.model))].join(", "))} then interprets each finding (headline, what the tests found, what it suggests, its limit) and writes a briefing for each preset habitat, reading only the facts code computed.</li>
           <li>Live: "Ask Flamebound" and "Write an SI briefing" send the facts computed for your habitat (the ranked findings, the gaps and your materials) to Gemini 3.1 Flash Lite, which answers from those facts only and cites the findings it used. The same two checks run in your browser before the answer is shown. Live answers are not read by a person first.</li>
@@ -450,6 +501,11 @@
       <div class="h-sec"><h2>Sources</h2><span>NASA Physical Science Informatics</span></div>
       <div class="scroll"><table class="t"><tr><th>Investigation</th><th>NASA record</th><th>Fuel class</th><th>Records</th><th>NASA file</th></tr>
         ${FF.investigations.map((i) => `<tr><td>${esc(i.name)}</td><td><a href="${i.link}" target="_blank" rel="noopener">${esc(i.psi)} ↗</a></td><td>${esc(i.class)}</td><td class="mono">${i.rows}</td><td>${esc(i.file)}</td></tr>`).join("")}</table></div>
+      <div class="h-sec"><h2>NASA technical reports</h2><span>Transcribed from the NASA Technical Reports Server</span></div>
+      <div class="scroll"><table class="t"><tr><th>Report</th><th>NASA record</th><th>What was copied</th><th>Rows</th></tr>
+        ${FF.reports.sources.map((s) => { const n = ["saffire", "ssce", "gravity", "wstf10", "wstfO2"].reduce((a, k) => a + FF.reports[k].filter((r) => r.src.includes(s.key)).length, 0);
+          return `<tr><td>${esc(s.citation)}</td><td><a href="${s.url}" target="_blank" rel="noopener">NTRS ${esc(s.ntrs)} ↗</a></td><td>${esc(s.used)}</td><td class="mono">${n || "context"}</td></tr>`; }).join("")}</table></div>
+      <p class="note">These tables were read from the rendered report pages and typed in by Claude, the SI coding assistant that helped build this site, with each row naming its table and page. A check in the build recomputes the oxygen margins printed in the partial-gravity report from the copied limits and stops if any disagree. The copied tables are in <a href="${LINKS.repo}/tree/main/data/reports" target="_blank" rel="noopener">data/reports</a>.</p>
       <p class="note">Data built ${esc(FF.built)}. The challenge statement names three Earth uses of this research: fine-water-mist extinguishers, smoke detection and firefighter gear. SAME and SAME-R hold the smoke-particle tests; FLEX holds droplet tests with CO2 or helium added to the atmosphere.</p>`;
   }
 
@@ -646,16 +702,17 @@
     el.innerHTML = `
       <span class="eyebrow">Atmosphere map</span>
       <h1 style="margin-top:12px">${open.length} of ${L.ATMOS.length} crew atmospheres, past and planned, have no microgravity fire test near them in the loaded data</h1>
-      <p class="lede">Every dot is a NASA microgravity fire test, placed at its oxygen level and pressure. Every numbered pin is a real crew atmosphere, from Mercury to the Moon-base plans. All ${pts.length} tests sit at ${g(topO)}% oxygen or less and ${r1(lowP)} psi or more. Every US spacewalk, and every US crewed flight before Skylab, happened outside that zone. NASA's ${L.inverse(FF).n} inverse-flame tests (ACME CFI-G and Flame Design) did feed up to ${g(L.inverse(FF).top)}% oxygen, but out of the burner into a chamber of fuel and nitrogen, not as the surrounding air, so they are not placed on this map. Click a pin, or anywhere on the map, to check that atmosphere.</p>
+      <p class="lede">Every dot is a NASA microgravity fire test, placed at its oxygen level and pressure. Every numbered pin is a real crew atmosphere, from Mercury to the Moon-base plans. All ${pts.length} tests sit at ${g(topO)}% oxygen or less and ${r1(lowP)} psi or more. Every US spacewalk, and every US crewed flight before Skylab, happened outside that zone. NASA's ${L.inverse(FF).n} inverse-flame tests (ACME CFI-G and Flame Design) did feed up to ${g(L.inverse(FF).top)}% oxygen, but out of the burner into a chamber of fuel and nitrogen, not as the surrounding air, so they are not placed on this map. Squares are solid-material fires in orbit from NASA's technical reports, with their pressure recorded (Saffire IV to VI, and the Space Shuttle's SSCE); they are counted separately. Click a pin, or anywhere on the map, to check that atmosphere.</p>
       <div class="tiles">
         <div class="tile"><div class="k">${esc(habitat)}: ${g(state.o2)}% oxygen, ${g(state.pressure)} psi</div><div class="v">${c.n} <small>tests within ${FF.near} points of oxygen and 25% of this pressure</small></div></div>
         <div class="tile"><div class="k">Nearest test</div><div class="v">${nr ? `${r1(nr.o)}% <small>at ${r1(nr.p)} psi · ${esc(nr.i)} ${esc(nr.t || "")}</small>` : "none"}</div></div>
         <div class="tile"><div class="k">Solid-material tests near this oxygen</div><div class="v">${c.solids} <small>${c.solids ? "pressure not listed" : `none above ${g(Math.max(...FF.rows.filter((r) => r.g !== "1" && r.c === "solid" && r.o).map((r) => r.o[1])))}% oxygen`}</small></div></div>
       </div>
       ${c.n ? `<p class="model-line">Near this atmosphere: ${by}.</p>` : `<div class="callout" style="margin-top:16px"><b>Open territory.</b> No microgravity test in the loaded data is this close. The nearest is ${nr ? `${r1(Math.abs(nr.o - state.o2))} points of oxygen and ${r1(Math.abs(nr.p - state.pressure))} psi away` : "missing"}. Anything said about fire here is an extrapolation.</div>`}
+      ${reportCard("What NASA's technical reports add here")}
       <div class="figure" style="margin-top:18px">
         <div id="atlas"></div>
-        <div class="legend"><span><i style="background:${CH.C.g1}"></i>Liquid droplets (FLEX, FLEX-2, CFI)</span><span><i style="background:${CH.C.third}"></i>Gas flames (CFI-G, ACME)</span><span><i class="tick" style="background:${CH.C.ug}"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span><span><i class="dia" style="background:#fff"></i>${esc(habitat)}</span></div>
+        <div class="legend"><span><i style="background:${CH.C.g1}"></i>Liquid droplets (FLEX, FLEX-2, CFI)</span><span><i style="background:${CH.C.third}"></i>Gas flames (CFI-G, ACME)</span><span><i style="background:${CH.C.ug};border-radius:2px"></i>Solid materials burned in orbit (NASA reports)</span><span><i class="tick" style="background:${CH.C.ug}"></i>Solid materials, oxygen only</span><span><i style="background:#fff"></i>Crew atmosphere with tests near it</span><span><i style="border:2px dashed #fff;background:transparent;width:9px;height:9px"></i>With none</span><span><i class="dia" style="background:#fff"></i>${esc(habitat)}</span></div>
         <p class="note">Bigger dots are several tests at the same spot. Pressure is on a log scale. "Near" means within ${FF.near} points of oxygen and 25% of the pressure. Only tests run in microgravity, with the oxygen of the surrounding air recorded, are shown. Crew atmospheres: NASA history and NASA's Exploration Atmospheres Working Group; the Apollo 1 cabin was pure oxygen at about 16.7 psi.</p>
       </div>
       <h2 style="margin:28px 0 12px">The atmospheres, and the tests near each</h2>
