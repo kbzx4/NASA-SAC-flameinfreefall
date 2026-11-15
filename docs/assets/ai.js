@@ -135,7 +135,9 @@ id such as R1, the result nearest the habitat, its facts, where and in what grav
 cite them like [R1], and say when a result was in Earth gravity or a drop tower rather than in orbit. When no PSI
 finding is close to the habitat, use the closest nasa_reports entries. air holds code-computed estimates for this
 habitat's air from NASA's published limits, not test data: minutes of pure-oxygen prebreathe before a spacewalk, the
-inspired oxygen and the altitude it matches; cite it as [air] and call it an estimate.
+inspired oxygen and the altitude it matches, the burn line (the oxygen band past which most droplet flames keep burning),
+the least-oxygen cabin with no prebreathe and how far past the burn line it is, and the suit pressure that would allow a
+cabin at the burn line; cite it as [air] and call it an estimate.
 
 Answer QUESTION in at most 110 words.
 
@@ -209,14 +211,23 @@ CONTEXT:
     return rev;
   }
   /* the cabin-air estimates the "Choose the air" view shows (logic.js), for this habitat */
-  function airFacts(L, st) {
+  function airFacts(FF, L, st) {
     if (!L.airAt) return undefined;
     const A = L.AIR, a = st.air || { suit: A.suit, strict: false }, rmax = a.strict ? A.rstrict : A.rmax, x = L.airAt(st.o2, st.pressure, a.suit, rmax), c = L.airCorner(a.suit, rmax);
+    // the burn line: the band holding the FLEX droplet model's 50-50 points, as drawn on the trade-off chart
+    const xo = window.FFCharts && window.FFCharts.crossoverData ? window.FFCharts.crossoverData(FF) : null, r1 = (v) => Math.round(v * 10) / 10;
+    const fits = xo ? xo.curves.map((k) => k.ff && k.ff.fit).filter((v) => v != null) : [], b0 = fits.length ? r1(Math.min(...fits)) : null, b1 = fits.length ? r1(Math.max(...fits)) : null;
+    const sf = b1 != null ? L.suitFor(b1, rmax) : null;
     return {
       what_this_is: "estimates from NASA's published limits, not test data: R is the cabin's nitrogen pressure over the suit pressure; NASA accepted its Shuttle and ISS prebreathe protocols at R 1.65; inspired oxygen is the oxygen fraction times (pressure minus 47 mmHg); simplified, one tissue, at rest",
       suit_pressure_psi: a.suit, decompression_limit_R: rmax, R_value: x.R, prebreathe_minutes_of_pure_oxygen: Math.round(x.min),
       inspired_oxygen_mmHg: Math.round(x.pio2), less_oxygen_than_nasa_accepts: x.low, altitude_with_the_same_oxygen_m: Math.round(x.alt / 10) * 10,
-      least_oxygen_cabin_with_no_prebreathe: { oxygen_pct: c.o2, pressure_psi: c.p },
+      least_oxygen_cabin_with_no_prebreathe: { oxygen_pct: c.o2, pressure_psi: c.p, points_past_the_burn_line: b1 != null && c.o2 > b1 ? r1(c.o2 - b1) : 0 },
+      prebreathe_minutes_from_iss_air: Math.round(L.airAt(21, 14.7, a.suit, rmax).min), nasa_iss_protocol_minutes: A.nasa.protocol_min,
+      prebreathe_minutes_saved_against_iss_air: Math.max(0, Math.round(L.airAt(21, 14.7, a.suit, rmax).min) - Math.round(x.min)),
+      burn_line: b1 == null ? undefined : { what: "the oxygen band holding the FLEX droplet model's 50-50 points for heptane and methanol: below it most droplet flames go out on their own, past it most keep burning", oxygen_pct_from: b0, oxygen_pct_to: b1,
+        this_habitat: st.o2 > b1 ? "past the burn line" : st.o2 >= b0 ? "on the burn line" : "below the burn line" },
+      suit_pressure_for_a_cabin_at_the_burn_line: sf ? { suit_psi: sf.suit, cabin_oxygen_pct: b1, cabin_pressure_psi: sf.p } : undefined,
     };
   }
   function context(FF, L, st) {
@@ -240,7 +251,7 @@ CONTEXT:
       gaps: L.gaps(FF, st.o2, st.pressure),
       model_predictions: modelFacts(FF, st),
       test_coverage: coverageFacts(FF, L, st),
-      air: airFacts(L, st),
+      air: airFacts(FF, L, st),
       nasa_reports: reportFacts(FF, L, st).map((e, k) => ({
         id: "R" + (k + 1), title: e.title, source: e.where, tested_in: e.gravity, oxygen_tested_pct: e.o2, pressure_tested_psi: e.p,
         oxygen_points_from_this_habitat: e.o2_gap, result_nearest_this_habitat: e.nearest, facts: e.lines, caveat: e.caveat,
