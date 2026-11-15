@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115q">
+<link rel="stylesheet" href="assets/style.css?v=20261115r">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -120,6 +120,12 @@
       <div id="airchart"></div>
       <div id="air-legend"></div>
       <p class="note">How it is worked out. Decompression uses NASA's R: the nitrogen pressure in the body's slowest tissue divided by the suit pressure. NASA accepted the Shuttle and ISS prebreathe protocols at R = 1.65, and breathing pure oxygen clears that nitrogen with a 360-minute half-time. Inspired oxygen is the oxygen fraction times the cabin pressure, less 47 mmHg of water vapour; NASA's exploration atmosphere gives 128 mmHg, and 127 mmHg is the floor used here. Checked against NASA: from ISS air the model gives <span data-a="iss"></span> of prebreathe, where NASA's resting protocol took 4 hours. With a stricter limit set only from NASA's 2024 estimate of about 6.5 hours from sea-level air, the least-oxygen cabin with no prebreathe moves to <span data-a="strict"></span> oxygen at <span data-a="strictp"></span> psi; NASA chose 34% at 8.2 psi for exploration. Under that stricter limit the suit helps less: a 5.8 psi suit's no-prebreathe cabin moves to <span data-a="orlstrict"></span> oxygen, and staying at the burn line takes a <span data-a="suitstrict"></span> psi suit. The fire side is the FLEX droplet model above: droplets in a test chamber, not cabin materials, and its tests ran at 10.1 psi or more. Simplified on purpose (one tissue, at rest) and not medical guidance. Skylab, Apollo and today's spacesuits used 74 to 100% oxygen, off this chart. Sources: Gernhardt, NASA EVA operations, 2013; Aerospace Medicine and Human Performance 89(9), 2018; NASA NTRS 20240014714 and 20170010132; suit pressures, including the Orlan's 5.8 psi and the 5.8 psi Shuttle-suit proposal: NASA NESC, Solving the Pressure Problem.</p>
+    </div>
+    <div class="figure reveal" style="margin-top:18px">
+      <h3>Raise the suit pressure, and more small fires go out on their own</h3>
+      <p class="sub">For each spacesuit pressure: the chance a burning droplet's flame goes out on its own in the least-oxygen cabin air that needs no prebreathe. Lines: the droplet model, with its 90% range. Hover for the cabin behind each point.</p>
+      <div id="suitcurve"></div>
+      <p class="note">An estimate, from NASA's limits above and the model fitted to NASA's FLEX droplet tests (3 mm droplets, nothing added to the nitrogen). Dashed: the cabin pressure is just below the pressures FLEX tested. The curve stops where the cabin would hold less oxygen than Earth's air.</p>
     </div>
     <div class="cta" style="margin-top:22px"><a class="btn primary" href="tool.html?view=air">Choose your habitat's air
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
@@ -278,13 +284,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115q"></script>
-<script src="assets/data.js?v=20261115q"></script>
-<script src="assets/logic.js?v=20261115q"></script>
-<script src="assets/charts.js?v=20261115q"></script>
-<script src="assets/models.js?v=20261115q"></script>
-<script src="assets/flame.js?v=20261115q"></script>
-<script src="assets/replay.js?v=20261115q"></script>
+<script src="assets/config.js?v=20261115r"></script>
+<script src="assets/data.js?v=20261115r"></script>
+<script src="assets/logic.js?v=20261115r"></script>
+<script src="assets/charts.js?v=20261115r"></script>
+<script src="assets/models.js?v=20261115r"></script>
+<script src="assets/flame.js?v=20261115r"></script>
+<script src="assets/replay.js?v=20261115r"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -432,6 +438,7 @@
     const go = (o, p) => { location.href = `tool.html?view=air&o2=${o}&p=${p}`; };
     FFCharts.airChart(document.getElementById("airchart"), FF, { onPin: (id) => { const a = L.ATMOS.find((y) => y.id === id); go(a.o2, a.p); }, onPick: go });
   });
+  safe(() => { FFCharts.suitCurve(document.getElementById("suitcurve"), FF); }); // the suit curve: the same limits and model, by suit pressure
   reveal(); // the cards drawn above
 })();
 </script>

@@ -547,5 +547,71 @@
       `<tr><td><b>${esc(x.id)}</b></td><td>${esc(x.when)}</td><td>${esc(x.material)}</td><td class="mono">${g(x.o)}%</td><td class="mono">${g(Math.round(x.p * 10) / 10)} psi</td><td>${esc(x.out)}</td><td>${cite(x)}<br><span class="muted">${esc(x.where)}</span></td></tr>`).join("")}</tbody></table></div>`;
   }
 
-  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, airChart, airLegend, gravityLimitsChart, reportTable, MAT_COL, bindTips, esc, C };
+  /* The suit curve: for each spacesuit pressure, the least-oxygen cabin that needs no prebreathe (logic.js airCorner) and
+     the droplet model's chance that a flame goes out on its own in that air. Dashed where the cabin pressure is below
+     the pressures FLEX tested. Stops where the cabin would hold less oxygen than Earth's air. */
+  function suitCurveData(FF) {
+    if (FF._sc) return FF._sc;
+    const L = window.FFLogic, A = L.AIR, MD = window.FFModels, D = FF.models.droplets, pmin = D.range.p[0] * 14.6959;
+    const fuels = [["Methanol", C.ug], ["Heptane", C.g1]], rows = [];
+    for (let i = 0; i < 80; i++) {
+      const s = Math.round((A.suit + i * 0.05) * 100) / 100, c = L.airCorner(s);
+      if (c.o2 < 20.9) break;
+      rows.push({ s, o2: c.o2, p: c.p, low: c.p < pmin - 1e-9, f: fuels.map(([fuel]) => { const r = MD.classify(D.ending, MD.dropletX(c.o2, "N2", c.p, 3, fuel)); return [r.fit[0], r.lo[0], r.hi[0]]; }) });
+    }
+    return (FF._sc = { rows, fuels, suit: A.suit, orlan: A.orlan });
+  }
+  function suitCurve(el, FF) {
+    const d = suitCurveData(FF), R = d.rows, X0 = 4.2, X1 = Math.max(6.2, R[R.length - 1].s + 0.15);
+    const pc = (v) => Math.round(v * 100) + "%", at = (v) => R.find((r) => Math.abs(r.s - v) < 1e-6);
+    mount(el, (W) => {
+      const narrow = W < 620, left = narrow ? 40 : 52, right = narrow ? 14 : 24, top = 44, plotH = Math.round(Math.max(240, Math.min(360, W * 0.38))), H = top + plotH + 46;
+      const X = (v) => left + ((v - X0) / (X1 - X0)) * (W - left - right), Y = (p) => top + plotH - p * plotH;
+      const halo = ` paint-order="stroke" stroke="${C.bg}" stroke-width="4" stroke-linejoin="round"`;
+      let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Chance a burning droplet's flame goes out on its own in the least-oxygen cabin air that needs no prebreathe, by spacesuit pressure, for methanol and heptane">`;
+      [0, 0.25, 0.5, 0.75, 1].forEach((t) => { s += `<line x1="${left}" x2="${W - right}" y1="${Y(t)}" y2="${Y(t)}" stroke="${C.line}"/>` + txt(left - 8, Y(t) + 4, pc(t), { anchor: "end", fill: C.ink3, size: 12, mono: true }); });
+      [4.5, 5, 5.5, 6].filter((t) => t <= X1).forEach((t) => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${top}" y2="${top + plotH}" stroke="${C.line}"/>` + txt(X(t), top + plotH + 20, g(t), { anchor: "middle", fill: C.ink3, size: 12, mono: true }); });
+      s += txt(W - right, top + plotH + 40, "Spacesuit pressure, psi", { anchor: "end", fill: C.ink3, size: 12 });
+      s += `<line x1="${left}" x2="${W - right}" y1="${Y(0.5)}" y2="${Y(0.5)}" stroke="${C.line2}" stroke-dasharray="3 5"/>`;
+      // the two suits that exist
+      [[d.suit, narrow ? `Today · ${g(d.suit)}` : `Today's suits · ${g(d.suit)} psi`, "start", 6], [d.orlan, narrow ? `Orlan · ${g(d.orlan)}` : `Russia's Orlan · ${g(d.orlan)} psi`, "end", -6]].forEach(([v, lab, anc, dx]) => {
+        s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top - 14}" y2="${top + plotH}" stroke="${C.you}" stroke-width="1.3" stroke-dasharray="4 4" opacity="0.75"/>`;
+        s += txt(X(v) + dx, top - 18, lab, { anchor: anc, fill: C.ink, size: 12.5, weight: 600 });
+      });
+      // model: 90% band, then the line (dashed where the cabin pressure is below the tested range)
+      d.fuels.forEach(([, col], k) => {
+        const band = R.map((r) => `${X(r.s).toFixed(1)},${Y(r.f[k][2]).toFixed(1)}`).concat(R.slice().reverse().map((r) => `${X(r.s).toFixed(1)},${Y(r.f[k][1]).toFixed(1)}`));
+        s += `<path d="M${band.join("L")}Z" fill="${col}" opacity="0.16"/>`;
+      });
+      const firstIn = Math.max(0, R.findIndex((r) => !r.low));
+      d.fuels.forEach(([, col], k) => {
+        const path = (q) => (q.length > 1 ? "M" + q.map((r) => `${X(r.s).toFixed(1)},${Y(r.f[k][0]).toFixed(1)}`).join("L") : "");
+        s += `<path d="${path(R.slice(firstIn))}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+        if (firstIn > 0) s += `<path d="${path(R.slice(0, firstIn + 1))}" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="4 4"/>`;
+      });
+      // direct labels
+      const mid = at(5) || R[Math.floor(R.length / 2)];
+      s += txt(X(mid.s) - 8, Y(mid.f[0][0]) - 10, "Methanol", { anchor: "end", fill: C.ink, size: 12.5, weight: 600, extra: halo });
+      s += txt(X(mid.s) + 10, Y(mid.f[1][0]) + 20, "Heptane", { fill: C.ink, size: 12.5, weight: 600, extra: halo });
+      // hover columns
+      const step = X(R[1].s) - X(R[0].s);
+      R.forEach((r) => {
+        const tip = `<b>${g(r.s)} psi suit · model</b><span>No prebreathe from ${g(r.o2)}% oxygen at ${g(r.p)} psi<br>Methanol flames out on their own: ${pc(r.f[0][0])} (90% range ${pc(r.f[0][1])} to ${pc(r.f[0][2])})<br>Heptane: ${pc(r.f[1][0])} (${pc(r.f[1][1])} to ${pc(r.f[1][2])})${r.low ? "<br>Cabin pressure just below the pressures FLEX tested" : ""}</span>`;
+        s += `<rect x="${(X(r.s) - step / 2).toFixed(1)}" y="${top}" width="${step.toFixed(1)}" height="${plotH}" fill="transparent" data-tip="${esc(tip)}"/>`;
+      });
+      // the values at the two suits, drawn last so they sit above the hover columns
+      [d.suit, d.orlan].forEach((v) => {
+        const r = at(v); if (!r) return;
+        d.fuels.forEach(([fuel, col], k) => {
+          const tip = `<b>${g(r.s)} psi suit · ${fuel.toLowerCase()}</b><span>No prebreathe from ${g(r.o2)}% oxygen at ${g(r.p)} psi<br>Flames out on their own: ${pc(r.f[k][0])} (90% range ${pc(r.f[k][1])} to ${pc(r.f[k][2])})</span>`;
+          s += `<circle cx="${X(r.s).toFixed(1)}" cy="${Y(r.f[k][0]).toFixed(1)}" r="5.5" fill="${C.bg}" stroke="${col}" stroke-width="2.4" tabindex="0" data-tip="${esc(tip)}"/>`;
+          s += k === 0 ? txt(X(r.s) + (v === d.suit ? 10 : -10), Y(r.f[k][0]) - 10, pc(r.f[k][0]), { anchor: v === d.suit ? "start" : "end", fill: C.ink, size: 14, weight: 700, mono: true, extra: halo })
+            : txt(X(r.s) + 11, Y(r.f[k][0]) + 5, pc(r.f[k][0]), { fill: C.ink2, size: 12.5, weight: 600, mono: true, extra: halo });
+        });
+      });
+      return s + "</svg>";
+    });
+  }
+
+  window.FFCharts = { dumbbell, lanes, materialStrip, mini, finding, atlas, atlasTable, crossover, crossoverData, airChart, airLegend, suitCurve, gravityLimitsChart, reportTable, MAT_COL, bindTips, esc, C };
 })();
