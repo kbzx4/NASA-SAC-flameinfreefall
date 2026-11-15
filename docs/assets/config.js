@@ -2,7 +2,7 @@
    the Demo button stays disabled while it is empty. */
 window.FF_LINKS = {
   repo: "https://github.com/kbzx4/NASA-SAC-flameinfreefall",
-  demo: "",
+  demo: "demo.mp4",
   challenge: "https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/",
   psi: "https://psi.nasa.gov/physci/repo/search?q=combustion",
 };
