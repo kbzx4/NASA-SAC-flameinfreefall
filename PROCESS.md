@@ -142,6 +142,14 @@ The whole site was read again as a judge would, against the challenge statement,
 - Checked against NASA before publishing (tests/air.mjs, 6 checks): 4.3 hours from ISS air against NASA's 4-hour protocol; with a stricter limit set only from NASA's 6.5-hour estimate, the least-oxygen no-prebreathe cabin lands at 33.5% and 8.2 psi, next to the 34% and 8.2 psi NASA chose. The first chart drawing put two labels on top of lines; both moved.
 - Renamed from Burnline to Airburn: a team called FIRELINE exists, and the new headline is about the air. "The burn line" stays as the name of the finding.
 
+## Nov 15, evening: the demo video
+
+- The 30-second demo is a screen recording of the site's own pages. Claude Code scripted it: headless Chrome recorded each scene, with the cursor moves and clicks written as code, and FFmpeg cut the scenes to the narration, burned in the captions and put "edited with SI" in every frame. A team member reads the captions as the voice-over.
+- For the recording only, the home-page replay ran faster (its own label says so) and held its last frame, and the hero carried a title card.
+- Recording the live SI turned up two weaknesses, both fixed on the site:
+  - Asked why a habitat runs its air past the burn line, it said the context never mentioned a burn line. The air facts now carry the burn line, where the habitat sits against it, the prebreathe from ISS air and the saving, and the suit pressure for a cabin at the line.
+  - Its gap sentences said "no test in the data ran in Moon gravity" right after citing NASA's drop-tower tests at Moon gravity. The gaps it gets now name NASA's PSI tables, and a rule asks it to say when a report goes beyond a gap.
+
 ## Still open
 
 - The prebreathe estimate is one tissue at rest. NASA's current planetary risk models are stricter; the stricter limit approximates them but does not reproduce them.
