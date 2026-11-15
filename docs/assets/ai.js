@@ -117,6 +117,7 @@ SENTENCES:
   const RULES = `Rules:
 - Use only CONTEXT. Bring in no outside facts: no other experiments, standards, missions or numbers.
 - If CONTEXT does not answer the question, say so plainly and name the gap from CONTEXT.gaps that applies.
+- CONTEXT.gaps are gaps in NASA's PSI tables: name them that way, and when a nasa_reports entry goes beyond a gap, say so.
 - End each sentence with the sources it used, once, in square brackets, like [F2] or [F2, model].
   Never put a citation inside a sentence.
 - Write every number exactly as it appears in CONTEXT. Do not work out new numbers, percentages or ratios.
@@ -248,7 +249,8 @@ CONTEXT:
           facts: f.facts, caveats: f.caveats,
         };
       }),
-      gaps: L.gaps(FF, st.o2, st.pressure),
+      // the gaps are gaps in NASA's PSI tables; say so, since nasa_reports can go beyond them (drop towers at Moon gravity, say)
+      gaps: L.gaps(FF, st.o2, st.pressure).map((s) => s.replace(/in the data/g, "in NASA's PSI tables").replace(/^no solid material \(fabric, plastic\) was/, "no solid material (fabric, plastic) in NASA's PSI tables was")),
       model_predictions: modelFacts(FF, st),
       test_coverage: coverageFacts(FF, L, st),
       air: airFacts(FF, L, st),
