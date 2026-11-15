@@ -444,3 +444,12 @@ table.rep-t td:nth-child(7) { white-space: nowrap; }
 .tiles.four { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 640px) { .tiles.four { grid-template-columns: 1fr; } }
 .air-ctl { margin: 18px 0 14px; justify-content: flex-start; }
+
+/* the suit dial under the hero */
+.dial-top { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 22px 32px; align-items: center; margin-top: 18px; }
+.dial-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.dial-out .tile .v small { line-height: 1.45; }
+#sdpict svg { max-width: 680px; margin: 22px 0 10px; }
+#sdpict p { color: var(--ink-2); margin: 0; }
+#sdpict p b { color: var(--ink); }
+@media (max-width: 860px) { .dial-top, .dial-out { grid-template-columns: minmax(0, 1fr); } }

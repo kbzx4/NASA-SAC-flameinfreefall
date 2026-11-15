@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261115r">
+<link rel="stylesheet" href="assets/style.css?v=20261115s">
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><canvas id="stars"></canvas></div>
@@ -63,6 +63,29 @@
     </div>
   </div>
 </header>
+
+<section id="suitdial" style="padding-top:0;padding-bottom:28px">
+  <div class="wrap">
+    <div class="figure reveal">
+      <span class="eyebrow">Try the finding</span>
+      <h3 style="margin-top:10px">Drag the suit pressure and watch the fires</h3>
+      <div class="dial-top">
+        <div>
+          <div class="g-read"><span class="g-val mono" id="sdval">4.3 psi</span><span class="g-where" id="sdwho">Today's suits</span></div>
+          <label class="sr" for="sd">Spacesuit pressure, psi</label>
+          <input id="sd" class="plain" type="range" min="4.3" max="5.8" step="0.05" value="4.3">
+          <div class="g-ticks"><button data-sd="4.3">Today · 4.3</button><button data-sd="4.8">4.8</button><button data-sd="5.3">5.3</button><button data-sd="5.8">Orlan · 5.8</button></div>
+        </div>
+        <div class="dial-out">
+          <div class="tile"><div class="k">The least-oxygen cabin air that needs no prebreathe</div><div class="v"><span id="sdair"></span> <small>oxygen at <span id="sdp"></span> psi, <span id="sdside"></span></small></div></div>
+          <div class="tile"><div class="k">Small fires that go out on their own in that air</div><div class="v"><span id="sdx"></span> <small>of burning methanol droplets (90% range <span id="sdr"></span>)</small></div></div>
+        </div>
+      </div>
+      <div id="sdpict"></div>
+      <p class="note">Each circle is one of 20 burning 3 mm methanol droplets in the model fitted to NASA's FLEX tests, in the cabin air shown. Dashed: the flame goes out on its own. Orange: it burns on. An estimate from NASA's published limits, worked out in the trade-off section below; not a safety assessment.</p>
+    </div>
+  </div>
+</section>
 
 <section id="replay-sec" style="padding-top:0;padding-bottom:28px">
   <div class="wrap">
@@ -284,13 +307,13 @@
   </div>
 </footer>
 
-<script src="assets/config.js?v=20261115r"></script>
-<script src="assets/data.js?v=20261115r"></script>
-<script src="assets/logic.js?v=20261115r"></script>
-<script src="assets/charts.js?v=20261115r"></script>
-<script src="assets/models.js?v=20261115r"></script>
-<script src="assets/flame.js?v=20261115r"></script>
-<script src="assets/replay.js?v=20261115r"></script>
+<script src="assets/config.js?v=20261115s"></script>
+<script src="assets/data.js?v=20261115s"></script>
+<script src="assets/logic.js?v=20261115s"></script>
+<script src="assets/charts.js?v=20261115s"></script>
+<script src="assets/models.js?v=20261115s"></script>
+<script src="assets/flame.js?v=20261115s"></script>
+<script src="assets/replay.js?v=20261115s"></script>
 <script>
 (function () {
   const FF = window.FF, L = window.FF_LINKS;
@@ -439,6 +462,40 @@
     FFCharts.airChart(document.getElementById("airchart"), FF, { onPin: (id) => { const a = L.ATMOS.find((y) => y.id === id); go(a.o2, a.p); }, onPick: go });
   });
   safe(() => { FFCharts.suitCurve(document.getElementById("suitcurve"), FF); }); // the suit curve: the same limits and model, by suit pressure
+  safe(() => { // the suit dial: the trade-off's limits and droplet model at one suit pressure, shown as 20 model droplets
+    const L = FFLogic, A = L.AIR, MD = window.FFModels, D = FF.models.droplets, x = FFCharts.crossoverData(FF), N = 20;
+    const fits = x.curves.map((c) => c.ff && c.ff.fit).filter((v) => v != null), r1 = (v) => Math.round(v * 10) / 10, b0 = r1(Math.min(...fits)), b1 = r1(Math.max(...fits));
+    const $ = (id) => document.getElementById(id), sd = $("sd"), pc = (v) => Math.round(v * 100) + "%";
+    const who = (s) => (Math.abs(s - A.suit) < 0.01 ? "Today's suits" : Math.abs(s - A.orlan) < 0.01 ? "Russia's Orlan" : `${Math.round((s - A.suit) * 100) / 100} psi above today's`);
+    const draw = () => {
+      const s = Math.round(+sd.value * 100) / 100, c = L.airCorner(s), r = MD.classify(D.ending, MD.dropletX(c.o2, "N2", c.p, 3, "Methanol")), n = Math.round(r.fit[0] * N);
+      $("sdval").textContent = s + " psi"; $("sdwho").textContent = who(s);
+      $("sdair").textContent = c.o2 + "%"; $("sdp").textContent = c.p; $("sdside").textContent = c.o2 > b1 ? "past the burn line" : c.o2 < b0 ? "before the burn line" : "inside the burn line";
+      $("sdx").textContent = pc(r.fit[0]); $("sdr").textContent = `${pc(r.lo[0])} to ${pc(r.hi[0])}`;
+      let g = "";
+      for (let i = 0; i < N; i++) {
+        const cx = 15 + i * 30;
+        g += i < n ? `<circle cx="${cx}" cy="15" r="10" fill="none" stroke="#8fa3c7" stroke-width="1.6" stroke-dasharray="3 3.2"/><circle cx="${cx}" cy="15" r="2.4" fill="#8fa3c7"/>`
+          : `<circle cx="${cx}" cy="15" r="11" fill="#d95926"/><circle cx="${cx}" cy="15" r="6.5" fill="#ffb066"/><circle cx="${cx}" cy="15" r="2.4" fill="#fff"/>`;
+      }
+      $("sdpict").innerHTML = `<svg viewBox="0 0 ${N * 30} 30" role="img" aria-label="${n} of ${N} model droplet flames go out on their own; ${N - n} keep burning">${g}</svg><p><b>${n} of ${N}</b> droplet flames go out on their own · <b>${N - n}</b> keep burning</p>`;
+    };
+    let raf = 0; const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+    sd.addEventListener("input", () => { stop(); draw(); });
+    document.querySelectorAll("[data-sd]").forEach((b) => b.addEventListener("click", () => { stop(); sd.value = b.dataset.sd; draw(); }));
+    draw();
+    // play it once when it first comes into view: from today's suits to the Orlan
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver((es) => {
+        if (!es.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        const t0 = performance.now() + 700, T = 3200;
+        const tick = (t) => { const k = Math.max(0, Math.min(1, (t - t0) / T)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; sd.value = (A.suit + (A.orlan - A.suit) * e).toFixed(2); draw(); raf = k < 1 ? requestAnimationFrame(tick) : 0; };
+        raf = requestAnimationFrame(tick);
+      }, { threshold: 0.6 });
+      io.observe($("suitdial"));
+    }
+  });
   reveal(); // the cards drawn above
 })();
 </script>
