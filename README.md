@@ -2,6 +2,8 @@
 
 **Describe a crewed habitat. See what NASA's microgravity fire experiments say about it, how close those tests come to your conditions, and what its air costs: hours of prebreathe before every spacewalk, or air where small fires keep burning, unless the spacesuit changes.**
 
+**Live site:** https://kbzx4.github.io/NASA-SAC-flameinfreefall/ · **30-second demo video:** https://kbzx4.github.io/NASA-SAC-flameinfreefall/demo.mp4
+
 Built for the NASA International Space Apps Challenge 2026, challenge [Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data](https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/).
 
 Airburn is an evidence summary, not a safety assessment. It reports which NASA tests exist near a set of conditions, and its models predict how NASA's droplet and gas-flame tests would end there, only within the conditions tested. It does not predict whether a cabin material will burn.
@@ -83,7 +85,7 @@ Checks on all SI text:
 1. Code looks up every number in a text in the facts it was written from, and removes any sentence containing a number that is not there.
 2. A second SI pass re-reads each remaining sentence against the facts and removes any it judges unsupported.
 
-Neither check is proof. [data/insight_cache.json](data/insight_cache.json) and [data/si_cache.json](data/si_cache.json) hold every SI text the site shows, with what each check removed, and every text was also read by hand. Findings, grades, counts, rankings and charts are computed without SI.
+Neither check is proof. [data/insight_cache.json](data/insight_cache.json) and [data/si_cache.json](data/si_cache.json) hold every SI text the site shows, with what each check removed, and every text was also read in full after it was generated. Findings, grades, counts, rankings and charts are computed without SI.
 
 ## Run it
 
