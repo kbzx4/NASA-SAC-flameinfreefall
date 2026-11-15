@@ -158,6 +158,12 @@ The whole site was read again as a judge would, against the challenge statement,
 - Under the stricter planetary limit the suit helps less (26.7% at 5.8 psi; the burn line needs 6.9 psi), and the site says so.
 - The home page now opens on it: "Moon-base fire safety starts with the spacesuit."
 
+## Nov 15, the last hour
+
+- The suit finding was two numbers, 14% and 67%. A suit curve on the home page now shows the whole relation: for each suit pressure from 4.3 to 6 psi, the least-oxygen cabin that needs no prebreathe and the droplet model's chance, with its 90% range, that a flame goes out on its own there. It is dashed where the cabin pressure is below the pressures FLEX tested, and stops where the cabin would hold less oxygen than Earth's air. Same limits, same model, no new data.
+- The demo video's file metadata now says how it was made (a screen recording scripted with Claude Code, narrated by a team member).
+- The official submission guide says the project page takes images, so five screenshots of the site's own pages and charts went onto it.
+
 ## Still open
 
 - The prebreathe estimate is one tissue at rest. NASA's current planetary risk models are stricter; the stricter limit approximates them but does not reproduce them.
