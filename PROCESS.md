@@ -161,6 +161,8 @@ The whole site was read again as a judge would, against the challenge statement,
 ## Nov 15, the last hour
 
 - The suit finding was two numbers, 14% and 67%. A suit curve on the home page now shows the whole relation: for each suit pressure from 4.3 to 6 psi, the least-oxygen cabin that needs no prebreathe and the droplet model's chance, with its 90% range, that a flame goes out on its own there. It is dashed where the cabin pressure is below the pressures FLEX tested, and stops where the cabin would hold less oxygen than Earth's air. Same limits, same model, no new data.
+- A suit dial sits right under the home page's headline: drag the suit pressure from today's 4.3 psi to the Orlan's 5.8 psi and it shows the least-oxygen cabin that needs no prebreathe and, as 20 model droplets, how many flames go out on their own there (3 of 20 at 4.3 psi, 13 of 20 at 5.8 psi). It plays once when it scrolls into view. Same limits and model as the trade-off section.
+- Of 120 team pages read for this challenge on the Space Apps site, 59 had submitted; none mentions prebreathe or decompression, which is why the suit finding now leads.
 - The demo video's file metadata now says how it was made (a screen recording scripted with Claude Code, narrated by a team member).
 - The official submission guide says the project page takes images, so five screenshots of the site's own pages and charts went onto it.
 
